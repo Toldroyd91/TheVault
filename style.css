@@ -1,0 +1,32 @@
+:root {
+    --bg-deep: #020617;
+    --glass-panel: rgba(15, 23, 42, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --accent-primary: #0dcaf0;
+    --text-bright: #f8fafc;
+}
+body {
+    background-color: var(--bg-deep);
+    color: var(--text-bright);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    margin: 0; padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+.glass-panel {
+    background: var(--glass-panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+.luxury-input {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--glass-border);
+    color: white;
+    border-radius: 6px;
+    width: 100%;
+}
+.luxury-input:focus { outline: none; border-color: var(--accent-primary); }
+/* Prevent iPad bounce on the drawing canvas */
+.sniper-container { touch-action: none; overscroll-behavior: none; }
