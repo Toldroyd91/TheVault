@@ -115,8 +115,11 @@ document.getElementById('btn-generate-pdf')?.addEventListener('click', async () 
         document.getElementById('btn-sync').click(); 
         
         const compilePDF = httpsCallable(functions, 'compilePDF');
-        const result = await compilePDF({ surveyId: SurveyState.id });
-        
+         const result = await compilePDF({ 
+    surveyId: SurveyState.id, 
+    pin: SurveyState.customerProfile.vaultPIN  // <--- THIS IS THE NEW PIECE
+});
+       
         if (result.data?.pdfUrl) {
             alert("PDF Compiled & Vault Updated Successfully!");
         }
