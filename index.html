@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COHI | Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="authGate" class="min-h-screen flex items-center justify-center p-6">
+        <div class="glass-panel p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6 text-center">COHI Concierge</h2>
+            <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input mb-4 p-3 w-full">
+            <input type="password" id="authPassword" placeholder="Password" class="luxury-input mb-4 p-3 w-full">
+            <button id="btnLogin" class="w-full bg-[#0dcaf0] text-black font-bold py-3 rounded-lg">Login</button>
+        </div>
+    </div>
+
+    <div id="dashboardApp" class="hidden min-h-screen p-8">
+        <header class="flex justify-between items-center mb-10">
+            <h1 id="designerWelcome" class="text-3xl font-black">Welcome</h1>
+            <button id="btnLogout" class="text-xs text-gray-500 hover:text-white">Logout</button>
+        </header>
+
+        <div id="pipelineGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </div>
+
+    <script type="module" src="js/ui-dashboard.js"></script>
+</body>
+</html>
