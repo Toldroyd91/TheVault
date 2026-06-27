@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COHI | Secure Client Vault</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="p-4 md:p-8">
+    <div id="loginGate" class="max-w-md mx-auto mt-20 glass-panel p-8 text-center">
+        <h2 class="text-xl font-bold mb-6">Secure Project Vault</h2>
+        <input type="password" id="vaultPinInput" placeholder="Enter Project PIN" class="luxury-input p-4 mb-4 text-center text-2xl tracking-widest">
+        <button onclick="window.unlockVault()" class="w-full py-4 bg-[#0dcaf0] text-black font-bold rounded-xl">Access Vault</button>
+    </div>
+
+    <div id="vaultContent" class="hidden max-w-5xl mx-auto space-y-6">
+        <h2 id="customerGreeting" class="text-3xl font-black mb-2">Welcome</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-panel p-6 md:col-span-1">
+                <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Project Scope</h3>
+                <div class="space-y-4">
+                    <div><label class="text-[10px] text-gray-500">Build Type</label><div id="vBuild" class="font-bold">...</div></div>
+                    <div><label class="text-[10px] text-gray-500">Roof System</label><div id="vRoof" class="font-bold">...</div></div>
+                    <div id="quoteContainer"></div>
+                </div>
+            </div>
+
+            <div id="vaultPamphletSection" class="glass-panel p-6 md:col-span-2 hidden">
+                <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Curated Literature</h3>
+                <div id="vaultPamphletGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 h-[300px] flex flex-col">
+            <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Direct Design Line</h3>
+            <div id="chat-window" class="flex-grow overflow-y-auto mb-4 space-y-2"></div>
+            <input type="text" id="chat-input" class="luxury-input p-3" placeholder="Message your designer...">
+        </div>
+    </div>
+
+    <script type="module" src="js/ui-vault.js"></script>
+</body>
+</html>
