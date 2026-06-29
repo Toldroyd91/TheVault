@@ -6,21 +6,48 @@
     <title>COHI | Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .luxury-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 8px;
+        }
+        .luxury-input:focus {
+            outline: none;
+            border-color: #0dcaf0;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-900 text-white">
     <div id="authGate" class="min-h-screen flex items-center justify-center p-6">
         <div class="glass-panel p-8 w-full max-w-md">
-            <h2 class="text-2xl font-bold mb-6 text-center">COHI Concierge</h2>
+            <h2 class="text-2xl font-bold mb-6 text-center text-white">COHI Concierge</h2>
             <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input mb-4 p-3 w-full">
             <input type="password" id="authPassword" placeholder="Password" class="luxury-input mb-4 p-3 w-full">
-            <button id="btnLogin" class="w-full bg-[#0dcaf0] text-black font-bold py-3 rounded-lg">Login</button>
+            <button id="btnLogin" class="w-full bg-[#0dcaf0] hover:bg-[#0baccc] text-black font-bold py-3 rounded-lg transition-colors">Login</button>
         </div>
     </div>
 
     <div id="dashboardApp" class="hidden min-h-screen p-8">
-        <header class="flex justify-between items-center mb-10">
-            <h1 id="designerWelcome" class="text-3xl font-black">Welcome</h1>
-            <button id="btnLogout" class="text-xs text-gray-500 hover:text-white">Logout</button>
+        <header class="flex justify-between items-center mb-10 border-b border-gray-800 pb-6">
+            <div>
+                <h1 id="designerWelcome" class="text-3xl font-black text-white">Welcome</h1>
+                <p class="text-gray-400 text-sm mt-1">Lead Management Pipeline</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="quotes.html" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-bold text-sm transition-all shadow-lg shadow-red-900/20">
+                    Build Quote
+                </a>
+                <button id="btnLogout" class="text-xs text-gray-500 hover:text-gray-300 transition-colors bg-gray-800 px-3 py-2 rounded">Logout</button>
+            </div>
         </header>
 
         <div id="pipelineGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

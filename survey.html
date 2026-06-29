@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Command Center - Full Survey Pack</title>
+    <style>
+        /* Modern High-End Dark Aesthetic */
+        :root {
+            --bg-dark: #0d1117; 
+            --card-bg: #161b22;
+            --accent: #E50914; 
+            --accent-hover: #b20710;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --input-bg: #090d13;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        h2 { margin: 0; font-weight: 600; font-size: 22px; letter-spacing: -0.5px; }
+        h3 { margin-top: 0; font-size: 15px; color: #fff; font-weight: 500; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 25px;
+            align-items: start;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 22px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .full-width { grid-column: 1 / -1; }
+        
+        label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        input, select, textarea {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: #c9d1d9;
+            padding: 12px;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 15px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.15);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            background: var(--input-bg);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+        .checkbox-group input { width: auto; accent-color: var(--accent); transform: scale(1.2); margin: 0; }
+        .checkbox-group label { margin: 0; font-size: 13px; color: #fff; text-transform: none; letter-spacing: normal; font-weight: normal;}
+        
+        .canvas-container {
+            background: #000;
+            border-radius: 8px;
+            width: 100%;
+            height: 460px;
+            border: 2px dashed var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        canvas { max-width: 100%; max-height: 100%; }
+        
+        /* New Photo Panel CSS */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .photo-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: #c9d1d9;
+            user-select: none;
+        }
+        .photo-btn:hover { border-color: var(--text-muted); }
+        .photo-btn .badge {
+            background: var(--border-color);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .photo-btn.has-photos {
+            border-color: var(--accent);
+            color: #fff;
+            background: rgba(229, 9, 20, 0.05);
+        }
+        .photo-btn.has-photos .badge {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .action-bar { display: flex; gap: 15px; margin-top: 20px; }
+        button {
+            background: var(--accent); color: white; border: none; padding: 15px 24px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        button:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-secondary { background: #21262d; border: 1px solid var(--border-color); color: #c9d1d9; }
+        .btn-secondary:hover { background: #30363d; border-color: #8b949e; }
+        
+        @media (max-width: 992px) { .grid-container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>COHI Pro Survey Engine</h2>
+        <select id="brandSelect" style="width: auto; padding: 8px 12px; font-size: 14px; background: #161b22;"></select>
+    </div>
+
+    <div class="grid-container">
+        <div>
+            <div class="card">
+                <h3>Client Profile</h3>
+                <div class="form-grid">
+                    <div><label>Lead Name *</label><input type="text" id="clientName" placeholder="e.g. John Dall"></div>
+                    <div><label>Customer Number</label><input type="text" id="clientNum" placeholder="e.g. 10245"></div>
+                    <div class="full-width"><label>Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70"></div>
+                    <div><label>Consultation Date</label><input type="date" id="apptDate"></div>
+                    <div><label>Revisit Date</label><input type="date" id="revisitDate"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Project Scope & Structure</h3>
+                <div class="form-grid">
+                    <div class="full-width"><label>Build Type</label><input type="text" id="buildType" placeholder="e.g. Conservatory Extension"></div>
+                    <div><label>Proposed Size</label><input type="text" id="proposedSize" placeholder="e.g. 3x3 Metres"></div>
+                    <div><label>House Material</label><input type="text" id="houseMaterial" placeholder="e.g. Brick/Render"></div>
+                    <div><label>Base Type</label><input type="text" id="baseType" placeholder="e.g. Concrete"></div>
+                    <div>
+                        <label>Floor Type</label>
+                        <select id="floorType">
+                            <option value="">Select...</option>
+                            <option value="Solid">Solid</option>
+                            <option value="Joisted">Joisted</option>
+                        </select>
+                    </div>
+                    <div><label>DPC Depth (mm)</label><input type="text" id="dpcDepth" placeholder="e.g. 150"></div>
+                    <div><label>Fascia Height (mm)</label><input type="text" id="fasciaHeight" placeholder="e.g. 2400"></div>
+                    <div><label>Air Bricks Required</label><input type="text" id="airBricks" placeholder="e.g. 4x Telescopic"></div>
+                    <div><label>Ext Brick Match</label><input type="text" id="extBrickMatch" placeholder="e.g. Red wirecut"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Logistics & Restrictions</h3>
+                <div class="form-grid">
+                    <div><label>Access Difficulties</label><input type="text" id="accessDifficult" placeholder="e.g. Side gate only"></div>
+                    <div><label>Access Width (mm)</label><input type="text" id="accessWidth" placeholder="e.g. 900"></div>
+                    <div>
+                        <label>Drainage</label>
+                        <select id="drainage">
+                            <option value="">Select...</option>
+                            <option value="MH">MH</option>
+                            <option value="RWP">RWP</option>
+                            <option value="Soil">Soil</option>
+                            <option value="Gulley">Gulley</option>
+                        </select>
+                    </div>
+                    <div class="full-width"><label>Wall Obstacles</label><input type="text" id="wallObstacles" placeholder="e.g. Boiler flue, soil pipe"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Design Specification</h3>
+                <div class="form-grid">
+                    <div>
+                        <label>Roof System</label>
+                        <select id="roofType">
+                            <option value="">Select...</option>
+                            <option value="Edwardian roof">Edwardian roof</option>
+                            <option value="Victorian">Victorian</option>
+                            <option value="Lean-to">Lean-to</option>
+                            <option value="Gable">Gable</option>
+                        </select>
+                    </div>
+                    <div><label>Roof Pitch</label><input type="text" id="roofPitch" placeholder="e.g. 25 degrees"></div>
+                    <div>
+                        <label>Frame Colour (External)</label>
+                        <select id="frameColour">
+                            <option value="">Select...</option>
+                            <option value="White">White</option>
+                            <option value="Grey Foil">Grey Foil</option>
+                            <option value="Rosewood">Rosewood</option>
+                            <option value="Light Oak">Light Oak</option>
+                            <option value="Black Brown Foil">Black Brown Foil</option>
+                            <option value="Cream Foil">Cream Foil</option>
+                            <option value="Chartwell Green Foil">Chartwell Green Foil</option>
+                            <option value="Agate Grey">Agate Grey</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Frame Colour (Internal)</label>
+                        <select id="internalFrameColour">
+                            <option value="White">White</option>
+                            <option value="Match External">Match External</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Compliance & Regulations</h3>
+                <div class="form-grid">
+                    <div>
+                        <label>Building Regs Required?</label>
+                        <select id="buildingRegs">
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Planning Perms Required?</label>
+                        <select id="planningPerms">
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>SAP Calcs Required?</label>
+                        <select id="sapCalcs">
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Handover Pamphlets</h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="cb-brochure">
+                    <label for="cb-brochure">Product Brochure Handed Over</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="cb-warranty">
+                    <label for="cb-warranty">Warranty Documentation Provided</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="cb-planning">
+                    <label for="cb-planning">Planning Guide / Regulatory Handout</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="cb-sap">
+                    <label for="cb-sap">SAP Calculations Factsheet</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="cb-roof">
+                    <label for="cb-roof">Roof System Specification Guide</label>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">
+                    <h3 style="border: none; margin: 0; padding: 0;">Elevation Sniper Engine</h3>
+                    <button id="btn-load-sniper-img" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; flex: none;">📷 Capture Photo</button>
+                </div>
+                
+                <div class="canvas-container">
+                    <canvas id="sniperCanvas" width="800" height="600"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Site Photography & Reference</h3>
+                <div class="photo-grid">
+                    <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()">
+                        <span>Front Elevation</span><span class="badge" id="badge-front">0</span>
+                    </div>
+                    <input type="file" id="upload-front" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'front')">
+                    
+                    <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()">
+                        <span>Side Elevation</span><span class="badge" id="badge-side">0</span>
+                    </div>
+                    <input type="file" id="upload-side" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'side')">
+                    
+                    <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()">
+                        <span>Back Elevation</span><span class="badge" id="badge-back">0</span>
+                    </div>
+                    <input type="file" id="upload-back" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'back')">
+                    
+                    <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()">
+                        <span>Access / Pathways</span><span class="badge" id="badge-access">0</span>
+                    </div>
+                    <input type="file" id="upload-access" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'access')">
+                    
+                    <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()">
+                        <span>Drainage / Manholes</span><span class="badge" id="badge-drainage">0</span>
+                    </div>
+                    <input type="file" id="upload-drainage" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'drainage')">
+                    
+                    <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()">
+                        <span>Trees / Foliage</span><span class="badge" id="badge-trees">0</span>
+                    </div>
+                    <input type="file" id="upload-trees" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'trees')">
+                    
+                    <div class="photo-btn" id="btn-sketches" onclick="document.getElementById('upload-sketches').click()">
+                        <span>Hand Sketches</span><span class="badge" id="badge-sketches">0</span>
+                    </div>
+                    <input type="file" id="upload-sketches" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'sketches')">
+                    
+                    <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()">
+                        <span>Misc / Other</span><span class="badge" id="badge-misc">0</span>
+                    </div>
+                    <input type="file" id="upload-misc" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'misc')">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Designer Survey Notes</h3>
+                <div class="full-width">
+                    <textarea id="designerNotes" rows="5" placeholder="Enter site notes (e.g., transom bars required, render details, brickwork match)..."></textarea>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                    <input type="checkbox" id="includeNotesInPack" checked style="accent-color: var(--accent);">
+                    <label for="includeNotesInPack" style="margin:0; text-transform:none; color: #fff; font-size: 13px;">Include these notes in Customer PDF</label>
+                </div>
+                
+                <button id="btn-ai-polish" class="btn-secondary" style="margin-top: 15px; width: 100%;">✨ AI Polish Notes</button>
+                
+                <div class="action-bar">
+                    <button id="btn-sync" class="btn-secondary">Save & Sync</button>
+                    <button id="btn-generate-pdf">Generate PDF Pack</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./js/ui-survey.js"></script>
+
+    <script>
+        // --- 1. SNIPER ENGINE IMAGE LOADER ---
+        document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: event.target.result }));
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        });
+
+        // --- 2. SITE MEDIA UPLOAD HANDLER ---
+        // This stores all uploaded photos in a global object so your PDF generator can easily grab them.
+        window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], sketches:[], misc:[] };
+
+        window.handlePhotoUpload = function(input, category) {
+            const files = input.files;
+            if(!files.length) return;
+
+            const badge = document.getElementById('badge-' + category);
+            const btn = document.getElementById('btn-' + category);
+
+            // Read each file and store it
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Save the Base64 image to our global store
+                    window.sitePhotos[category].push(e.target.result);
+                    
+                    // Update the UI Button Badge
+                    const count = window.sitePhotos[category].length;
+                    badge.innerText = count;
+                    btn.classList.add('has-photos');
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            // Clear the input so the user can click it again to add more photos if needed
+            input.value = ''; 
+        };
+
+        // --- 3. SMART PAMPHLET AUTO-TICKERS ---
+        document.getElementById('planningPerms')?.addEventListener('change', (e) => {
+            const cb = document.getElementById('cb-planning');
+            if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== '');
+        });
+        document.getElementById('sapCalcs')?.addEventListener('change', (e) => {
+            const cb = document.getElementById('cb-sap');
+            if(cb) cb.checked = (e.target.value === 'Yes');
+        });
+        document.getElementById('roofType')?.addEventListener('change', (e) => {
+            const cb = document.getElementById('cb-roof');
+            if(cb) cb.checked = (e.target.value !== '');
+        });
+    </script>
+</body>
+</html>
