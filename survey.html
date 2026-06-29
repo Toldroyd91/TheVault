@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Command Center - Survey Pro Engine</title>
+    <title>Command Center - Full Survey Pack</title>
     <style>
         /* Modern High-End Dark Aesthetic */
         :root {
@@ -89,11 +89,24 @@
             align-items: center;
             gap: 10px;
             padding: 8px 0;
+            background: var(--input-bg);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
         }
         .checkbox-group input {
             width: auto;
             accent-color: var(--accent);
-            transform: scale(1.1);
+            transform: scale(1.2);
+            margin: 0;
+        }
+        .checkbox-group label {
+            margin: 0;
+            font-size: 13px;
+            color: #fff;
+            text-transform: none;
+            letter-spacing: normal;
         }
         
         .canvas-container {
@@ -142,16 +155,6 @@
         }
         .btn-secondary:hover { background: #30363d; border-color: #8b949e; }
         
-        .badge-count {
-            background: var(--accent);
-            color: white;
-            border-radius: 12px;
-            padding: 2px 6px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 5px;
-        }
-
         @media (max-width: 992px) {
             .grid-container { grid-template-columns: 1fr; }
         }
@@ -172,26 +175,48 @@
                     <div><label>Lead Name *</label><input type="text" id="clientName" placeholder="e.g. John Dall"></div>
                     <div><label>Customer Number</label><input type="text" id="clientNum" placeholder="e.g. 10245"></div>
                     <div class="full-width"><label>Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70"></div>
+                    <div><label>Consultation Date</label><input type="date" id="apptDate"></div>
+                    <div><label>Revisit Date</label><input type="date" id="revisitDate"></div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Structural Basics</h3>
+                <h3>Project Scope & Structure</h3>
                 <div class="form-grid">
-                    <div><label>Build Type</label><input type="text" id="buildType" placeholder="e.g. Conservatory Extension"></div>
+                    <div class="full-width"><label>Build Type</label><input type="text" id="buildType" placeholder="e.g. Conservatory Extension"></div>
                     <div><label>Proposed Size</label><input type="text" id="proposedSize" placeholder="e.g. 3x3 Metres"></div>
                     <div><label>House Material</label><input type="text" id="houseMaterial" placeholder="e.g. Brick/Render"></div>
+                    <div><label>Base Type</label><input type="text" id="baseType" placeholder="e.g. Concrete"></div>
+                    <div>
+                        <label>Floor Type</label>
+                        <select id="floorType">
+                            <option value="">Select...</option>
+                            <option value="Solid">Solid</option>
+                            <option value="Joisted">Joisted</option>
+                        </select>
+                    </div>
                     <div><label>DPC Depth (mm)</label><input type="text" id="dpcDepth" placeholder="e.g. 150"></div>
                     <div><label>Fascia Height (mm)</label><input type="text" id="fasciaHeight" placeholder="e.g. 2400"></div>
                     <div><label>Air Bricks Required</label><input type="text" id="airBricks" placeholder="e.g. 4x Telescopic"></div>
+                    <div><label>Ext Brick Match</label><input type="text" id="extBrickMatch" placeholder="e.g. Red wirecut"></div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Technical & Logistics</h3>
+                <h3>Logistics & Restrictions</h3>
                 <div class="form-grid">
                     <div><label>Access Difficulties</label><input type="text" id="accessDifficult" placeholder="e.g. Side gate only"></div>
                     <div><label>Access Width (mm)</label><input type="text" id="accessWidth" placeholder="e.g. 900"></div>
+                    <div>
+                        <label>Drainage</label>
+                        <select id="drainage">
+                            <option value="">Select...</option>
+                            <option value="MH">MH</option>
+                            <option value="RWP">RWP</option>
+                            <option value="Soil">Soil</option>
+                            <option value="Gulley">Gulley</option>
+                        </select>
+                    </div>
                     <div class="full-width"><label>Wall Obstacles</label><input type="text" id="wallObstacles" placeholder="e.g. Boiler flue, soil pipe"></div>
                 </div>
             </div>
@@ -201,7 +226,7 @@
                 <div class="form-grid">
                     <div>
                         <label>Roof System</label>
-                        <select id="roofSystem">
+                        <select id="roofType">
                             <option value="">Select...</option>
                             <option value="Edwardian roof">Edwardian roof</option>
                             <option value="Victorian">Victorian</option>
@@ -209,25 +234,36 @@
                             <option value="Gable">Gable</option>
                         </select>
                     </div>
+                    <div><label>Roof Pitch</label><input type="text" id="roofPitch" placeholder="e.g. 25 degrees"></div>
                     <div>
                         <label>Frame Colour (External)</label>
                         <select id="frameColour">
                             <option value="">Select...</option>
                             <option value="White">White</option>
-                            <option value="Anthracite Grey">Anthracite Grey</option>
+                            <option value="Grey Foil">Grey Foil</option>
                             <option value="Rosewood">Rosewood</option>
                             <option value="Light Oak">Light Oak</option>
+                            <option value="Black Brown Foil">Black Brown Foil</option>
+                            <option value="Cream Foil">Cream Foil</option>
+                            <option value="Chartwell Green Foil">Chartwell Green Foil</option>
+                            <option value="Agate Grey">Agate Grey</option>
                         </select>
                     </div>
-                    <div class="full-width">
+                    <div>
                         <label>Frame Colour (Internal)</label>
                         <select id="internalFrameColour">
                             <option value="White">White</option>
                             <option value="Match External">Match External</option>
                         </select>
                     </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Compliance & Regulations</h3>
+                <div class="form-grid">
                     <div>
-                        <label>Building Regs Required</label>
+                        <label>Building Regs Required?</label>
                         <select id="buildingRegs">
                             <option value="">Select...</option>
                             <option value="Yes">Yes</option>
@@ -235,8 +271,16 @@
                         </select>
                     </div>
                     <div>
-                        <label>Planning Permission Required</label>
+                        <label>Planning Perms Required?</label>
                         <select id="planningPerms">
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>SAP Calcs Required?</label>
+                        <select id="sapCalcs">
                             <option value="">Select...</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
@@ -246,18 +290,26 @@
             </div>
 
             <div class="card">
-                <h3>Handover Materials (Pamphlets)</h3>
+                <h3>Handover Pamphlets</h3>
                 <div class="checkbox-group">
-                    <input type="checkbox" id="check-brochure">
-                    <label for="check-brochure">Product Brochure Handed Over</label>
+                    <input type="checkbox" id="cb-brochure">
+                    <label for="cb-brochure">Product Brochure Handed Over</label>
                 </div>
                 <div class="checkbox-group">
-                    <input type="checkbox" id="check-warranty">
-                    <label for="check-warranty">Warranty Documentation Provided</label>
+                    <input type="checkbox" id="cb-warranty">
+                    <label for="cb-warranty">Warranty Documentation Provided</label>
                 </div>
                 <div class="checkbox-group">
-                    <input type="checkbox" id="check-planning">
-                    <label for="check-planning">Planning Guide / Regulatory Handout</label>
+                    <input type="checkbox" id="cb-planning">
+                    <label for="cb-planning">Planning Guide / Regulatory Handout</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="cb-sap">
+                    <label for="cb-sap">SAP Calculations Factsheet</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="cb-roof">
+                    <label for="cb-roof">Roof System Specification Guide</label>
                 </div>
             </div>
         </div>
@@ -279,7 +331,12 @@
                 <div class="full-width">
                     <textarea id="designerNotes" rows="5" placeholder="Enter site notes (e.g., transom bars required, render details, brickwork match)..."></textarea>
                 </div>
-                <button id="btn-ai-polish" class="btn-secondary" style="margin-top: 10px; width: 100%;">✨ AI Polish Notes</button>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                    <input type="checkbox" id="includeNotesInPack" checked style="accent-color: var(--accent);">
+                    <label for="includeNotesInPack" style="margin:0; text-transform:none; color: #fff; font-size: 13px;">Include these notes in Customer PDF</label>
+                </div>
+                
+                <button id="btn-ai-polish" class="btn-secondary" style="margin-top: 15px; width: 100%;">✨ AI Polish Notes</button>
                 
                 <div class="action-bar">
                     <button id="btn-sync" class="btn-secondary">Save & Sync</button>
@@ -302,13 +359,26 @@
                 if(file) {
                     const reader = new FileReader();
                     reader.onload = (event) => {
-                        // Dispatches a global custom event your sniper engine listens for
                         window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: event.target.result }));
                     };
                     reader.readAsDataURL(file);
                 }
             };
             input.click();
+        });
+
+        // Restore the "Smart Pamphlet Auto-Tickers" from your old app.js
+        document.getElementById('planningPerms')?.addEventListener('change', (e) => {
+            const cb = document.getElementById('cb-planning');
+            if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== '');
+        });
+        document.getElementById('sapCalcs')?.addEventListener('change', (e) => {
+            const cb = document.getElementById('cb-sap');
+            if(cb) cb.checked = (e.target.value === 'Yes');
+        });
+        document.getElementById('roofType')?.addEventListener('change', (e) => {
+            const cb = document.getElementById('cb-roof');
+            if(cb) cb.checked = (e.target.value !== '');
         });
     </script>
 </body>
