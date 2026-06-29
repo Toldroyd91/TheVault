@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Designer Registration | COHI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0d1117; color: #f0f6fc; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        .glass-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        .luxury-input {
+            background: #090d13;
+            border: 1px solid #30363d;
+            color: white;
+            border-radius: 8px;
+        }
+        .luxury-input:focus { outline: none; border-color: #E50914; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="glass-panel p-8 w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-2 text-center">Designer Registration</h2>
+        <p class="text-gray-400 text-sm text-center mb-6">Create your secure access profile.</p>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Full Name</label>
+                <input type="text" id="regName" placeholder="e.g. Thomas Oldroyd" class="luxury-input mt-1 p-3 w-full">
+            </div>
+            
+            <div>
+                <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Email Address</label>
+                <input type="email" id="regEmail" placeholder="name@domain.com" class="luxury-input mt-1 p-3 w-full">
+            </div>
+
+            <div>
+                <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Password (Min 6 Characters)</label>
+                <input type="password" id="regPassword" placeholder="••••••••" class="luxury-input mt-1 p-3 w-full">
+            </div>
+
+            <div>
+                <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Primary Brand</label>
+                <select id="regBrand" class="luxury-input mt-1 p-3 w-full">
+                    <option value="CO Home Improvements">CO Home Improvements</option>
+                    <option value="Yorkshire Windows">Yorkshire Windows</option>
+                </select>
+            </div>
+
+            <button id="btnRegister" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-colors mt-4">
+                Create Profile
+            </button>
+            <div id="statusMsg" class="text-center text-sm mt-3 hidden"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // *** PASTE YOUR FIREBASE CONFIG HERE ***
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById('btnRegister').addEventListener('click', async () => {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const brand = document.getElementById('regBrand').value;
+            const status = document.getElementById('statusMsg');
+
+            if(!name || !email || !password) {
+                status.textContent = "Please fill in all fields.";
+                status.className = "text-center text-sm mt-3 text-red-500 block";
+                return;
+            }
+
+            try {
+                status.textContent = "Creating profile...";
+                status.className = "text-center text-sm mt-3 text-gray-400 block";
+                
+                // 1. Create the Auth Account
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Attach their name to the Auth profile
+                await updateProfile(user, { displayName: name });
+
+                // 3. Create a strict database entry to lock their leads to their brand
+                await setDoc(doc(db, "designers", user.uid), {
+                    name: name,
+                    email: email,
+                    brand: brand,
+                    role: "designer",
+                    createdAt: new Date()
+                });
+
+                status.textContent = "Success! You can now log into the Command Center.";
+                status.className = "text-center text-sm mt-3 text-green-500 block";
+                
+                // Clear form
+                document.getElementById('regName').value = '';
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPassword').value = '';
+                
+            } catch (error) {
+                console.error(error);
+                status.textContent = error.message;
+                status.className = "text-center text-sm mt-3 text-red-500 block";
+            }
+        });
+    </script>
+</body>
+</html>
