@@ -2,23 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Command Center - Survey Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Command Center - Survey Pro Engine</title>
     <style>
-        /* Sleek Premium Aesthetic */
+        /* Modern High-End Dark Aesthetic */
         :root {
-            --bg-dark: #0f1115; 
-            --card-bg: #1c2128;
+            --bg-dark: #0d1117; 
+            --card-bg: #161b22;
             --accent: #E50914; 
             --accent-hover: #b20710;
-            --text-main: #f5f5f1;
+            --text-main: #f0f6fc;
             --text-muted: #8b949e;
             --border-color: #30363d;
+            --input-bg: #090d13;
         }
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
@@ -32,33 +33,33 @@
             padding-bottom: 15px;
             border-bottom: 1px solid var(--border-color);
         }
-        h2 { margin: 0; font-weight: 600; font-size: 24px; letter-spacing: -0.5px; }
-        h3 { margin-top: 0; font-size: 16px; color: #fff; font-weight: 500; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; }
+        h2 { margin: 0; font-weight: 600; font-size: 22px; letter-spacing: -0.5px; }
+        h3 { margin-top: 0; font-size: 15px; color: #fff; font-weight: 500; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .grid-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.1fr 0.9fr;
             gap: 25px;
             align-items: start;
         }
         .card {
             background: var(--card-bg);
             border-radius: 12px;
-            padding: 25px;
+            padding: 22px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
         
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 14px;
         }
-        .form-group.full-width { grid-column: 1 / -1; }
+        .full-width { grid-column: 1 / -1; }
         
         label {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
             margin-bottom: 6px;
             display: block;
@@ -67,11 +68,11 @@
             font-weight: 600;
         }
         input, select, textarea {
-            background: #0d1117;
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
             color: #c9d1d9;
-            padding: 14px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 6px;
             width: 100%;
             box-sizing: border-box;
             font-size: 15px;
@@ -80,14 +81,26 @@
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.2);
+            box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.15);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+        }
+        .checkbox-group input {
+            width: auto;
+            accent-color: var(--accent);
+            transform: scale(1.1);
         }
         
         .canvas-container {
             background: #000;
-            border-radius: 10px;
+            border-radius: 8px;
             width: 100%;
-            height: 450px;
+            height: 460px;
             border: 2px dashed var(--border-color);
             display: flex;
             justify-content: center;
@@ -103,15 +116,15 @@
         .action-bar {
             display: flex;
             gap: 15px;
-            margin-top: 25px;
+            margin-top: 20px;
         }
         button {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 16px 24px;
-            border-radius: 8px;
-            font-size: 15px;
+            padding: 15px 24px;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -120,7 +133,7 @@
             letter-spacing: 0.5px;
         }
         button:hover { background: var(--accent-hover); transform: translateY(-1px); }
-        button:disabled { background: #555; cursor: not-allowed; transform: none; }
+        button:disabled { background: #444; color: #777; cursor: not-allowed; transform: none; }
         
         .btn-secondary {
             background: #21262d;
@@ -129,64 +142,62 @@
         }
         .btn-secondary:hover { background: #30363d; border-color: #8b949e; }
         
-        @media (max-width: 900px) {
+        .badge-count {
+            background: var(--accent);
+            color: white;
+            border-radius: 12px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        @media (max-width: 992px) {
             .grid-container { grid-template-columns: 1fr; }
-            .form-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>Command Center</h2>
-        <select id="brandSelect" style="width: auto; padding: 10px 15px; font-size: 14px; background: #1c2128;"></select>
+        <h2>COHI Pro Survey Engine</h2>
+        <select id="brandSelect" style="width: auto; padding: 8px 12px; font-size: 14px; background: #161b22;"></select>
     </div>
 
     <div class="grid-container">
-        <div style="display: flex; flex-direction: column; gap: 25px;">
-            
+        <div>
             <div class="card">
                 <h3>Client Profile</h3>
                 <div class="form-grid">
-                    <div><label>Lead Name *</label><input type="text" id="clientName" placeholder="e.g. John Doe"></div>
-                    <div><label>Customer Number</label><input type="tel" id="clientNum" placeholder="12345"></div>
-                    <div><label>Postcode *</label><input type="text" id="postCode" placeholder="S70 1AA"></div>
-                    <div><label>Consultation Date</label><input type="date" id="apptDate"></div>
-                    <div><label>Revisit Date</label><input type="date" id="revisitDate"></div>
-                    <div><label>Revisit Location</label><input type="text" id="revisitLocation" placeholder="e.g. Showroom"></div>
+                    <div><label>Lead Name *</label><input type="text" id="clientName" placeholder="e.g. John Dall"></div>
+                    <div><label>Customer Number</label><input type="text" id="clientNum" placeholder="e.g. 10245"></div>
+                    <div class="full-width"><label>Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70"></div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Site Survey Basics</h3>
+                <h3>Structural Basics</h3>
                 <div class="form-grid">
-                    <div><label>DPC Depth (mm)</label><input type="text" id="dpcDepth" placeholder="150"></div>
-                    <div><label>Finished Floor Level</label><input type="text" id="ffl" placeholder="Level with DPC"></div>
-                    <div>
-                        <label>Floor Type</label>
-                        <select id="floorType">
-                            <option value="">Select...</option>
-                            <option value="Solid">Solid</option>
-                            <option value="Joisted">Joisted</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Drainage</label>
-                        <select id="drainage">
-                            <option value="">Select...</option>
-                            <option value="MH">MH</option>
-                            <option value="RWP">RWP</option>
-                            <option value="Soil">Soil</option>
-                            <option value="Gulley">Gulley</option>
-                        </select>
-                    </div>
-                    <div><label>Ext Brick Match</label><input type="text" id="extBrickMatch" placeholder="e.g. Red wirecut"></div>
-                    <div><label>Base Type</label><input type="text" id="baseType" placeholder="e.g. Concrete"></div>
+                    <div><label>Build Type</label><input type="text" id="buildType" placeholder="e.g. Conservatory Extension"></div>
+                    <div><label>Proposed Size</label><input type="text" id="proposedSize" placeholder="e.g. 3x3 Metres"></div>
+                    <div><label>House Material</label><input type="text" id="houseMaterial" placeholder="e.g. Brick/Render"></div>
+                    <div><label>DPC Depth (mm)</label><input type="text" id="dpcDepth" placeholder="e.g. 150"></div>
+                    <div><label>Fascia Height (mm)</label><input type="text" id="fasciaHeight" placeholder="e.g. 2400"></div>
+                    <div><label>Air Bricks Required</label><input type="text" id="airBricks" placeholder="e.g. 4x Telescopic"></div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Design & Logistics</h3>
+                <h3>Technical & Logistics</h3>
+                <div class="form-grid">
+                    <div><label>Access Difficulties</label><input type="text" id="accessDifficult" placeholder="e.g. Side gate only"></div>
+                    <div><label>Access Width (mm)</label><input type="text" id="accessWidth" placeholder="e.g. 900"></div>
+                    <div class="full-width"><label>Wall Obstacles</label><input type="text" id="wallObstacles" placeholder="e.g. Boiler flue, soil pipe"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Design Specification</h3>
                 <div class="form-grid">
                     <div>
                         <label>Roof System</label>
@@ -198,9 +209,8 @@
                             <option value="Gable">Gable</option>
                         </select>
                     </div>
-                    <div><label>Roof Pitch</label><input type="text" id="roofPitch" placeholder="e.g. 25 degrees"></div>
                     <div>
-                        <label>Frame Colour (Ext)</label>
+                        <label>Frame Colour (External)</label>
                         <select id="frameColour">
                             <option value="">Select...</option>
                             <option value="White">White</option>
@@ -209,15 +219,15 @@
                             <option value="Light Oak">Light Oak</option>
                         </select>
                     </div>
-                    <div>
-                        <label>Frame Colour (Int)</label>
+                    <div class="full-width">
+                        <label>Frame Colour (Internal)</label>
                         <select id="internalFrameColour">
                             <option value="White">White</option>
                             <option value="Match External">Match External</option>
                         </select>
                     </div>
                     <div>
-                        <label>Building Regs?</label>
+                        <label>Building Regs Required</label>
                         <select id="buildingRegs">
                             <option value="">Select...</option>
                             <option value="Yes">Yes</option>
@@ -225,7 +235,7 @@
                         </select>
                     </div>
                     <div>
-                        <label>Planning Perms?</label>
+                        <label>Planning Permission Required</label>
                         <select id="planningPerms">
                             <option value="">Select...</option>
                             <option value="Yes">Yes</option>
@@ -234,15 +244,29 @@
                     </div>
                 </div>
             </div>
-            
+
+            <div class="card">
+                <h3>Handover Materials (Pamphlets)</h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="check-brochure">
+                    <label for="check-brochure">Product Brochure Handed Over</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="check-warranty">
+                    <label for="check-warranty">Warranty Documentation Provided</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="check-planning">
+                    <label for="check-planning">Planning Guide / Regulatory Handout</label>
+                </div>
+            </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 25px;">
-            
+        <div>
             <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">
-                    <h3 style="border: none; margin: 0; padding: 0;">Elevation Markup (Sniper Engine)</h3>
-                    <button id="btn-upload-sniper" class="btn-secondary" style="padding: 8px 12px; font-size: 12px; flex: none;">📷 Load Photo</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">
+                    <h3 style="border: none; margin: 0; padding: 0;">Elevation Sniper Engine</h3>
+                    <button id="btn-load-sniper-img" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; flex: none;">📷 Capture Photo</button>
                 </div>
                 
                 <div class="canvas-container">
@@ -251,9 +275,9 @@
             </div>
 
             <div class="card">
-                <h3>Designer Notes & Processing</h3>
-                <div class="form-group full-width">
-                    <textarea id="designerNotes" rows="4" placeholder="Enter rough notes here..."></textarea>
+                <h3>Designer Survey Notes</h3>
+                <div class="full-width">
+                    <textarea id="designerNotes" rows="5" placeholder="Enter site notes (e.g., transom bars required, render details, brickwork match)..."></textarea>
                 </div>
                 <button id="btn-ai-polish" class="btn-secondary" style="margin-top: 10px; width: 100%;">✨ AI Polish Notes</button>
                 
@@ -262,14 +286,14 @@
                     <button id="btn-generate-pdf">Generate PDF Pack</button>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script type="module" src="./js/ui-survey.js"></script>
+
     <script>
-        // Hook to allow the Load Photo button to send images into the Sniper Canvas
-        document.getElementById('btn-upload-sniper')?.addEventListener('click', () => {
+        // Media upload interface hook to feed images directly into the Sniper Engine Canvas
+        document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
@@ -277,7 +301,10 @@
                 const file = e.target.files[0];
                 if(file) {
                     const reader = new FileReader();
-                    reader.onload = (event) => window.dispatchEvent(new CustomEvent('loadSniperImage', {detail: event.target.result}));
+                    reader.onload = (event) => {
+                        // Dispatches a global custom event your sniper engine listens for
+                        window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: event.target.result }));
+                    };
                     reader.readAsDataURL(file);
                 }
             };
