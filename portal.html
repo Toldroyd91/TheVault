@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Personal Design Vault | COHI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-dark: #0d1117; --card-bg: #161b22; --accent: #E50914; 
+            --text-main: #f0f6fc; --text-muted: #8b949e; --border-color: #30363d;
+        }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+        
+        /* The Stepper CSS */
+        .stepper-container { margin: 30px 0; padding: 25px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .stepper { display: flex; justify-content: space-between; position: relative; margin-top: 20px;}
+        .stepper::before { content: ''; position: absolute; top: 15px; left: 0; width: 100%; height: 2px; background: #30363d; z-index: 1; }
+        .stepper-progress { position: absolute; top: 15px; left: 0; height: 2px; background: var(--accent); z-index: 2; transition: width 0.5s ease; }
+        .step { position: relative; z-index: 3; text-align: center; flex: 1; }
+        .step-dot { width: 32px; height: 32px; border-radius: 50%; background: #0d1117; border: 2px solid #30363d; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #8b949e; }
+        .step-label { font-size: 12px; color: #8b949e; text-transform: uppercase; font-weight: 600; }
+        .step.completed .step-dot { background: #238636; border-color: #238636; color: white; }
+        .step.completed .step-label { color: #fff; }
+        .step.active .step-dot { background: #0d1117; border-color: var(--accent); color: var(--accent); box-shadow: 0 0 15px rgba(229, 9, 20, 0.4); }
+        .step.active .step-label { color: var(--accent); }
+
+        /* The Teaser Lock CSS */
+        .locked-section { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); background: var(--card-bg); margin-top: 20px; }
+        .locked-content { padding: 30px; filter: blur(6px) brightness(0.6); user-select: none; pointer-events: none; }
+        .unlock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(180deg, rgba(13,17,23,0.4) 0%, rgba(13,17,23,0.95) 100%); z-index: 10; }
+        .btn-unlock { background: var(--accent); color: white; border: none; padding: 16px 32px; border-radius: 30px; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 0 20px rgba(229, 9, 20, 0.4); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(229, 9, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); } }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="border-b border-gray-800 pb-6 mb-8 text-center md:text-left">
+            <h1 class="text-3xl font-black text-white uppercase tracking-wide">Design Vault</h1>
+            <p id="clientGreeting" class="text-gray-400 mt-2">Loading your proprietary presentation...</p>
+        </header>
+
+        <div class="stepper-container hidden" id="roadmapUi">
+            <h3 class="text-white text-sm font-bold uppercase tracking-wider mb-2">Project Roadmap</h3>
+            <div class="stepper">
+                <div class="stepper-progress" style="width: 25%;"></div>
+                <div class="step completed"><div class="step-dot">✓</div><div class="step-label">Survey</div></div>
+                <div class="step active"><div class="step-dot">2</div><div class="step-label">Quote</div></div>
+                <div class="step"><div class="step-dot">3</div><div class="step-label">Contracts</div></div>
+                <div class="step"><div class="step-dot">4</div><div class="step-label">Install</div></div>
+            </div>
+        </div>
+
+        <div id="quoteVault" class="hidden">
+            <h3 class="text-xl font-bold text-white mb-4 mt-8">Proposed Specification</h3>
+            
+            <div class="locked-section">
+                <div class="locked-content" id="blurredData">
+                    <div class="text-gray-400 text-sm uppercase font-bold mb-1">Total Investment</div>
+                    <div class="text-4xl font-black text-white mb-6">£XX,XXX.00</div>
+                    
+                    <div class="text-gray-400 text-sm uppercase font-bold mb-2">Structural Details</div>
+                    <ul class="text-gray-300 space-y-2 text-sm">
+                        <li>► Full structural engineering calculations</li>
+                        <li>► Custom foundation mapping and step forms</li>
+                        <li>► Architectural window scheduling & Roof Glazing</li>
+                        <li>► Complete Waste/Plumbing management</li>
+                    </ul>
+                </div>
+
+                <div class="unlock-overlay" id="lockOverlay">
+                    <div class="text-4xl mb-4">🔒</div>
+                    <a href="tel:07700000000" class="btn-unlock" id="btnContact">Schedule Reveal</a>
+                    <div class="text-gray-400 text-xs font-bold uppercase mt-4 tracking-wider text-center px-6">
+                        Book your brief consultation to unlock full pricing and technical plans.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // *** PASTE YOUR FIREBASE CONFIG HERE ***
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 1. Check the URL for the Lead ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const leadId = urlParams.get('id');
+
+        async function loadVault() {
+            if(!leadId) {
+                document.getElementById('clientGreeting').innerText = "Invalid Vault Link. Please contact your designer.";
+                return;
+            }
+
+            try {
+                // 2. Fetch the Quote Data from Firebase
+                const docRef = doc(db, "quotes", leadId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // 3. Personalize the screen
+                    document.getElementById('clientGreeting').innerText = `Prepared exclusively for ${data.clientName || 'you'}.`;
+                    document.getElementById('roadmapUi').classList.remove('hidden');
+                    document.getElementById('quoteVault').classList.remove('hidden');
+
+                    // 4. Check if we should unlock it
+                    if(data.isUnlocked === true) {
+                        // Remove the blur and the lock overlay!
+                        document.getElementById('blurredData').style.filter = 'none';
+                        document.getElementById('lockOverlay').style.display = 'none';
+                        
+                        // Inject the REAL price instead of £XX,XXX
+                        document.getElementById('blurredData').innerHTML = `
+                            <div class="text-gray-400 text-sm uppercase font-bold mb-1">Total Investment</div>
+                            <div class="text-4xl font-black text-red-600 mb-6">${data.totalPrice || 'TBC'}</div>
+                            <div class="text-gray-400 text-sm uppercase font-bold mb-2">Confirmed Specifications</div>
+                            <ul class="text-gray-300 space-y-2 text-sm">
+                                <li>► Roof: ${data.roofType || 'Standard'}</li>
+                                <li>► Dimensions: ${data.dimensions || 'Surveyed'}</li>
+                                <li>► Windows: ${data.windowSpecs || 'Standard'}</li>
+                            </ul>
+                        `;
+                    }
+
+                } else {
+                    document.getElementById('clientGreeting').innerText = "Vault not found or expired.";
+                }
+            } catch (error) {
+                console.error("Error loading vault:", error);
+            }
+        }
+
+        loadVault();
+    </script>
+</body>
+</html>
