@@ -95,19 +95,8 @@
             border: 1px solid var(--border-color);
             margin-bottom: 8px;
         }
-        .checkbox-group input {
-            width: auto;
-            accent-color: var(--accent);
-            transform: scale(1.2);
-            margin: 0;
-        }
-        .checkbox-group label {
-            margin: 0;
-            font-size: 13px;
-            color: #fff;
-            text-transform: none;
-            letter-spacing: normal;
-        }
+        .checkbox-group input { width: auto; accent-color: var(--accent); transform: scale(1.2); margin: 0; }
+        .checkbox-group label { margin: 0; font-size: 13px; color: #fff; text-transform: none; letter-spacing: normal; font-weight: normal;}
         
         .canvas-container {
             background: #000;
@@ -121,43 +110,58 @@
             overflow: hidden;
             position: relative;
         }
-        canvas {
-            max-width: 100%;
-            max-height: 100%;
-        }
+        canvas { max-width: 100%; max-height: 100%; }
         
-        .action-bar {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
+        /* New Photo Panel CSS */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
-        button {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 15px 24px;
+        .photo-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
             border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             cursor: pointer;
             transition: all 0.2s;
-            flex: 1;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 13px;
+            color: #c9d1d9;
+            user-select: none;
+        }
+        .photo-btn:hover { border-color: var(--text-muted); }
+        .photo-btn .badge {
+            background: var(--border-color);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .photo-btn.has-photos {
+            border-color: var(--accent);
+            color: #fff;
+            background: rgba(229, 9, 20, 0.05);
+        }
+        .photo-btn.has-photos .badge {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .action-bar { display: flex; gap: 15px; margin-top: 20px; }
+        button {
+            background: var(--accent); color: white; border: none; padding: 15px 24px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 0.5px;
         }
         button:hover { background: var(--accent-hover); transform: translateY(-1px); }
-        button:disabled { background: #444; color: #777; cursor: not-allowed; transform: none; }
-        
-        .btn-secondary {
-            background: #21262d;
-            border: 1px solid var(--border-color);
-            color: #c9d1d9;
-        }
+        .btn-secondary { background: #21262d; border: 1px solid var(--border-color); color: #c9d1d9; }
         .btn-secondary:hover { background: #30363d; border-color: #8b949e; }
         
-        @media (max-width: 992px) {
-            .grid-container { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 992px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -327,6 +331,51 @@
             </div>
 
             <div class="card">
+                <h3>Site Photography & Reference</h3>
+                <div class="photo-grid">
+                    <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()">
+                        <span>Front Elevation</span><span class="badge" id="badge-front">0</span>
+                    </div>
+                    <input type="file" id="upload-front" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'front')">
+                    
+                    <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()">
+                        <span>Side Elevation</span><span class="badge" id="badge-side">0</span>
+                    </div>
+                    <input type="file" id="upload-side" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'side')">
+                    
+                    <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()">
+                        <span>Back Elevation</span><span class="badge" id="badge-back">0</span>
+                    </div>
+                    <input type="file" id="upload-back" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'back')">
+                    
+                    <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()">
+                        <span>Access / Pathways</span><span class="badge" id="badge-access">0</span>
+                    </div>
+                    <input type="file" id="upload-access" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'access')">
+                    
+                    <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()">
+                        <span>Drainage / Manholes</span><span class="badge" id="badge-drainage">0</span>
+                    </div>
+                    <input type="file" id="upload-drainage" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'drainage')">
+                    
+                    <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()">
+                        <span>Trees / Foliage</span><span class="badge" id="badge-trees">0</span>
+                    </div>
+                    <input type="file" id="upload-trees" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'trees')">
+                    
+                    <div class="photo-btn" id="btn-sketches" onclick="document.getElementById('upload-sketches').click()">
+                        <span>Hand Sketches</span><span class="badge" id="badge-sketches">0</span>
+                    </div>
+                    <input type="file" id="upload-sketches" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'sketches')">
+                    
+                    <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()">
+                        <span>Misc / Other</span><span class="badge" id="badge-misc">0</span>
+                    </div>
+                    <input type="file" id="upload-misc" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'misc')">
+                </div>
+            </div>
+
+            <div class="card">
                 <h3>Designer Survey Notes</h3>
                 <div class="full-width">
                     <textarea id="designerNotes" rows="5" placeholder="Enter site notes (e.g., transom bars required, render details, brickwork match)..."></textarea>
@@ -349,7 +398,7 @@
     <script type="module" src="./js/ui-survey.js"></script>
 
     <script>
-        // Media upload interface hook to feed images directly into the Sniper Engine Canvas
+        // --- 1. SNIPER ENGINE IMAGE LOADER ---
         document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -358,16 +407,44 @@
                 const file = e.target.files[0];
                 if(file) {
                     const reader = new FileReader();
-                    reader.onload = (event) => {
-                        window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: event.target.result }));
-                    };
+                    reader.onload = (event) => window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: event.target.result }));
                     reader.readAsDataURL(file);
                 }
             };
             input.click();
         });
 
-        // Restore the "Smart Pamphlet Auto-Tickers" from your old app.js
+        // --- 2. SITE MEDIA UPLOAD HANDLER ---
+        // This stores all uploaded photos in a global object so your PDF generator can easily grab them.
+        window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], sketches:[], misc:[] };
+
+        window.handlePhotoUpload = function(input, category) {
+            const files = input.files;
+            if(!files.length) return;
+
+            const badge = document.getElementById('badge-' + category);
+            const btn = document.getElementById('btn-' + category);
+
+            // Read each file and store it
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Save the Base64 image to our global store
+                    window.sitePhotos[category].push(e.target.result);
+                    
+                    // Update the UI Button Badge
+                    const count = window.sitePhotos[category].length;
+                    badge.innerText = count;
+                    btn.classList.add('has-photos');
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            // Clear the input so the user can click it again to add more photos if needed
+            input.value = ''; 
+        };
+
+        // --- 3. SMART PAMPHLET AUTO-TICKERS ---
         document.getElementById('planningPerms')?.addEventListener('change', (e) => {
             const cb = document.getElementById('cb-planning');
             if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== '');
