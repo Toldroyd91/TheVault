@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Engine - Pro Builder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0d1117; --card-bg: #161b22; --accent: #E50914; 
+            --text-main: #f0f6fc; --text-muted: #8b949e; --border: #30363d;
+        }
+        body {
+            background-color: var(--bg-dark); color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; padding: 20px; box-sizing: border-box;
+        }
+        .header { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 25px; }
+        h2 { margin: 0; font-size: 24px; font-weight: 600; }
+        
+        /* The Drop Zone */
+        .drop-zone {
+            background: #090d13; border: 2px dashed var(--accent);
+            border-radius: 12px; padding: 40px; text-align: center;
+            cursor: pointer; transition: background 0.3s;
+            margin-bottom: 30px;
+        }
+        .drop-zone.dragover { background: rgba(229, 9, 20, 0.1); }
+        .drop-zone h3 { margin: 0 0 10px 0; color: var(--accent); }
+        .drop-zone p { margin: 0; color: var(--text-muted); font-size: 14px; }
+        
+        /* Tier Columns */
+        .tiers-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .tier-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .tier-card h4 { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; font-size: 18px; }
+        .tier-price { font-size: 28px; font-weight: bold; color: #fff; margin-bottom: 15px; }
+        
+        .feature-list { list-style: none; padding: 0; margin: 0; font-size: 14px; color: #c9d1d9; }
+        .feature-list li { padding: 8px 0; border-bottom: 1px solid #21262d; }
+        .feature-list li span.label { font-weight: 600; color: var(--text-muted); display: block; font-size: 11px; text-transform: uppercase; }
+
+        .btn-sync {
+            background: var(--accent); color: white; border: none; padding: 15px 24px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+            width: 100%; margin-top: 20px; text-transform: uppercase;
+        }
+        .btn-sync:hover { background: #b20710; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>U Design Extraction Engine</h2>
+        <p style="color: var(--text-muted); margin: 5px 0 0 0;">Drag and drop PDF quotes to automatically build presentation tiers.</p>
+    </div>
+
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <h3>Drop U Design PDF Here</h3>
+        <p>or tap to browse files</p>
+        <input type="file" id="fileInput" accept="application/pdf" style="display: none;" multiple>
+    </div>
+
+    <div class="tiers-container" id="tiersContainer">
+        </div>
+
+    <button class="btn-sync" id="btnSaveQuotes" style="display:none;">Save Tiers & Generate Portal Link</button>
+
+    <script>
+        // Setup PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
+        let quoteCounter = 1;
+
+        // UI Drop Zone Setup
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault(); dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        async function handleFiles(files) {
+            for(let file of files) {
+                if(file.type === 'application/pdf') {
+                    await extractPDFData(file);
+                }
+            }
+        }
+
+        // The Scrape and Sort Engine
+        async function extractPDFData(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+            let fullText = "";
+
+            // Read all text from all pages
+            for(let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                fullText += textContent.items.map(item => item.str).join(" ") + " ";
+            }
+
+            console.log("Raw PDF Text:", fullText); // For debugging
+            
+            // AI Sorting Rules (Regex matching based on U Design output)
+            const getMatch = (regex, fallback = "N/A") => {
+                const match = fullText.match(regex);
+                return match ? match[1].trim() : fallback;
+            };
+
+            // 1. Total Price
+            const totalPrice = getMatch(/CONTRACT TOTAL\s*£\s*([\d,.]+)/i, "TBC");
+            
+            // 2. Dimensions
+            const width = getMatch(/Width\s*(\d+)/i, "TBC");
+            const projection = getMatch(/Projection\s*(\d+)/i, "TBC");
+            
+            // 3. Roof System (Skip Livin room pelmet if it says No)
+            const roofSystem = getMatch(/Roof System",\s*"([^"]+)/i, "Standard");
+            
+            // 4. Frames
+            const frameOut = getMatch(/Frame Colour Out",\s*"([^"]+)/i, "White");
+            const frameIn = getMatch(/Frame Colour In",\s*"([^"]+)/i, "White");
+            const windowType = getMatch(/Window Type",\s*"([^"]+)/i, "Casement");
+            const doorType = getMatch(/Door Type",\s*"([^"]+)/i, "French");
+
+            // Build the clean UI Card
+            const tierTitle = quoteCounter === 1 ? "Option 1: Practical" : quoteCounter === 2 ? "Option 2: Aspirational" : "Option 3: The Curveball";
+            
+            const cardHtml = `
+                <div class="tier-card">
+                    <h4>${tierTitle}</h4>
+                    <div class="tier-price">£${totalPrice}</div>
+                    <ul class="feature-list">
+                        <li><span class="label">Dimensions</span> ${width}mm x ${projection}mm</li>
+                        <li><span class="label">Roof System</span> ${roofSystem}</li>
+                        <li><span class="label">Frames</span> ${frameOut} (Ext) / ${frameIn} (Int)<br>${windowType} windows with ${doorType}</li>
+                        <li><span class="label">Groundworks</span> Base exempt up to 600mm</li>
+                        <li><span class="label">Plumbing & Electrics</span> No Plumbing / No Electrics</li>
+                    </ul>
+                </div>
+            `;
+
+            document.getElementById('tiersContainer').insertAdjacentHTML('beforeend', cardHtml);
+            document.getElementById('btnSaveQuotes').style.display = 'block';
+            quoteCounter++;
+        }
+    </script>
+</body>
+</html>
