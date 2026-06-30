@@ -72,6 +72,13 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
                     </div>
                 </div>
 
+                <!-- NEW: U-Design Quote Engine Link -->
+                <div class="mt-2 mb-2">
+                    <a href="quotes.html?leadId=${id}" class="block text-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-bold transition-all shadow-lg">
+                        🔨 Build U-Design Quote
+                    </a>
+                </div>
+
                 <div class="flex gap-2 mt-2">
                     <a href="survey.html?id=${id}" class="flex-1 bg-[#10b981] hover:bg-emerald-400 text-white text-xs py-2 rounded text-center font-bold transition">✏️ Survey</a>
                     <a href="vault.html?id=${id}" target="_blank" class="flex-1 bg-[#0dcaf0] hover:bg-cyan-400 text-black text-xs py-2 rounded text-center font-bold transition">🔒 Vault</a>
