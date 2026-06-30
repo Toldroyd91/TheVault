@@ -3,207 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quote Engine - Pro Builder</title>
+    <title>Quote Engine | Command Center</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
-        :root {
-            --bg-dark: #0d1117; --card-bg: #161b22; --accent: #E50914; 
-            --text-main: #f0f6fc; --text-muted: #8b949e; --border: #30363d;
-        }
-        body {
-            background-color: var(--bg-dark); color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0; padding: 20px; box-sizing: border-box;
-        }
-        .header { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 25px; }
-        h2 { margin: 0; font-size: 24px; font-weight: 600; }
-        
-        .drop-zone {
-            background: #090d13; border: 2px dashed var(--accent);
-            border-radius: 12px; padding: 40px; text-align: center;
-            cursor: pointer; transition: background 0.3s; margin-bottom: 30px;
-        }
-        .drop-zone.dragover { background: rgba(229, 9, 20, 0.1); }
-        .drop-zone h3 { margin: 0 0 10px 0; color: var(--accent); }
-        .drop-zone p { margin: 0; color: var(--text-muted); font-size: 14px; }
-        
-        .tiers-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .tier-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-        .tier-card h4 { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; font-size: 18px; }
-        .tier-price { font-size: 28px; font-weight: bold; color: #fff; margin-bottom: 15px; }
-        
-        .feature-list { list-style: none; padding: 0; margin: 0; font-size: 14px; color: #c9d1d9; }
-        .feature-list li { padding: 8px 0; border-bottom: 1px solid #21262d; }
-        .feature-list li span.label { font-weight: 600; color: var(--text-muted); display: block; font-size: 11px; text-transform: uppercase; }
-
-        .btn-sync {
-            background: var(--accent); color: white; border: none; padding: 15px 24px;
-            border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
-            width: 100%; margin-top: 20px; text-transform: uppercase; display: none;
-        }
-        .btn-sync:hover { background: #b20710; }
-
-        #successLink {
-            display: none; margin-top: 20px; padding: 20px; background: #238636; 
-            border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px;
-        }
-        #successLink a { color: white; text-decoration: underline; }
+        body { background: #0d1117; color: #f0f6fc; font-family: -apple-system, sans-serif; padding: 20px; }
+        .header { margin-bottom: 20px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .drop-zone { background: #090d13; border: 2px dashed #E50914; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .drop-zone:hover { background: rgba(229, 9, 20, 0.1); }
+        .tier-card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .btn-sync { background: #E50914; color: white; padding: 15px; border: none; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; display: none; text-transform: uppercase; }
+        .success-box { display: none; background: #238636; padding: 20px; border-radius: 6px; text-align: center; margin-top: 20px; font-weight: bold; }
+        .success-box a { color: white; text-decoration: underline; font-size: 18px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>U Design Extraction Engine</h2>
-        <p style="color: var(--text-muted); margin: 5px 0 0 0;" id="leadStatus">Checking Lead Connection...</p>
+        <h2 style="margin:0;">U-Design Scraper</h2>
+        <p id="statusHeader" style="color: #8b949e; margin-top: 5px;">Checking connection to customer...</p>
     </div>
-
-    <div class="drop-zone" id="dropZone">
-        <h3>Drop U Design PDF Here</h3>
-        <p>or tap to browse files</p>
-        <input type="file" id="fileInput" accept="application/pdf" style="display: none;" multiple>
-    </div>
-
-    <div class="tiers-container" id="tiersContainer"></div>
-
-    <button class="btn-sync" id="btnSaveQuotes">Save Tiers & Generate Portal Link</button>
     
-    <div id="successLink">
-        Quote Saved! <br><br>
-        <a href="#" id="portalUrl" target="_blank">Open Customer Vault Link</a>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <h3>Drop U-Design Scope of Works Here</h3>
+        <p style="color: #8b949e;">or tap to browse files</p>
+        <input type="file" id="fileInput" accept="application/pdf" style="display: none;">
+    </div>
+
+    <div id="tiersContainer"></div>
+    <button id="btnSaveQuotes" class="btn-sync">Save to Vault & Generate Link</button>
+    
+    <div id="successBox" class="success-box">
+        Quote Successfully Saved! <br><br>
+        <a href="#" id="portalLink" target="_blank">Open Customer Vault Presentation</a>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // Your exact live Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAn-2Ytgrj28uT7NhFdCN-DBQt49k",
-            authDomain: "cohi-live.firebaseapp.com",
-            projectId: "cohi-live",
-            storageBucket: "cohi-live.firebasestorage.app",
-            messagingSenderId: "3574390317",
-            appId: "1:357439040317:web:d55654d76abef354"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // --- 1. THE LINKAGE TUNNEL ---
+        import { db, doc, setDoc } from './js/core-firebase.js';
+        
+        // Ensure we are attached to a specific customer via the URL
         const urlParams = new URLSearchParams(window.location.search);
         const currentLeadId = urlParams.get('leadId');
         
         if(!currentLeadId) {
-            document.getElementById('leadStatus').innerHTML = "⚠️ No Lead ID detected. <a href='index.html' style='color:#E50914'>Return to Dashboard</a>";
-            document.getElementById('dropZone').style.pointerEvents = "none";
-            document.getElementById('dropZone').style.opacity = "0.5";
+            document.getElementById('statusHeader').innerText = "⚠️ Error: No Customer ID detected. Go back to Dashboard and click 'Build Quote'.";
+            document.getElementById('statusHeader').style.color = "#E50914";
+            document.getElementById('dropZone').style.display = "none";
         } else {
-            document.getElementById('leadStatus').innerText = `Linked to Lead ID: ${currentLeadId}`;
+            document.getElementById('statusHeader').innerText = `Securely linked to Lead ID: ${currentLeadId}`;
         }
 
-        // --- 2. U-DESIGN PDF EXTRACTION ---
+        let finalQuoteData = {};
+
+        // Setup PDF Engine
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
         
-        let quoteCounter = 1;
-        let finalQuoteData = {}; // Stores data before pushing to Firebase
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
 
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-
-        dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault(); dropZone.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        });
-        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-        async function handleFiles(files) {
-            for(let file of files) {
-                if(file.type === 'application/pdf') {
-                    await extractPDFData(file);
-                }
-            }
-        }
-
-        async function extractPDFData(file) {
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-            let fullText = "";
+            let rawText = "";
 
             for(let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                // U-Design often outputs elements separated by weird spacing. 
-                fullText += textContent.items.map(item => item.str).join(" ") + " ";
+                rawText += textContent.items.map(item => item.str).join(" ") + " ";
             }
 
-            console.log("Raw PDF Text for Regex:", fullText);
-            
-            // Upgraded Regex to handle U-Design's comma/quote formatting
-            // It looks for the label, ignores spaces/quotes/commas, and grabs the next word block
-            const getMatch = (regex, fallback = "N/A") => {
-                const match = fullText.match(regex);
-                return match ? match[1].replace(/["\n]/g, '').trim() : fallback;
+            // CLEAN THE U-DESIGN NIGHTMARE: Strip quotes and line breaks, turn into comma separated data
+            const cleanText = rawText.replace(/[\n\r"]/g, ' ').replace(/\s+/g, ' ');
+            console.log("Cleaned U-Design Text:", cleanText);
+
+            // Precision Extraction Logic for U-Design format
+            const getMatch = (regex, fallback) => {
+                const match = cleanText.match(regex);
+                return match ? match[1].trim() : fallback;
             };
 
-            const totalPrice = getMatch(/CONTRACT TOTAL\s*£\s*([\d,.]+)/i, "TBC");
-            const width = getMatch(/Width[\s",]+(\d+)/i, "TBC");
-            const projection = getMatch(/Projection[\s",]+(\d+)/i, "TBC");
-            const roofSystem = getMatch(/Roof System[\s",]+([^",]+)/i, "Standard");
-            const frameOut = getMatch(/Frame Colour Out[\s",]+([^",]+)/i, "White");
-            const windowType = getMatch(/Window Type[\s",]+([^",]+)/i, "Casement");
+            const grandTotal = getMatch(/GRAND TOTAL\s*£?\s*([\d,.]+)/i, "TBC");
+            const roofSystem = getMatch(/Roof System\s*,\s*([^,]+)/i, "Standard");
+            const frames = getMatch(/Window Type\s*,\s*([^,]+)/i, "Standard");
+            const doors = getMatch(/Door Type\s*,\s*([^,]+)/i, "Standard");
+            const frameColour = getMatch(/Frame Colour Out\s*,\s*([^,]+)/i, "White");
+            
+            // Note: U-Design dimensions layout can vary, pulling safely.
+            const width = getMatch(/Width\s*,\s*(\d+)/i, "Surveyed");
+            const projection = getMatch(/Projection\s*,\s*(\d+)/i, "Surveyed");
 
-            // Save to our prep object
             finalQuoteData = {
-                isUnlocked: false, // Default to Teaser Mode
-                totalPrice: `£${totalPrice}`,
+                isUnlocked: false, // Starts locked as a Teaser
+                totalPrice: `£${grandTotal}`,
                 dimensions: `${width}mm x ${projection}mm`,
                 roofType: roofSystem,
-                windowSpecs: `${windowType} (${frameOut} Ext)`
+                windowSpecs: `${frames} (${frameColour}) with ${doors}`
             };
 
-            const tierTitle = quoteCounter === 1 ? "Option 1: Practical" : quoteCounter === 2 ? "Option 2: Aspirational" : "Option 3: The Curveball";
-            
-            const cardHtml = `
+            // Display to the Designer before saving
+            document.getElementById('tiersContainer').innerHTML = `
                 <div class="tier-card">
-                    <h4>${tierTitle}</h4>
-                    <div class="tier-price">£${totalPrice}</div>
-                    <ul class="feature-list">
-                        <li><span class="label">Dimensions</span> ${width}mm x ${projection}mm</li>
-                        <li><span class="label">Roof System</span> ${roofSystem}</li>
-                        <li><span class="label">Frames</span> ${frameOut} (${windowType})</li>
+                    <h4 style="margin-top:0; color: #8b949e; text-transform: uppercase;">Extracted Specification</h4>
+                    <h2 style="margin:10px 0; font-size: 32px; color: #fff;">£${grandTotal}</h2>
+                    <ul style="color: #c9d1d9; line-height: 1.8; font-size: 14px; padding-left: 0; list-style: none;">
+                        <li><b style="color:#fff;">Dimensions:</b> ${width}mm x ${projection}mm</li>
+                        <li><b style="color:#fff;">Roof System:</b> ${roofSystem}</li>
+                        <li><b style="color:#fff;">Frames & Glazing:</b> ${frames} / ${doors} / ${frameColour}</li>
                     </ul>
                 </div>
             `;
+            
+            document.getElementById('btnSaveQuotes').style.display = "block";
+        });
 
-            document.getElementById('tiersContainer').insertAdjacentHTML('beforeend', cardHtml);
-            document.getElementById('btnSaveQuotes').style.display = 'block';
-            quoteCounter++;
-        }
-
-        // --- 3. THE MISSING SAVE BUTTON LOGIC ---
-        document.getElementById('btnSaveQuotes').addEventListener('click', async (e) => {
-            const btn = e.target;
-            btn.innerText = "Saving to Vault..."; btn.disabled = true;
-
+        // The Fix: Save Button pushes securely to the specific customer ID
+        document.getElementById('btnSaveQuotes').addEventListener('click', async () => {
             try {
-                // Save the parsed data strictly to this specific Lead ID in Firebase
+                document.getElementById('btnSaveQuotes').innerText = "Encrypting & Saving to Vault...";
+                
+                // Uses setDoc to push to the 'quotes' collection under the specific leadId
                 await setDoc(doc(db, "quotes", currentLeadId), finalQuoteData, { merge: true });
                 
-                // Show the Customer Portal Link
-                const portalLink = `portal.html?id=${currentLeadId}`;
-                document.getElementById('portalUrl').href = portalLink;
-                document.getElementById('portalUrl').innerText = `your-app.vercel.app/${portalLink}`;
+                document.getElementById('btnSaveQuotes').style.display = "none";
+                document.getElementById('successBox').style.display = "block";
                 
-                document.getElementById('successLink').style.display = 'block';
-                btn.style.display = 'none';
-                
-            } catch (err) {
-                console.error("Save Error:", err);
-                alert("Failed to save. Check console for details.");
-                btn.innerText = "Save Tiers & Generate Portal Link"; btn.disabled = false;
+                // Generates the final portal link
+                document.getElementById('portalLink').href = `portal.html?id=${currentLeadId}`;
+            } catch(e) {
+                alert("Database Save Error. Check Console.");
+                console.error("Save Error Details:", e);
             }
         });
     </script>
