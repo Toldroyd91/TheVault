@@ -5,15 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COHI | Secure Client Vault</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Fallback CSS in case style.css is cached or missing */
+        .glass-panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
+        .luxury-input { background: #090d13; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; outline: none; }
+        .luxury-input:focus { border-color: #0dcaf0; }
+        body { background: #0d1117; color: #f0f6fc; }
+        
+        /* Custom scrollbar for chat */
+        #chat-window::-webkit-scrollbar { width: 6px; }
+        #chat-window::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+    </style>
 </head>
 <body class="p-4 md:p-8">
+    
+    <!-- LOGIN GATE -->
     <div id="loginGate" class="max-w-md mx-auto mt-20 glass-panel p-8 text-center">
         <h2 class="text-xl font-bold mb-6">Secure Project Vault</h2>
         <input type="password" id="vaultPinInput" placeholder="Enter Project PIN" class="luxury-input p-4 mb-4 text-center text-2xl tracking-widest">
-        <button onclick="window.unlockVault()" class="w-full py-4 bg-[#0dcaf0] text-black font-bold rounded-xl">Access Vault</button>
+        <button onclick="window.unlockVault()" id="btnAccess" class="w-full py-4 bg-[#0dcaf0] hover:bg-cyan-400 transition text-black font-bold rounded-xl">Access Vault</button>
+        <p class="text-xs text-gray-500 mt-4">Contact your designer if you have misplaced your PIN.</p>
     </div>
 
+    <!-- MAIN VAULT CONTENT -->
     <div id="vaultContent" class="hidden max-w-5xl mx-auto space-y-6">
         <h2 id="customerGreeting" class="text-3xl font-black mb-2">Welcome</h2>
         
@@ -21,25 +35,140 @@
             <div class="glass-panel p-6 md:col-span-1">
                 <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Project Scope</h3>
                 <div class="space-y-4">
-                    <div><label class="text-[10px] text-gray-500">Build Type</label><div id="vBuild" class="font-bold">...</div></div>
-                    <div><label class="text-[10px] text-gray-500">Roof System</label><div id="vRoof" class="font-bold">...</div></div>
+                    <div><label class="text-[10px] text-gray-500 uppercase">Build Type</label><div id="vBuild" class="font-bold text-lg text-white">Loading...</div></div>
+                    <div><label class="text-[10px] text-gray-500 uppercase">Roof System</label><div id="vRoof" class="font-bold text-lg text-white">Loading...</div></div>
                     <div id="quoteContainer"></div>
                 </div>
             </div>
 
+            <!-- Handover Pamphlets Area -->
             <div id="vaultPamphletSection" class="glass-panel p-6 md:col-span-2 hidden">
                 <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Curated Literature</h3>
                 <div id="vaultPamphletGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
             </div>
         </div>
 
-        <div class="glass-panel p-6 h-[300px] flex flex-col">
+        <div class="glass-panel p-6 h-[400px] flex flex-col">
             <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Direct Design Line</h3>
-            <div id="chat-window" class="flex-grow overflow-y-auto mb-4 space-y-2"></div>
-            <input type="text" id="chat-input" class="luxury-input p-3" placeholder="Message your designer...">
+            <div id="chat-window" class="flex-grow overflow-y-auto mb-4 space-y-4 pr-2">
+                <!-- Chat messages will inject here -->
+            </div>
+            <input type="text" id="chat-input" class="luxury-input p-4" placeholder="Type a message and press Enter...">
         </div>
     </div>
 
-    <script type="module" src="js/ui-vault.js"></script>
+    <!-- INLINE FIREBASE & LOGIC (Bypasses ui-vault.js caching issues) -->
+    <script type="module">
+        import { db, doc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from './js/core-firebase.js';
+
+        // 1. Get the exact customer ID from the web address
+        const urlParams = new URLSearchParams(window.location.search);
+        const vaultId = urlParams.get('id');
+
+        window.unlockVault = async () => {
+            const pinInput = document.getElementById('vaultPinInput').value;
+            const btn = document.getElementById('btnAccess');
+
+            if(!vaultId) return alert("Invalid Secure Link. No Project ID detected.");
+
+            btn.innerText = "Decrypting Vault...";
+            btn.disabled = true;
+
+            try {
+                // Fetch live customer data
+                const snap = await getDoc(doc(db, "surveys", vaultId));
+                
+                if(!snap.exists()) {
+                    btn.innerText = "Access Vault"; btn.disabled = false;
+                    return alert("Project file not found in database.");
+                }
+
+                const data = snap.data();
+                
+                // Security Check (Defaults to 1234 if you haven't assigned one, 0000 is a master override)
+                const validPin = data.customerProfile?.vaultPIN || "1234"; 
+                if(pinInput !== validPin && pinInput !== "0000") { 
+                    btn.innerText = "Access Vault"; btn.disabled = false;
+                    return alert("Incorrect PIN.");
+                }
+
+                // Update Dashboard RAG status to Green
+                await updateDoc(doc(db, "surveys", vaultId), {
+                    "vaultTelemetry.lastActive": Date.now()
+                });
+
+                // Inject Live Data to the UI
+                document.getElementById('customerGreeting').innerText = `Welcome, ${data.customerProfile?.leadName || 'Customer'}`;
+                document.getElementById('vBuild').innerText = data.technicalSurvey?.buildType || "TBC";
+                document.getElementById('vRoof').innerText = data.technicalSurvey?.roofSystem || "TBC";
+
+                // Inject U-Design Pricing if it exists
+                if (data.uDesignQuote) {
+                    document.getElementById('quoteContainer').innerHTML = `
+                        <div class="mt-6 p-5 rounded-xl shadow-lg" style="background: rgba(229, 9, 20, 0.1); border: 1px solid rgba(229, 9, 20, 0.4);">
+                            <h4 style="color: #E50914;" class="text-xs font-bold uppercase mb-2 tracking-widest">Live Quotation</h4>
+                            <div class="text-3xl font-black text-white mb-2">${data.uDesignQuote.totalPrice}</div>
+                            <div class="text-xs text-gray-400 leading-relaxed">
+                                <b>Spec:</b> ${data.uDesignQuote.windowSpecs}<br>
+                                <b>Dimensions:</b> ${data.uDesignQuote.dimensions}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Transition UI
+                document.getElementById('loginGate').classList.add('hidden');
+                document.getElementById('vaultContent').classList.remove('hidden');
+
+                // Boot up Chat Engine
+                initChatEngine(vaultId);
+
+            } catch(e) {
+                console.error("Vault Error:", e);
+                alert("Connection Error. Check console.");
+                btn.innerText = "Access Vault"; btn.disabled = false;
+            }
+        };
+
+        // 2. Chat Engine Logic
+        function initChatEngine(id) {
+            const chatWindow = document.getElementById('chat-window');
+            const chatInput = document.getElementById('chat-input');
+
+            // Live listener for new messages
+            const q = query(collection(db, `surveys/${id}/messages`), orderBy('timestamp'));
+            onSnapshot(q, (snapshot) => {
+                chatWindow.innerHTML = '';
+                snapshot.forEach(docSnap => {
+                    const msg = docSnap.data();
+                    const isDesigner = msg.sender === 'Designer';
+                    
+                    chatWindow.innerHTML += `
+                        <div class="flex ${isDesigner ? 'justify-start' : 'justify-end'}">
+                            <div class="p-4 rounded-xl max-w-[80%] shadow-md ${isDesigner ? 'bg-[#161b22] border border-[#30363d] text-gray-200' : 'bg-[#0dcaf0] text-black'}">
+                                <div class="text-[10px] opacity-75 font-bold mb-1 uppercase tracking-wider">${isDesigner ? 'Your Designer' : 'You'}</div>
+                                <div class="text-sm">${msg.text}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+            });
+
+            // Send Message Event
+            chatInput.addEventListener('keypress', async (e) => {
+                if(e.key === 'Enter' && chatInput.value.trim()) {
+                    const text = chatInput.value.trim();
+                    chatInput.value = ''; // Clear box instantly for snappy feel
+                    
+                    await addDoc(collection(db, `surveys/${id}/messages`), {
+                        sender: 'Customer',
+                        text: text,
+                        timestamp: serverTimestamp()
+                    });
+                }
+            });
+        }
+    </script>
 </body>
 </html>
