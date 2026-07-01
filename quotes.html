@@ -115,19 +115,22 @@
             document.getElementById('btnSaveQuotes').style.display = "block";
         });
 
-        // The Fix: Save Button pushes securely to the specific customer ID
+        // The Fix: Save Button pushes securely into the existing Survey document
         document.getElementById('btnSaveQuotes').addEventListener('click', async () => {
             try {
                 document.getElementById('btnSaveQuotes').innerText = "Encrypting & Saving to Vault...";
                 
-                // Uses setDoc to push to the 'quotes' collection under the specific leadId
-                await setDoc(doc(db, "quotes", currentLeadId), finalQuoteData, { merge: true });
+                // IMPORTANT FIX: Save into "surveys" instead of "quotes" to respect Firebase rules
+                await setDoc(doc(db, "surveys", currentLeadId), {
+                    uDesignQuote: finalQuoteData,
+                    pipelineStatus: "2. Quote Sent"
+                }, { merge: true });
                 
                 document.getElementById('btnSaveQuotes').style.display = "none";
                 document.getElementById('successBox').style.display = "block";
                 
                 // Generates the final portal link
-                document.getElementById('portalLink').href = `portal.html?id=${currentLeadId}`;
+                document.getElementById('portalLink').href = `vault.html?id=${currentLeadId}`;
             } catch(e) {
                 alert("Database Save Error. Check Console.");
                 console.error("Save Error Details:", e);
