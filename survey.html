@@ -112,7 +112,6 @@
         }
         canvas { max-width: 100%; max-height: 100%; }
         
-        /* New Photo Panel CSS */
         .photo-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -395,7 +394,178 @@
         </div>
     </div>
 
-    <script type="module" src="./js/ui-survey.js"></script>
+    <script type="module">
+        import { auth, db, doc, setDoc, getDoc, collection, serverTimestamp, onAuthStateChanged, BRAND_CONFIG } from './js/core-firebase.js';
+
+        const el = (id) => document.getElementById(id);
+        const val = (id) => el(id)?.value || "";
+        const checked = (id) => el(id) ? el(id).checked : false;
+
+        const SurveyState = {
+            id: new URLSearchParams(window.location.search).get('id') || null,
+            brand: "YorkshireWindows",
+            customerProfile: {},
+            technicalSurvey: {},
+            logistics: {},
+            designSpecification: {},
+            compliance: {},
+            pamphlets: {}
+        };
+
+        // Render Multi-Tenant Brand selection dynamically
+        const brandSelect = el('brandSelect');
+        if (brandSelect && BRAND_CONFIG) {
+            brandSelect.innerHTML = Object.entries(BRAND_CONFIG)
+                .map(([key, data]) => `<option value="${key}">${data.name}</option>`).join('');
+        }
+
+        // Auto-load data if looking up an existing lead ID
+        onAuthStateChanged(auth, async (user) => {
+            if(!user) return alert("Security Notice: Not logged in. Saves will fail.");
+            
+            if(SurveyState.id) {
+                const snap = await getDoc(doc(db, "surveys", SurveyState.id));
+                if(snap.exists()) {
+                    Object.assign(SurveyState, snap.data());
+                    
+                    // Repopulate UI beautifully
+                    if(el('brandSelect')) el('brandSelect').value = SurveyState.brand || "YorkshireWindows";
+                    if(el('clientName')) el('clientName').value = SurveyState.customerProfile?.leadName || "";
+                    if(el('clientNum')) el('clientNum').value = SurveyState.customerProfile?.customerNum || "";
+                    if(el('postCode')) el('postCode').value = SurveyState.customerProfile?.postcode || "";
+                    if(el('apptDate')) el('apptDate').value = SurveyState.customerProfile?.apptDate || "";
+                    if(el('revisitDate')) el('revisitDate').value = SurveyState.customerProfile?.revisitDate || "";
+                    
+                    if(el('buildType')) el('buildType').value = SurveyState.technicalSurvey?.buildType || "";
+                    if(el('proposedSize')) el('proposedSize').value = SurveyState.technicalSurvey?.proposedSize || "";
+                    if(el('houseMaterial')) el('houseMaterial').value = SurveyState.technicalSurvey?.houseMaterial || "";
+                    if(el('baseType')) el('baseType').value = SurveyState.technicalSurvey?.baseType || "";
+                    if(el('floorType')) el('floorType').value = SurveyState.technicalSurvey?.floorType || "";
+                    if(el('dpcDepth')) el('dpcDepth').value = SurveyState.technicalSurvey?.dpcDepth || "";
+                    if(el('fasciaHeight')) el('fasciaHeight').value = SurveyState.technicalSurvey?.fasciaHeight || "";
+                    if(el('airBricks')) el('airBricks').value = SurveyState.technicalSurvey?.airBricks || "";
+                    if(el('extBrickMatch')) el('extBrickMatch').value = SurveyState.technicalSurvey?.extBrickMatch || "";
+                    
+                    if(el('accessDifficult')) el('accessDifficult').value = SurveyState.logistics?.accessDifficult || "";
+                    if(el('accessWidth')) el('accessWidth').value = SurveyState.logistics?.accessWidth || "";
+                    if(el('drainage')) el('drainage').value = SurveyState.logistics?.drainage || "";
+                    if(el('wallObstacles')) el('wallObstacles').value = SurveyState.logistics?.wallObstacles || "";
+                    
+                    if(el('roofType')) el('roofType').value = SurveyState.designSpecification?.roofType || "";
+                    if(el('roofPitch')) el('roofPitch').value = SurveyState.designSpecification?.roofPitch || "";
+                    if(el('frameColour')) el('frameColour').value = SurveyState.designSpecification?.frameColour || "";
+                    if(el('internalFrameColour')) el('internalFrameColour').value = SurveyState.designSpecification?.internalFrameColour || "";
+                    
+                    if(el('buildingRegs')) el('buildingRegs').value = SurveyState.compliance?.buildingRegs || "";
+                    if(el('planningPerms')) el('planningPerms').value = SurveyState.compliance?.planningPerms || "";
+                    if(el('sapCalcs')) el('sapCalcs').value = SurveyState.compliance?.sapCalcs || "";
+                    
+                    if(el('designerNotes')) el('designerNotes').value = SurveyState.technicalSurvey?.designerNotes || "";
+                    if(el('includeNotesInPack')) el('includeNotesInPack').checked = SurveyState.technicalSurvey?.includeNotesInPack !== false;
+
+                    // Checkboxes
+                    if(el('cb-brochure')) el('cb-brochure').checked = !!SurveyState.pamphlets?.brochure;
+                    if(el('cb-warranty')) el('cb-warranty').checked = !!SurveyState.pamphlets?.warranty;
+                    if(el('cb-planning')) el('cb-planning').checked = !!SurveyState.pamphlets?.planning;
+                    if(el('cb-sap')) el('cb-sap').checked = !!SurveyState.pamphlets?.sap;
+                    if(el('cb-roof')) el('cb-roof').checked = !!SurveyState.pamphlets?.roof;
+                }
+            }
+        });
+
+        // The Master Capture and Sync Event
+        el('btn-sync')?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const btn = e.target;
+            btn.innerText = "Syncing Everything..."; 
+            btn.disabled = true;
+
+            try {
+                SurveyState.brand = val('brandSelect') || "YorkshireWindows";
+                
+                // Map ALL Profile fields
+                SurveyState.customerProfile = {
+                    leadName: val('clientName'),
+                    customerNum: val('clientNum'),
+                    postcode: val('postCode'),
+                    apptDate: val('apptDate'),
+                    revisitDate: val('revisitDate')
+                };
+                
+                // Map ALL Structure fields
+                SurveyState.technicalSurvey = {
+                    buildType: val('buildType'),
+                    proposedSize: val('proposedSize'),
+                    houseMaterial: val('houseMaterial'),
+                    baseType: val('baseType'),
+                    floorType: val('floorType'),
+                    dpcDepth: val('dpcDepth'),
+                    fasciaHeight: val('fasciaHeight'),
+                    airBricks: val('airBricks'),
+                    extBrickMatch: val('extBrickMatch'),
+                    designerNotes: val('designerNotes'),
+                    includeNotesInPack: checked('includeNotesInPack')
+                };
+
+                // Map ALL Logistics fields
+                SurveyState.logistics = {
+                    accessDifficult: val('accessDifficult'),
+                    accessWidth: val('accessWidth'),
+                    drainage: val('drainage'),
+                    wallObstacles: val('wallObstacles')
+                };
+
+                // Map ALL Design Specs
+                SurveyState.designSpecification = {
+                    roofType: val('roofType'),
+                    roofPitch: val('roofPitch'),
+                    frameColour: val('frameColour'),
+                    internalFrameColour: val('internalFrameColour')
+                };
+
+                // Map ALL Compliance Options
+                SurveyState.compliance = {
+                    buildingRegs: val('buildingRegs'),
+                    planningPerms: val('planningPerms'),
+                    sapCalcs: val('sapCalcs')
+                };
+
+                // Map Handover Checkboxes
+                SurveyState.pamphlets = {
+                    brochure: checked('cb-brochure'),
+                    warranty: checked('cb-warranty'),
+                    planning: checked('cb-planning'),
+                    sap: checked('cb-sap'),
+                    roof: checked('cb-roof')
+                };
+
+                // Security Isolation
+                SurveyState.userId = auth.currentUser.uid; 
+                SurveyState.timestamps = { updatedAt: serverTimestamp() };
+                if(!SurveyState.id) SurveyState.timestamps.createdAt = serverTimestamp();
+
+                // Fire directly to the DB
+                const docRef = SurveyState.id ? doc(db, "surveys", SurveyState.id) : doc(collection(db, "surveys"));
+                await setDoc(docRef, SurveyState, { merge: true });
+                
+                SurveyState.id = docRef.id;
+                
+                // Success feedback loop
+                btn.style.backgroundColor = "#238636";
+                btn.innerText = "Complete Pack Saved ✓";
+                setTimeout(() => { btn.style.backgroundColor = ""; btn.innerText = "Save & Sync"; btn.disabled = false; }, 3000);
+
+            } catch(err) {
+                alert("Critical Database Sync Error: " + err.message);
+                btn.innerText = "Save & Sync"; 
+                btn.disabled = false;
+            }
+        });
+
+        // Bypassed hooks for appointment safety
+        el('btn-ai-polish')?.addEventListener('click', (e) => { e.preventDefault(); alert("AI module deactivated for stability during today's consultation."); });
+        el('btn-generate-pdf')?.addEventListener('click', (e) => { e.preventDefault(); alert("PDF module deactivated. Please use 'Save & Sync' to hold the data structures."); });
+    </script>
 
     <script>
         // --- 1. SNIPER ENGINE IMAGE LOADER ---
@@ -415,7 +585,6 @@
         });
 
         // --- 2. SITE MEDIA UPLOAD HANDLER ---
-        // This stores all uploaded photos in a global object so your PDF generator can easily grab them.
         window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], sketches:[], misc:[] };
 
         window.handlePhotoUpload = function(input, category) {
@@ -425,22 +594,16 @@
             const badge = document.getElementById('badge-' + category);
             const btn = document.getElementById('btn-' + category);
 
-            // Read each file and store it
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    // Save the Base64 image to our global store
                     window.sitePhotos[category].push(e.target.result);
-                    
-                    // Update the UI Button Badge
                     const count = window.sitePhotos[category].length;
                     badge.innerText = count;
                     btn.classList.add('has-photos');
                 };
                 reader.readAsDataURL(file);
             });
-            
-            // Clear the input so the user can click it again to add more photos if needed
             input.value = ''; 
         };
 
