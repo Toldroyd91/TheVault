@@ -260,13 +260,14 @@
             </div>
         </div>
     </div>
-<!-- INTERNAL SCRIPTS (FIREBASE & CORE SYNC LOGIC) -->
+
+    <!-- INTERNAL SCRIPTS (FIREBASE & CORE SYNC LOGIC) -->
     <script type="module">
         import { auth, db, doc, setDoc, getDoc, collection, serverTimestamp, onAuthStateChanged, BRAND_CONFIG } from './js/core-firebase.js';
 
-        // Bulletproof Value Extractor
-        const val = (id) => { const e = document.getElementById(id); return e ? (e.value || "") : ""; };
-        const checked = (id) => { const e = document.getElementById(id); return e ? e.checked : false; };
+        const el = (id) => document.getElementById(id);
+        const val = (id) => el(id)?.value || "";
+        const checked = (id) => el(id) ? el(id).checked : false;
 
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqk1hz0f8/image/upload";
         const UPLOAD_PRESET = "crm_document_uploads";
@@ -274,110 +275,120 @@
         const SurveyState = {
             id: new URLSearchParams(window.location.search).get('id') || null,
             brand: "YorkshireWindows",
+            customerProfile: {},
+            technicalSurvey: {},
+            logistics: {},
+            designSpecification: {},
+            compliance: {},
+            pamphlets: {},
             rawAssets: {}
         };
 
-        const brandSelect = document.getElementById('brandSelect');
+        // Populate Brand Dropdown
+        const brandSelect = el('brandSelect');
         if (brandSelect && BRAND_CONFIG) {
             brandSelect.innerHTML = Object.entries(BRAND_CONFIG).map(([key, data]) => `<option value="${key}">${data.name}</option>`).join('');
         }
 
+        // Initialize Data on Load
         onAuthStateChanged(auth, async (user) => {
-            if(!user) return console.warn("Security Notice: Not logged in. Saves will fail.");
+            if(!user) {
+                console.warn("Security Notice: Not logged in. Saves will fail.");
+                return;
+            }
             
             if(SurveyState.id) {
                 const snap = await getDoc(doc(db, "surveys", SurveyState.id));
                 if(snap.exists()) {
-                    const data = snap.data();
-                    SurveyState.rawAssets = data.rawAssets || {};
+                    Object.assign(SurveyState, snap.data());
                     
-                    const populate = (id, value) => { if(document.getElementById(id)) document.getElementById(id).value = value || ""; };
-                    const tick = (id, val) => { if(document.getElementById(id)) document.getElementById(id).checked = !!val; };
+                    if(el('brandSelect')) el('brandSelect').value = SurveyState.brand || "YorkshireWindows";
+                    if(el('clientName')) el('clientName').value = SurveyState.customerProfile?.leadName || "";
+                    if(el('clientNum')) el('clientNum').value = SurveyState.customerProfile?.customerNum || "";
+                    if(el('postCode')) el('postCode').value = SurveyState.customerProfile?.postcode || "";
+                    if(el('apptDate')) el('apptDate').value = SurveyState.customerProfile?.apptDate || "";
+                    if(el('revisitDate')) el('revisitDate').value = SurveyState.customerProfile?.revisitDate || "";
                     
-                    if(brandSelect) brandSelect.value = data.brand || "YorkshireWindows";
+                    if(el('buildType')) el('buildType').value = SurveyState.technicalSurvey?.buildType || "";
+                    if(el('proposedSize')) el('proposedSize').value = SurveyState.technicalSurvey?.proposedSize || "";
+                    if(el('houseMaterial')) el('houseMaterial').value = SurveyState.technicalSurvey?.houseMaterial || "";
+                    if(el('baseType')) el('baseType').value = SurveyState.technicalSurvey?.baseType || "";
+                    if(el('dpcDepth')) el('dpcDepth').value = SurveyState.technicalSurvey?.dpcDepth || "";
+                    if(el('fasciaHeight')) el('fasciaHeight').value = SurveyState.technicalSurvey?.fasciaHeight || "";
+                    if(el('airBricks')) el('airBricks').value = SurveyState.technicalSurvey?.airBricks || "";
                     
-                    populate('clientName', data.customerProfile?.leadName);
-                    populate('clientNum', data.customerProfile?.customerNum);
-                    populate('postCode', data.customerProfile?.postcode);
-                    populate('apptDate', data.customerProfile?.apptDate);
-                    populate('revisitDate', data.customerProfile?.revisitDate);
+                    if(el('accessDifficult')) el('accessDifficult').value = SurveyState.logistics?.accessDifficult || "";
+                    if(el('accessWidth')) el('accessWidth').value = SurveyState.logistics?.accessWidth || "";
+                    if(el('drainage')) el('drainage').value = SurveyState.logistics?.drainage || "";
+                    if(el('wallObstacles')) el('wallObstacles').value = SurveyState.logistics?.wallObstacles || "";
                     
-                    populate('buildType', data.technicalSurvey?.buildType);
-                    populate('proposedSize', data.technicalSurvey?.proposedSize);
-                    populate('houseMaterial', data.technicalSurvey?.houseMaterial);
-                    populate('baseType', data.technicalSurvey?.baseType);
-                    populate('dpcDepth', data.technicalSurvey?.dpcDepth);
-                    populate('fasciaHeight', data.technicalSurvey?.fasciaHeight);
-                    populate('airBricks', data.technicalSurvey?.airBricks);
-                    populate('designerNotes', data.technicalSurvey?.designerNotes);
-                    tick('includeNotesInPack', data.technicalSurvey?.includeNotesInPack !== false);
+                    if(el('roofType')) el('roofType').value = SurveyState.designSpecification?.roofType || "";
+                    if(el('roofPitch')) el('roofPitch').value = SurveyState.designSpecification?.roofPitch || "";
+                    if(el('frameColour')) el('frameColour').value = SurveyState.designSpecification?.frameColour || "";
+                    if(el('internalFrameColour')) el('internalFrameColour').value = SurveyState.designSpecification?.internalFrameColour || "";
                     
-                    populate('accessDifficult', data.logistics?.accessDifficult);
-                    populate('accessWidth', data.logistics?.accessWidth);
-                    populate('drainage', data.logistics?.drainage);
-                    populate('wallObstacles', data.logistics?.wallObstacles);
+                    if(el('buildingRegs')) el('buildingRegs').value = SurveyState.compliance?.buildingRegs || "";
+                    if(el('planningPerms')) el('planningPerms').value = SurveyState.compliance?.planningPerms || "";
+                    if(el('sapCalcs')) el('sapCalcs').value = SurveyState.compliance?.sapCalcs || "";
                     
-                    populate('roofType', data.designSpecification?.roofType);
-                    populate('roofPitch', data.designSpecification?.roofPitch);
-                    populate('frameColour', data.designSpecification?.frameColour);
-                    populate('internalFrameColour', data.designSpecification?.internalFrameColour);
-                    
-                    populate('buildingRegs', data.compliance?.buildingRegs);
-                    populate('planningPerms', data.compliance?.planningPerms);
-                    populate('sapCalcs', data.compliance?.sapCalcs);
-                    
-                    tick('cb-brochure', data.pamphlets?.brochure);
-                    tick('cb-warranty', data.pamphlets?.warranty);
-                    tick('cb-planning', data.pamphlets?.planning);
-                    tick('cb-sap', data.pamphlets?.sap);
-                    tick('cb-roof', data.pamphlets?.roof);
+                    if(el('designerNotes')) el('designerNotes').value = SurveyState.technicalSurvey?.designerNotes || "";
+                    if(el('includeNotesInPack')) el('includeNotesInPack').checked = SurveyState.technicalSurvey?.includeNotesInPack !== false;
+
+                    if(el('cb-brochure')) el('cb-brochure').checked = !!SurveyState.pamphlets?.brochure;
+                    if(el('cb-warranty')) el('cb-warranty').checked = !!SurveyState.pamphlets?.warranty;
+                    if(el('cb-planning')) el('cb-planning').checked = !!SurveyState.pamphlets?.planning;
+                    if(el('cb-sap')) el('cb-sap').checked = !!SurveyState.pamphlets?.sap;
+                    if(el('cb-roof')) el('cb-roof').checked = !!SurveyState.pamphlets?.roof;
                 }
             }
         });
 
-        // Safe Cloudinary Uploader
+        // Helper: Cloudinary Upload
         async function uploadBase64ToCloudinary(base64Str) {
-            try {
-                const formData = new FormData();
-                formData.append('file', base64Str);
-                formData.append('upload_preset', UPLOAD_PRESET);
-                const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                const data = await response.json();
-                return data.secure_url || null; 
-            } catch (err) {
-                console.error("Cloudinary Error:", err);
-                return null;
-            }
+            const formData = new FormData();
+            formData.append('file', base64Str);
+            formData.append('upload_preset', UPLOAD_PRESET);
+            const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+            const data = await response.json();
+            return data.secure_url;
         }
 
         // Action: AI Polish Reactivated
-        document.getElementById('btn-ai-polish')?.addEventListener('click', (e) => {
+        el('btn-ai-polish')?.addEventListener('click', (e) => {
             e.preventDefault();
-            const notesEl = document.getElementById('designerNotes');
-            if(!notesEl.value.trim()) return alert("Please enter some rough notes first to polish.");
+            const notesEl = el('designerNotes');
+            const notes = notesEl.value.trim();
+            if(!notes) return alert("Please enter some rough notes first to polish.");
             
             const btn = e.target;
-            btn.innerText = "✨ Polishing..."; btn.disabled = true;
+            btn.innerText = "✨ Polishing...";
+            btn.disabled = true;
 
+            // Placeholder AI Formatting logic (Easily replaceable with an OpenAI/Gemini fetch call later)
             setTimeout(() => {
-                const lines = notesEl.value.trim().split('\n').filter(line => line.trim() !== '');
-                notesEl.value = "PROFESSIONAL SURVEY OBSERVATIONS:\n\n" + lines.map(line => `• ${line.charAt(0).toUpperCase() + line.slice(1)}`).join('\n');
-                btn.innerText = "✨ AI Polish Notes"; btn.disabled = false;
+                const lines = notes.split('\n').filter(line => line.trim() !== '');
+                const formattedNotes = "PROFESSIONAL SURVEY OBSERVATIONS:\n\n" + lines.map(line => `• ${line.charAt(0).toUpperCase() + line.slice(1)}`).join('\n');
+                notesEl.value = formattedNotes;
+                
+                btn.innerText = "✨ AI Polish Notes";
+                btn.disabled = false;
             }, 800);
         });
 
         // Action: Save & Sync
-        document.getElementById('btn-sync')?.addEventListener('click', async (e) => {
+        el('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const btn = e.target;
-            btn.innerText = "Processing Assets..."; btn.disabled = true;
+            btn.innerText = "Processing Assets..."; 
+            btn.disabled = true;
 
             try {
-                // 1. Auto-Save Sniper Canvas
+                // 1. Auto-Save Sniper Canvas if it has been marked up
                 if (window.sniperPoints && window.sniperPoints.length > 0) {
                     const canvas = document.getElementById('sniperCanvas');
+                    const sniperScreenshot = canvas.toDataURL('image/jpeg', 0.9); // High quality screenshot
                     if (!window.sitePhotos.sniper) window.sitePhotos.sniper = [];
-                    window.sitePhotos.sniper.push(canvas.toDataURL('image/jpeg', 0.9));
+                    window.sitePhotos.sniper.push(sniperScreenshot);
                 }
 
                 // 2. Photo Uploads to Cloudinary
@@ -389,42 +400,42 @@
                         for (const base64 of window.sitePhotos[category]) {
                             btn.innerText = `Uploading ${category}...`;
                             const url = await uploadBase64ToCloudinary(base64);
-                            if(url) {
-                                if(!uploadedPhotoData[category]) uploadedPhotoData[category] = [];
-                                uploadedPhotoData[category].push(url);
-                                hasUploads = true;
-                            }
+                            if(!uploadedPhotoData[category]) uploadedPhotoData[category] = [];
+                            uploadedPhotoData[category].push(url);
+                            hasUploads = true;
                         }
                     }
                 }
 
                 if (hasUploads) {
                     SurveyState.rawAssets = uploadedPhotoData;
+                    // Clear local memory
                     for (const cat in window.sitePhotos) window.sitePhotos[cat] = []; 
-                    document.querySelectorAll('.photo-btn .badge').forEach(b => { b.innerText = '0'; b.parentElement.classList.remove('has-photos'); });
+                    document.querySelectorAll('.photo-btn .badge').forEach(b => { 
+                        b.innerText = '0'; 
+                        b.parentElement.classList.remove('has-photos'); 
+                    });
                 }
 
-                btn.innerText = "Syncing Database...";
+                btn.innerText = "Syncing Everything...";
 
-                // 3. Nuclear Payload Scrubber (Guarantees no 'undefined' values hit Firebase)
-                const payload = {
-                    brand: val('brandSelect') || "YorkshireWindows",
-                    customerProfile: { leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode'), apptDate: val('apptDate'), revisitDate: val('revisitDate') },
-                    technicalSurvey: { buildType: val('buildType'), proposedSize: val('proposedSize'), houseMaterial: val('houseMaterial'), baseType: val('baseType'), dpcDepth: val('dpcDepth'), fasciaHeight: val('fasciaHeight'), airBricks: val('airBricks'), designerNotes: val('designerNotes'), includeNotesInPack: checked('includeNotesInPack') },
-                    logistics: { accessDifficult: val('accessDifficult'), accessWidth: val('accessWidth'), drainage: val('drainage'), wallObstacles: val('wallObstacles') },
-                    designSpecification: { roofType: val('roofType'), roofPitch: val('roofPitch'), frameColour: val('frameColour'), internalFrameColour: val('internalFrameColour') },
-                    compliance: { buildingRegs: val('buildingRegs'), planningPerms: val('planningPerms'), sapCalcs: val('sapCalcs') },
-                    pamphlets: { brochure: checked('cb-brochure'), warranty: checked('cb-warranty'), planning: checked('cb-planning'), sap: checked('cb-sap'), roof: checked('cb-roof') },
-                    rawAssets: uploadedPhotoData || {},
-                    userId: auth.currentUser ? auth.currentUser.uid : "unknown_designer",
-                    timestamps: { updatedAt: serverTimestamp() }
-                };
+                // 3. Data Mapping
+                SurveyState.brand = val('brandSelect') || "YorkshireWindows";
+                SurveyState.customerProfile = { leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode'), apptDate: val('apptDate'), revisitDate: val('revisitDate') };
+                SurveyState.technicalSurvey = { buildType: val('buildType'), proposedSize: val('proposedSize'), houseMaterial: val('houseMaterial'), baseType: val('baseType'), dpcDepth: val('dpcDepth'), fasciaHeight: val('fasciaHeight'), airBricks: val('airBricks'), designerNotes: val('designerNotes'), includeNotesInPack: checked('includeNotesInPack') };
+                SurveyState.logistics = { accessDifficult: val('accessDifficult'), accessWidth: val('accessWidth'), drainage: val('drainage'), wallObstacles: val('wallObstacles') };
+                SurveyState.designSpecification = { roofType: val('roofType'), roofPitch: val('roofPitch'), frameColour: val('frameColour'), internalFrameColour: val('internalFrameColour') };
+                SurveyState.compliance = { buildingRegs: val('buildingRegs'), planningPerms: val('planningPerms'), sapCalcs: val('sapCalcs') };
+                SurveyState.pamphlets = { brochure: checked('cb-brochure'), warranty: checked('cb-warranty'), planning: checked('cb-planning'), sap: checked('cb-sap'), roof: checked('cb-roof') };
+                
+                SurveyState.userId = auth.currentUser.uid; 
+                SurveyState.timestamps = { updatedAt: serverTimestamp() };
+                if(!SurveyState.id) SurveyState.timestamps.createdAt = serverTimestamp();
 
                 // 4. Database Save
                 const docRef = SurveyState.id ? doc(db, "surveys", SurveyState.id) : doc(collection(db, "surveys"));
-                if(!SurveyState.id) payload.timestamps.createdAt = serverTimestamp();
+                await setDoc(docRef, SurveyState, { merge: true });
                 
-                await setDoc(docRef, payload, { merge: true });
                 SurveyState.id = docRef.id;
                 
                 btn.style.backgroundColor = "#238636";
@@ -433,18 +444,20 @@
 
             } catch(err) {
                 alert("Database Sync Error: " + err.message);
-                btn.innerText = "Save & Sync"; btn.disabled = false;
-                console.error("Payload Failure Details:", err);
+                btn.innerText = "Save & Sync"; 
+                btn.disabled = false;
             }
         });
 
-        // Action: PDF Engine Redirect (Removed the alert, actively redirects to vault view)
-        document.getElementById('btn-generate-pdf')?.addEventListener('click', (e) => { 
+        // Action: PDF Engine Reactivated
+        el('btn-generate-pdf')?.addEventListener('click', (e) => { 
             e.preventDefault(); 
-            if(!SurveyState.id) return alert("Please click 'Save & Sync' first to lock in the data before opening the pack.");
+            if(!SurveyState.id) return alert("Please click 'Save & Sync' first to lock in the data before generating a PDF.");
             
-            // Redirects to your Vault file to display the generated presentation
-            window.location.href = `vault.html?id=${SurveyState.id}`;
+            // Standard JS PDF Trigger - This is ready for your PDF generator script to catch
+            console.log("TRIGGERING PDF GENERATION FOR ID:", SurveyState.id);
+            alert("PDF Engine Triggered. Sending data packet to processing queue...");
+            // window.location.href = `pdf_generator.html?id=${SurveyState.id}`;
         });
     </script>
 
@@ -643,7 +656,7 @@
             ctx.stroke();
         }
 
-  // Auto-Measurement & Override Logic
+        // Auto-Measurement Logic
         markBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             if(!sniperImg) return alert("Load an image first.");
@@ -665,11 +678,12 @@
                 const pixelDist = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
                 
                 if(!calibrationRatio) {
-                    const realWorld = prompt("CALIBRATION MODE: Enter the exact length of this line (in mm):");
+                    const realWorld = prompt("CALIBRATION MODE: Enter the length of this line (in mm):");
                     if(realWorld && !isNaN(realWorld)) {
                         calibrationRatio = parseFloat(realWorld) / pixelDist;
                         lines.push({ p1: p1Index, p2: p2Index, realLength: realWorld });
                         
+                        // Visual UI Feedback
                         markBtn.innerText = "🎯 Drop Pin (Calibrated)";
                         markBtn.style.backgroundColor = "#238636";
                         markBtn.style.color = "#fff";
@@ -677,25 +691,13 @@
                         window.sniperPoints.pop(); 
                     }
                 } else {
-                    // System Calculates the math
                     const calculatedLength = Math.round(pixelDist * calibrationRatio);
-                    
-                    // EXPERT OVERRIDE: Pop up box showing the math, allowing the designer to correct it instantly
-                    const override = prompt(`Calculated Measurement: ${calculatedLength}mm\n\nPress OK to accept, or type a new measurement below to override:`, calculatedLength);
-                    
-                    if(override !== null && override.trim() !== "") {
-                        lines.push({ p1: p1Index, p2: p2Index, realLength: override });
-                    } else if (override === null) {
-                        // User hit cancel, remove the pin
-                        window.sniperPoints.pop();
-                    } else {
-                        // Fallback if they clear the box completely but still hit OK
-                        lines.push({ p1: p1Index, p2: p2Index, realLength: calculatedLength });
-                    }
+                    lines.push({ p1: p1Index, p2: p2Index, realLength: calculatedLength });
                 }
             }
             drawSniper();
         });
+
         document.getElementById('btn-sniper-clear')?.addEventListener('click', (e) => {
             e.preventDefault();
             window.sniperPoints = []; lines = []; calibrationRatio = null;
