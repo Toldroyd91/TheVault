@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Command Center - Full Survey Pack</title>
     <style>
-        /* Modern High-End Dark Aesthetic */
         :root {
             --bg-dark: #0d1117; 
             --card-bg: #161b22;
@@ -16,146 +15,37 @@
             --border-color: #30363d;
             --input-bg: #090d13;
         }
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            -webkit-font-smoothing: antialiased;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
         h2 { margin: 0; font-weight: 600; font-size: 22px; letter-spacing: -0.5px; }
         h3 { margin-top: 0; font-size: 15px; color: #fff; font-weight: 500; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .grid-container {
-            display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: 25px;
-            align-items: start;
-        }
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 22px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
+        .grid-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 25px; align-items: start; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 22px; border: 1px solid var(--border-color); box-shadow: 0 8px 24px rgba(0,0,0,0.3); margin-bottom: 20px; }
         
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .full-width { grid-column: 1 / -1; }
         
-        label {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            display: block;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-        input, select, textarea {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: #c9d1d9;
-            padding: 12px;
-            border-radius: 6px;
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 15px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.15);
-        }
+        label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        input, select, textarea { background: var(--input-bg); border: 1px solid var(--border-color); color: #c9d1d9; padding: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 15px; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.15); }
         
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            background: var(--input-bg);
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 8px;
-        }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; padding: 8px 0; background: var(--input-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 8px; }
         .checkbox-group input { width: auto; accent-color: var(--accent); transform: scale(1.2); margin: 0; }
         .checkbox-group label { margin: 0; font-size: 13px; color: #fff; text-transform: none; letter-spacing: normal; font-weight: normal;}
         
-        .canvas-container {
-            background: #000;
-            border-radius: 8px;
-            width: 100%;
-            height: 460px;
-            border: 2px dashed var(--border-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-        }
+        .canvas-container { background: #000; border-radius: 8px; width: 100%; height: 460px; border: 2px dashed var(--border-color); display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
         canvas { max-width: 100%; max-height: 100%; }
         
-        .photo-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .photo-btn {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            padding: 12px 14px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 13px;
-            color: #c9d1d9;
-            user-select: none;
-        }
+        .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .photo-btn { background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; font-size: 13px; color: #c9d1d9; user-select: none; }
         .photo-btn:hover { border-color: var(--text-muted); }
-        .photo-btn .badge {
-            background: var(--border-color);
-            color: var(--text-muted);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        .photo-btn.has-photos {
-            border-color: var(--accent);
-            color: #fff;
-            background: rgba(229, 9, 20, 0.05);
-        }
-        .photo-btn.has-photos .badge {
-            background: var(--accent);
-            color: #fff;
-        }
+        .photo-btn .badge { background: var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .photo-btn.has-photos { border-color: var(--accent); color: #fff; background: rgba(229, 9, 20, 0.05); }
+        .photo-btn.has-photos .badge { background: var(--accent); color: #fff; }
 
         .action-bar { display: flex; gap: 15px; margin-top: 20px; }
-        button {
-            background: var(--accent); color: white; border: none; padding: 15px 24px;
-            border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
-            transition: all 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 0.5px;
-        }
+        button { background: var(--accent); color: white; border: none; padding: 15px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 0.5px; }
         button:hover { background: var(--accent-hover); transform: translateY(-1px); }
         .btn-secondary { background: #21262d; border: 1px solid var(--border-color); color: #c9d1d9; }
         .btn-secondary:hover { background: #30363d; border-color: #8b949e; }
@@ -171,6 +61,7 @@
     </div>
 
     <div class="grid-container">
+        <!-- LEFT COLUMN -->
         <div>
             <div class="card">
                 <h3>Client Profile</h3>
@@ -294,82 +185,49 @@
 
             <div class="card">
                 <h3>Handover Pamphlets</h3>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="cb-brochure">
-                    <label for="cb-brochure">Product Brochure Handed Over</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="cb-warranty">
-                    <label for="cb-warranty">Warranty Documentation Provided</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="cb-planning">
-                    <label for="cb-planning">Planning Guide / Regulatory Handout</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="cb-sap">
-                    <label for="cb-sap">SAP Calculations Factsheet</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="cb-roof">
-                    <label for="cb-roof">Roof System Specification Guide</label>
-                </div>
+                <div class="checkbox-group"><input type="checkbox" id="cb-brochure"><label for="cb-brochure">Product Brochure Handed Over</label></div>
+                <div class="checkbox-group"><input type="checkbox" id="cb-warranty"><label for="cb-warranty">Warranty Documentation Provided</label></div>
+                <div class="checkbox-group"><input type="checkbox" id="cb-planning"><label for="cb-planning">Planning Guide / Regulatory Handout</label></div>
+                <div class="checkbox-group"><input type="checkbox" id="cb-sap"><label for="cb-sap">SAP Calculations Factsheet</label></div>
+                <div class="checkbox-group"><input type="checkbox" id="cb-roof"><label for="cb-roof">Roof System Specification Guide</label></div>
             </div>
         </div>
 
+        <!-- RIGHT COLUMN -->
         <div>
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">
                     <h3 style="border: none; margin: 0; padding: 0;">Elevation Sniper Engine</h3>
                     <button id="btn-load-sniper-img" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; flex: none;">📷 Capture Photo</button>
                 </div>
-                
-                <div class="canvas-container">
-                    <canvas id="sniperCanvas" width="800" height="600"></canvas>
-                </div>
+                <div class="canvas-container"><canvas id="sniperCanvas" width="800" height="600"></canvas></div>
             </div>
 
             <div class="card">
                 <h3>Site Photography & Reference</h3>
                 <div class="photo-grid">
-                    <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()">
-                        <span>Front Elevation</span><span class="badge" id="badge-front">0</span>
-                    </div>
+                    <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()"><span>Front Elevation</span><span class="badge" id="badge-front">0</span></div>
                     <input type="file" id="upload-front" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'front')">
                     
-                    <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()">
-                        <span>Side Elevation</span><span class="badge" id="badge-side">0</span>
-                    </div>
+                    <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()"><span>Side Elevation</span><span class="badge" id="badge-side">0</span></div>
                     <input type="file" id="upload-side" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'side')">
                     
-                    <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()">
-                        <span>Back Elevation</span><span class="badge" id="badge-back">0</span>
-                    </div>
+                    <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()"><span>Back Elevation</span><span class="badge" id="badge-back">0</span></div>
                     <input type="file" id="upload-back" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'back')">
                     
-                    <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()">
-                        <span>Access / Pathways</span><span class="badge" id="badge-access">0</span>
-                    </div>
+                    <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()"><span>Access / Pathways</span><span class="badge" id="badge-access">0</span></div>
                     <input type="file" id="upload-access" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'access')">
                     
-                    <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()">
-                        <span>Drainage / Manholes</span><span class="badge" id="badge-drainage">0</span>
-                    </div>
+                    <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()"><span>Drainage / Manholes</span><span class="badge" id="badge-drainage">0</span></div>
                     <input type="file" id="upload-drainage" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'drainage')">
                     
-                    <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()">
-                        <span>Trees / Foliage</span><span class="badge" id="badge-trees">0</span>
-                    </div>
+                    <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()"><span>Trees / Foliage</span><span class="badge" id="badge-trees">0</span></div>
                     <input type="file" id="upload-trees" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'trees')">
                     
-                    <div class="photo-btn" id="btn-sketches" onclick="document.getElementById('upload-sketches').click()">
-                        <span>Hand Sketches</span><span class="badge" id="badge-sketches">0</span>
-                    </div>
+                    <div class="photo-btn" id="btn-sketches" onclick="document.getElementById('upload-sketches').click()"><span>Hand Sketches</span><span class="badge" id="badge-sketches">0</span></div>
                     <input type="file" id="upload-sketches" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'sketches')">
                     
-                    <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()">
-                        <span>Misc / Other</span><span class="badge" id="badge-misc">0</span>
-                    </div>
+                    <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()"><span>Misc / Other</span><span class="badge" id="badge-misc">0</span></div>
                     <input type="file" id="upload-misc" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'misc')">
                 </div>
             </div>
@@ -394,12 +252,16 @@
         </div>
     </div>
 
+    <!-- INTERNAL SCRIPTS -->
     <script type="module">
         import { auth, db, doc, setDoc, getDoc, collection, serverTimestamp, onAuthStateChanged, BRAND_CONFIG } from './js/core-firebase.js';
 
         const el = (id) => document.getElementById(id);
         const val = (id) => el(id)?.value || "";
         const checked = (id) => el(id) ? el(id).checked : false;
+
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqk1hz0f8/image/upload";
+        const UPLOAD_PRESET = "crm_document_uploads";
 
         const SurveyState = {
             id: new URLSearchParams(window.location.search).get('id') || null,
@@ -409,17 +271,15 @@
             logistics: {},
             designSpecification: {},
             compliance: {},
-            pamphlets: {}
+            pamphlets: {},
+            rawAssets: {}
         };
 
-        // Render Multi-Tenant Brand selection dynamically
         const brandSelect = el('brandSelect');
         if (brandSelect && BRAND_CONFIG) {
-            brandSelect.innerHTML = Object.entries(BRAND_CONFIG)
-                .map(([key, data]) => `<option value="${key}">${data.name}</option>`).join('');
+            brandSelect.innerHTML = Object.entries(BRAND_CONFIG).map(([key, data]) => `<option value="${key}">${data.name}</option>`).join('');
         }
 
-        // Auto-load data if looking up an existing lead ID
         onAuthStateChanged(auth, async (user) => {
             if(!user) return alert("Security Notice: Not logged in. Saves will fail.");
             
@@ -428,7 +288,6 @@
                 if(snap.exists()) {
                     Object.assign(SurveyState, snap.data());
                     
-                    // Repopulate UI beautifully
                     if(el('brandSelect')) el('brandSelect').value = SurveyState.brand || "YorkshireWindows";
                     if(el('clientName')) el('clientName').value = SurveyState.customerProfile?.leadName || "";
                     if(el('clientNum')) el('clientNum').value = SurveyState.customerProfile?.customerNum || "";
@@ -463,7 +322,6 @@
                     if(el('designerNotes')) el('designerNotes').value = SurveyState.technicalSurvey?.designerNotes || "";
                     if(el('includeNotesInPack')) el('includeNotesInPack').checked = SurveyState.technicalSurvey?.includeNotesInPack !== false;
 
-                    // Checkboxes
                     if(el('cb-brochure')) el('cb-brochure').checked = !!SurveyState.pamphlets?.brochure;
                     if(el('cb-warranty')) el('cb-warranty').checked = !!SurveyState.pamphlets?.warranty;
                     if(el('cb-planning')) el('cb-planning').checked = !!SurveyState.pamphlets?.planning;
@@ -473,102 +331,80 @@
             }
         });
 
-        // The Master Capture and Sync Event
+        // Cloudinary Uploader Helper
+        async function uploadBase64ToCloudinary(base64Str) {
+            const formData = new FormData();
+            formData.append('file', base64Str);
+            formData.append('upload_preset', UPLOAD_PRESET);
+            const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+            const data = await response.json();
+            return data.secure_url;
+        }
+
         el('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const btn = e.target;
-            btn.innerText = "Syncing Everything..."; 
+            btn.innerText = "Processing Assets..."; 
             btn.disabled = true;
 
             try {
+                // 1. Upload new photos to Cloudinary to get secure URLs
+                let uploadedPhotoData = SurveyState.rawAssets || { front:[], side:[], back:[], access:[], drainage:[], trees:[], sketches:[], misc:[] };
+                let hasUploads = false;
+
+                for (const category in window.sitePhotos) {
+                    for (const base64 of window.sitePhotos[category]) {
+                        btn.innerText = `Uploading ${category} photo...`;
+                        const url = await uploadBase64ToCloudinary(base64);
+                        uploadedPhotoData[category].push(url);
+                        hasUploads = true;
+                    }
+                }
+
+                if (hasUploads) {
+                    SurveyState.rawAssets = uploadedPhotoData;
+                    // Reset local photo arrays so they don't get uploaded twice on a second click
+                    for (const cat in window.sitePhotos) window.sitePhotos[cat] = [];
+                    // Reset UI badges
+                    document.querySelectorAll('.photo-btn .badge').forEach(b => { b.innerText = '0'; b.parentElement.classList.remove('has-photos'); });
+                }
+
+                btn.innerText = "Syncing Everything...";
+
+                // 2. Map Text Data
                 SurveyState.brand = val('brandSelect') || "YorkshireWindows";
-                
-                // Map ALL Profile fields
-                SurveyState.customerProfile = {
-                    leadName: val('clientName'),
-                    customerNum: val('clientNum'),
-                    postcode: val('postCode'),
-                    apptDate: val('apptDate'),
-                    revisitDate: val('revisitDate')
-                };
-                
-                // Map ALL Structure fields
-                SurveyState.technicalSurvey = {
-                    buildType: val('buildType'),
-                    proposedSize: val('proposedSize'),
-                    houseMaterial: val('houseMaterial'),
-                    baseType: val('baseType'),
-                    floorType: val('floorType'),
-                    dpcDepth: val('dpcDepth'),
-                    fasciaHeight: val('fasciaHeight'),
-                    airBricks: val('airBricks'),
-                    extBrickMatch: val('extBrickMatch'),
-                    designerNotes: val('designerNotes'),
-                    includeNotesInPack: checked('includeNotesInPack')
-                };
-
-                // Map ALL Logistics fields
-                SurveyState.logistics = {
-                    accessDifficult: val('accessDifficult'),
-                    accessWidth: val('accessWidth'),
-                    drainage: val('drainage'),
-                    wallObstacles: val('wallObstacles')
-                };
-
-                // Map ALL Design Specs
-                SurveyState.designSpecification = {
-                    roofType: val('roofType'),
-                    roofPitch: val('roofPitch'),
-                    frameColour: val('frameColour'),
-                    internalFrameColour: val('internalFrameColour')
-                };
-
-                // Map ALL Compliance Options
-                SurveyState.compliance = {
-                    buildingRegs: val('buildingRegs'),
-                    planningPerms: val('planningPerms'),
-                    sapCalcs: val('sapCalcs')
-                };
-
-                // Map Handover Checkboxes
-                SurveyState.pamphlets = {
-                    brochure: checked('cb-brochure'),
-                    warranty: checked('cb-warranty'),
-                    planning: checked('cb-planning'),
-                    sap: checked('cb-sap'),
-                    roof: checked('cb-roof')
-                };
-
-                // Security Isolation
+                SurveyState.customerProfile = { leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode'), apptDate: val('apptDate'), revisitDate: val('revisitDate') };
+                SurveyState.technicalSurvey = { buildType: val('buildType'), proposedSize: val('proposedSize'), houseMaterial: val('houseMaterial'), baseType: val('baseType'), floorType: val('floorType'), dpcDepth: val('dpcDepth'), fasciaHeight: val('fasciaHeight'), airBricks: val('airBricks'), extBrickMatch: val('extBrickMatch'), designerNotes: val('designerNotes'), includeNotesInPack: checked('includeNotesInPack') };
+                SurveyState.logistics = { accessDifficult: val('accessDifficult'), accessWidth: val('accessWidth'), drainage: val('drainage'), wallObstacles: val('wallObstacles') };
+                SurveyState.designSpecification = { roofType: val('roofType'), roofPitch: val('roofPitch'), frameColour: val('frameColour'), internalFrameColour: val('internalFrameColour') };
+                SurveyState.compliance = { buildingRegs: val('buildingRegs'), planningPerms: val('planningPerms'), sapCalcs: val('sapCalcs') };
+                SurveyState.pamphlets = { brochure: checked('cb-brochure'), warranty: checked('cb-warranty'), planning: checked('cb-planning'), sap: checked('cb-sap'), roof: checked('cb-roof') };
                 SurveyState.userId = auth.currentUser.uid; 
                 SurveyState.timestamps = { updatedAt: serverTimestamp() };
                 if(!SurveyState.id) SurveyState.timestamps.createdAt = serverTimestamp();
 
-                // Fire directly to the DB
+                // 3. Fire to Database
                 const docRef = SurveyState.id ? doc(db, "surveys", SurveyState.id) : doc(collection(db, "surveys"));
                 await setDoc(docRef, SurveyState, { merge: true });
                 
                 SurveyState.id = docRef.id;
                 
-                // Success feedback loop
                 btn.style.backgroundColor = "#238636";
                 btn.innerText = "Complete Pack Saved ✓";
                 setTimeout(() => { btn.style.backgroundColor = ""; btn.innerText = "Save & Sync"; btn.disabled = false; }, 3000);
 
             } catch(err) {
-                alert("Critical Database Sync Error: " + err.message);
+                alert("Database Sync Error: " + err.message);
                 btn.innerText = "Save & Sync"; 
                 btn.disabled = false;
             }
         });
 
-        // Bypassed hooks for appointment safety
         el('btn-ai-polish')?.addEventListener('click', (e) => { e.preventDefault(); alert("AI module deactivated for stability during today's consultation."); });
         el('btn-generate-pdf')?.addEventListener('click', (e) => { e.preventDefault(); alert("PDF module deactivated. Please use 'Save & Sync' to hold the data structures."); });
     </script>
 
     <script>
-        // --- 1. SNIPER ENGINE IMAGE LOADER ---
         document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -584,7 +420,6 @@
             input.click();
         });
 
-        // --- 2. SITE MEDIA UPLOAD HANDLER ---
         window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], sketches:[], misc:[] };
 
         window.handlePhotoUpload = function(input, category) {
@@ -607,7 +442,6 @@
             input.value = ''; 
         };
 
-        // --- 3. SMART PAMPHLET AUTO-TICKERS ---
         document.getElementById('planningPerms')?.addEventListener('change', (e) => {
             const cb = document.getElementById('cb-planning');
             if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== '');
