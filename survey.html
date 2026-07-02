@@ -81,18 +81,9 @@
                     <div><label>Proposed Size</label><input type="text" id="proposedSize" placeholder="e.g. 3x3 Metres"></div>
                     <div><label>House Material</label><input type="text" id="houseMaterial" placeholder="e.g. Brick/Render"></div>
                     <div><label>Base Type</label><input type="text" id="baseType" placeholder="e.g. Concrete"></div>
-                    <div>
-                        <label>Floor Type</label>
-                        <select id="floorType">
-                            <option value="">Select...</option>
-                            <option value="Solid">Solid</option>
-                            <option value="Joisted">Joisted</option>
-                        </select>
-                    </div>
                     <div><label>DPC Depth (mm)</label><input type="text" id="dpcDepth" placeholder="e.g. 150"></div>
                     <div><label>Fascia Height (mm)</label><input type="text" id="fasciaHeight" placeholder="e.g. 2400"></div>
-                    <div><label>Air Bricks Required</label><input type="text" id="airBricks" placeholder="e.g. 4x Telescopic"></div>
-                    <div><label>Ext Brick Match</label><input type="text" id="extBrickMatch" placeholder="e.g. Red wirecut"></div>
+                    <div class="full-width"><label>Air Bricks Required</label><input type="text" id="airBricks" placeholder="e.g. 4x Telescopic"></div>
                 </div>
             </div>
 
@@ -195,12 +186,27 @@
 
         <!-- RIGHT COLUMN -->
         <div>
+            <!-- EXERT SNIPER UI -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">
                     <h3 style="border: none; margin: 0; padding: 0;">Elevation Sniper Engine</h3>
                     <button id="btn-load-sniper-img" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; flex: none;">📷 Capture Photo</button>
                 </div>
-                <div class="canvas-container"><canvas id="sniperCanvas" width="800" height="600"></canvas></div>
+                
+                <div class="canvas-container" style="cursor: grab; position: relative;">
+                    <canvas id="sniperCanvas" width="800" height="600"></canvas>
+                    
+                    <!-- Zoom Slider for iPad -->
+                    <div style="position: absolute; bottom: 20px; right: 20px; background: rgba(9, 13, 19, 0.8); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 12px; color: #8b949e;">Zoom</span>
+                        <input type="range" id="sniperZoom" min="0.5" max="5" step="0.1" value="1" style="width: 100px;">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button id="btn-sniper-mark" class="btn-secondary" style="font-size: 12px; padding: 12px;">🎯 Drop Target Pin</button>
+                    <button id="btn-sniper-clear" class="btn-secondary" style="font-size: 12px; padding: 12px; flex: 0.4;">↺ Clear All</button>
+                </div>
             </div>
 
             <div class="card">
@@ -224,8 +230,8 @@
                     <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()"><span>Trees / Foliage</span><span class="badge" id="badge-trees">0</span></div>
                     <input type="file" id="upload-trees" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'trees')">
                     
-                    <div class="photo-btn" id="btn-sketches" onclick="document.getElementById('upload-sketches').click()"><span>Hand Sketches</span><span class="badge" id="badge-sketches">0</span></div>
-                    <input type="file" id="upload-sketches" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'sketches')">
+                    <div class="photo-btn" id="btn-brick" onclick="document.getElementById('upload-brick').click()"><span>Brickwork / Match</span><span class="badge" id="badge-brick">0</span></div>
+                    <input type="file" id="upload-brick" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'brick')">
                     
                     <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()"><span>Misc / Other</span><span class="badge" id="badge-misc">0</span></div>
                     <input type="file" id="upload-misc" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'misc')">
@@ -235,7 +241,7 @@
             <div class="card">
                 <h3>Designer Survey Notes</h3>
                 <div class="full-width">
-                    <textarea id="designerNotes" rows="5" placeholder="Enter site notes (e.g., transom bars required, render details, brickwork match)..."></textarea>
+                    <textarea id="designerNotes" rows="5" placeholder="Enter site notes (e.g., transom bars required, render details, obstacles)..."></textarea>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
                     <input type="checkbox" id="includeNotesInPack" checked style="accent-color: var(--accent);">
@@ -252,7 +258,7 @@
         </div>
     </div>
 
-    <!-- INTERNAL SCRIPTS -->
+    <!-- INTERNAL SCRIPTS (FIREBASE) -->
     <script type="module">
         import { auth, db, doc, setDoc, getDoc, collection, serverTimestamp, onAuthStateChanged, BRAND_CONFIG } from './js/core-firebase.js';
 
@@ -299,11 +305,9 @@
                     if(el('proposedSize')) el('proposedSize').value = SurveyState.technicalSurvey?.proposedSize || "";
                     if(el('houseMaterial')) el('houseMaterial').value = SurveyState.technicalSurvey?.houseMaterial || "";
                     if(el('baseType')) el('baseType').value = SurveyState.technicalSurvey?.baseType || "";
-                    if(el('floorType')) el('floorType').value = SurveyState.technicalSurvey?.floorType || "";
                     if(el('dpcDepth')) el('dpcDepth').value = SurveyState.technicalSurvey?.dpcDepth || "";
                     if(el('fasciaHeight')) el('fasciaHeight').value = SurveyState.technicalSurvey?.fasciaHeight || "";
                     if(el('airBricks')) el('airBricks').value = SurveyState.technicalSurvey?.airBricks || "";
-                    if(el('extBrickMatch')) el('extBrickMatch').value = SurveyState.technicalSurvey?.extBrickMatch || "";
                     
                     if(el('accessDifficult')) el('accessDifficult').value = SurveyState.logistics?.accessDifficult || "";
                     if(el('accessWidth')) el('accessWidth').value = SurveyState.logistics?.accessWidth || "";
@@ -331,7 +335,6 @@
             }
         });
 
-        // Cloudinary Uploader Helper
         async function uploadBase64ToCloudinary(base64Str) {
             const formData = new FormData();
             formData.append('file', base64Str);
@@ -348,8 +351,8 @@
             btn.disabled = true;
 
             try {
-                // 1. Upload new photos to Cloudinary to get secure URLs
-                let uploadedPhotoData = SurveyState.rawAssets || { front:[], side:[], back:[], access:[], drainage:[], trees:[], sketches:[], misc:[] };
+                // 1. Photo Uploads to Cloudinary
+                let uploadedPhotoData = SurveyState.rawAssets || { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[] };
                 let hasUploads = false;
 
                 for (const category in window.sitePhotos) {
@@ -363,27 +366,26 @@
 
                 if (hasUploads) {
                     SurveyState.rawAssets = uploadedPhotoData;
-                    // Reset local photo arrays so they don't get uploaded twice on a second click
                     for (const cat in window.sitePhotos) window.sitePhotos[cat] = [];
-                    // Reset UI badges
                     document.querySelectorAll('.photo-btn .badge').forEach(b => { b.innerText = '0'; b.parentElement.classList.remove('has-photos'); });
                 }
 
                 btn.innerText = "Syncing Everything...";
 
-                // 2. Map Text Data
+                // 2. Data Mapping
                 SurveyState.brand = val('brandSelect') || "YorkshireWindows";
                 SurveyState.customerProfile = { leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode'), apptDate: val('apptDate'), revisitDate: val('revisitDate') };
-                SurveyState.technicalSurvey = { buildType: val('buildType'), proposedSize: val('proposedSize'), houseMaterial: val('houseMaterial'), baseType: val('baseType'), floorType: val('floorType'), dpcDepth: val('dpcDepth'), fasciaHeight: val('fasciaHeight'), airBricks: val('airBricks'), extBrickMatch: val('extBrickMatch'), designerNotes: val('designerNotes'), includeNotesInPack: checked('includeNotesInPack') };
+                SurveyState.technicalSurvey = { buildType: val('buildType'), proposedSize: val('proposedSize'), houseMaterial: val('houseMaterial'), baseType: val('baseType'), dpcDepth: val('dpcDepth'), fasciaHeight: val('fasciaHeight'), airBricks: val('airBricks'), designerNotes: val('designerNotes'), includeNotesInPack: checked('includeNotesInPack') };
                 SurveyState.logistics = { accessDifficult: val('accessDifficult'), accessWidth: val('accessWidth'), drainage: val('drainage'), wallObstacles: val('wallObstacles') };
                 SurveyState.designSpecification = { roofType: val('roofType'), roofPitch: val('roofPitch'), frameColour: val('frameColour'), internalFrameColour: val('internalFrameColour') };
                 SurveyState.compliance = { buildingRegs: val('buildingRegs'), planningPerms: val('planningPerms'), sapCalcs: val('sapCalcs') };
                 SurveyState.pamphlets = { brochure: checked('cb-brochure'), warranty: checked('cb-warranty'), planning: checked('cb-planning'), sap: checked('cb-sap'), roof: checked('cb-roof') };
+                
                 SurveyState.userId = auth.currentUser.uid; 
                 SurveyState.timestamps = { updatedAt: serverTimestamp() };
                 if(!SurveyState.id) SurveyState.timestamps.createdAt = serverTimestamp();
 
-                // 3. Fire to Database
+                // 3. Database Save
                 const docRef = SurveyState.id ? doc(db, "surveys", SurveyState.id) : doc(collection(db, "surveys"));
                 await setDoc(docRef, SurveyState, { merge: true });
                 
@@ -404,7 +406,28 @@
         el('btn-generate-pdf')?.addEventListener('click', (e) => { e.preventDefault(); alert("PDF module deactivated. Please use 'Save & Sync' to hold the data structures."); });
     </script>
 
+    <!-- INTERNAL SCRIPTS (SNIPER & UPLOADS) -->
     <script>
+        // -----------------------------------------------------
+        // EXPERT SNIPER ENGINE (Vector Scaling & Auto-Math)
+        // -----------------------------------------------------
+        const canvas = document.getElementById('sniperCanvas');
+        const ctx = canvas.getContext('2d');
+        const zoomSlider = document.getElementById('sniperZoom');
+        let sniperImg = null;
+
+        // Camera State
+        let imgScale = 1;
+        let imgX = 0, imgY = 0;
+        let isDragging = false;
+        let startDragX = 0, startDragY = 0;
+
+        // Measurement State
+        let points = []; 
+        let lines = []; 
+        let calibrationRatio = null; // mm per pixel
+
+        // Load Sniper Image
         document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -420,7 +443,179 @@
             input.click();
         });
 
-        window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], sketches:[], misc:[] };
+        window.addEventListener('loadSniperImage', (e) => {
+            sniperImg = new Image();
+            sniperImg.onload = () => {
+                imgScale = Math.min(canvas.width / sniperImg.width, canvas.height / sniperImg.height);
+                if (zoomSlider) {
+                    zoomSlider.value = imgScale; 
+                    zoomSlider.min = imgScale * 0.5; 
+                }
+                
+                imgX = (canvas.width - (sniperImg.width * imgScale)) / 2;
+                imgY = (canvas.height - (sniperImg.height * imgScale)) / 2;
+                
+                points = [];
+                lines = [];
+                calibrationRatio = null;
+                drawSniper();
+            };
+            sniperImg.src = e.detail;
+        });
+
+        // Zoom Slider Logic
+        zoomSlider?.addEventListener('input', (e) => {
+            if(!sniperImg) return;
+            const newScale = parseFloat(e.target.value);
+            
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            
+            imgX = cx - ((cx - imgX) * (newScale / imgScale));
+            imgY = cy - ((cy - imgY) * (newScale / imgScale));
+            
+            imgScale = newScale;
+            drawSniper();
+        });
+
+        // Panning Mechanics
+        canvas.addEventListener('mousedown', (e) => {
+            if(!sniperImg) return;
+            isDragging = true;
+            startDragX = e.offsetX - imgX;
+            startDragY = e.offsetY - imgY;
+            canvas.style.cursor = 'grabbing';
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if(!isDragging || !sniperImg) return;
+            imgX = e.offsetX - startDragX;
+            imgY = e.offsetY - startDragY;
+            drawSniper();
+        });
+
+        canvas.addEventListener('mouseup', () => { isDragging = false; canvas.style.cursor = 'grab'; });
+        canvas.addEventListener('mouseleave', () => { isDragging = false; canvas.style.cursor = 'grab'; });
+
+        // Core Drawing Loop
+        function drawSniper() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if(!sniperImg) return;
+
+            // 1. Draw Image Background (Scaled)
+            ctx.drawImage(sniperImg, 0, 0, sniperImg.width, sniperImg.height, imgX, imgY, sniperImg.width * imgScale, sniperImg.height * imgScale);
+
+            // 2. Draw Measurements (Vector mapping)
+            lines.forEach(line => {
+                const p1 = points[line.p1];
+                const p2 = points[line.p2];
+                
+                const screenX1 = (p1.x * imgScale) + imgX;
+                const screenY1 = (p1.y * imgScale) + imgY;
+                const screenX2 = (p2.x * imgScale) + imgX;
+                const screenY2 = (p2.y * imgScale) + imgY;
+
+                ctx.beginPath();
+                ctx.moveTo(screenX1, screenY1);
+                ctx.lineTo(screenX2, screenY2);
+                ctx.strokeStyle = '#0dcaf0';
+                ctx.lineWidth = 2; 
+                ctx.stroke();
+
+                const midX = (screenX1 + screenX2) / 2;
+                const midY = (screenY1 + screenY2) / 2;
+                const text = line.realLength + 'mm';
+                
+                ctx.font = 'bold 12px -apple-system, sans-serif';
+                const textWidth = ctx.measureText(text).width;
+
+                ctx.fillStyle = 'rgba(9, 13, 19, 0.85)';
+                ctx.fillRect(midX - (textWidth / 2) - 8, midY - 12, textWidth + 16, 24);
+                
+                ctx.fillStyle = '#f0f6fc';
+                ctx.fillText(text, midX - (textWidth / 2), midY + 4);
+            });
+
+            // 3. Draw Dropped Pins (Vector mapping)
+            points.forEach((p, index) => {
+                const screenX = (p.x * imgScale) + imgX;
+                const screenY = (p.y * imgScale) + imgY;
+                
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+                ctx.fillStyle = (index === points.length - 1 && points.length % 2 !== 0) ? '#E50914' : '#8b949e';
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            });
+
+            // 4. Draw FIXED Center Target
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(cx - 20, cy);
+            ctx.lineTo(cx + 20, cy);
+            ctx.moveTo(cx, cy - 20);
+            ctx.lineTo(cx, cy + 20);
+            ctx.strokeStyle = 'rgba(229, 9, 20, 0.9)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(229, 9, 20, 0.5)';
+            ctx.stroke();
+        }
+
+        // Auto-Measurement Logic
+        document.getElementById('btn-sniper-mark')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(!sniperImg) return alert("Load an image first.");
+            
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            
+            const imgPixelX = (cx - imgX) / imgScale;
+            const imgPixelY = (cy - imgY) / imgScale;
+            
+            points.push({ x: imgPixelX, y: imgPixelY });
+            
+            if(points.length > 0 && points.length % 2 === 0) {
+                const p1Index = points.length - 2;
+                const p2Index = points.length - 1;
+                const p1 = points[p1Index];
+                const p2 = points[p2Index];
+                
+                const pixelDist = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+                
+                if(!calibrationRatio) {
+                    const realWorld = prompt("CALIBRATION MODE: Enter the length of this line (in mm):");
+                    if(realWorld && !isNaN(realWorld)) {
+                        calibrationRatio = parseFloat(realWorld) / pixelDist;
+                        lines.push({ p1: p1Index, p2: p2Index, realLength: realWorld });
+                    } else {
+                        points.pop(); 
+                    }
+                } else {
+                    const calculatedLength = Math.round(pixelDist * calibrationRatio);
+                    lines.push({ p1: p1Index, p2: p2Index, realLength: calculatedLength });
+                }
+            }
+            drawSniper();
+        });
+
+        document.getElementById('btn-sniper-clear')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            points = []; lines = []; calibrationRatio = null;
+            drawSniper();
+        });
+
+        // -----------------------------------------------------
+        // SITE MEDIA UPLOAD HANDLER
+        // -----------------------------------------------------
+        window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[] };
 
         window.handlePhotoUpload = function(input, category) {
             const files = input.files;
@@ -442,6 +637,9 @@
             input.value = ''; 
         };
 
+        // -----------------------------------------------------
+        // SMART PAMPHLET AUTO-TICKERS
+        // -----------------------------------------------------
         document.getElementById('planningPerms')?.addEventListener('change', (e) => {
             const cb = document.getElementById('cb-planning');
             if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== '');
@@ -453,26 +651,6 @@
         document.getElementById('roofType')?.addEventListener('change', (e) => {
             const cb = document.getElementById('cb-roof');
             if(cb) cb.checked = (e.target.value !== '');
-        });
-        // --- 4. SNIPER CANVAS RECEIVER ---
-        window.addEventListener('loadSniperImage', (e) => {
-            const canvas = document.getElementById('sniperCanvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-            
-            img.onload = () => {
-                // Wipe the canvas clean
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Scale the image so it fits perfectly inside the 800x600 box
-                const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-                const x = (canvas.width / 2) - (img.width / 2) * scale;
-                const y = (canvas.height / 2) - (img.height / 2) * scale;
-                
-                // Draw the image
-                ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-            };
-            img.src = e.detail;
         });
     </script>
 </body>
