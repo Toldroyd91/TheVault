@@ -454,6 +454,26 @@
             const cb = document.getElementById('cb-roof');
             if(cb) cb.checked = (e.target.value !== '');
         });
+        // --- 4. SNIPER CANVAS RECEIVER ---
+        window.addEventListener('loadSniperImage', (e) => {
+            const canvas = document.getElementById('sniperCanvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                // Wipe the canvas clean
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Scale the image so it fits perfectly inside the 800x600 box
+                const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                const x = (canvas.width / 2) - (img.width / 2) * scale;
+                const y = (canvas.height / 2) - (img.height / 2) * scale;
+                
+                // Draw the image
+                ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+            };
+            img.src = e.detail;
+        });
     </script>
 </body>
 </html>
