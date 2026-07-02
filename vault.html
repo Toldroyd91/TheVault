@@ -6,13 +6,11 @@
     <title>COHI | Secure Client Vault</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Fallback CSS in case style.css is cached or missing */
         .glass-panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
         .luxury-input { background: #090d13; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; outline: none; }
         .luxury-input:focus { border-color: #0dcaf0; }
         body { background: #0d1117; color: #f0f6fc; }
         
-        /* Custom scrollbar for chat */
         #chat-window::-webkit-scrollbar { width: 6px; }
         #chat-window::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
@@ -57,11 +55,10 @@
         </div>
     </div>
 
-    <!-- INLINE FIREBASE & LOGIC (Bypasses ui-vault.js caching issues) -->
+    <!-- INLINE FIREBASE ENGINE -->
     <script type="module">
         import { db, doc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from './js/core-firebase.js';
 
-        // 1. Get the exact customer ID from the web address
         const urlParams = new URLSearchParams(window.location.search);
         const vaultId = urlParams.get('id');
 
@@ -75,7 +72,6 @@
             btn.disabled = true;
 
             try {
-                // Fetch live customer data
                 const snap = await getDoc(doc(db, "surveys", vaultId));
                 
                 if(!snap.exists()) {
@@ -85,24 +81,23 @@
 
                 const data = snap.data();
                 
-                // Security Check (Defaults to 1234 if you haven't assigned one, 0000 is a master override)
+                // Master PIN 0000 built-in for testing
                 const validPin = data.customerProfile?.vaultPIN || "1234"; 
                 if(pinInput !== validPin && pinInput !== "0000") { 
                     btn.innerText = "Access Vault"; btn.disabled = false;
                     return alert("Incorrect PIN.");
                 }
 
-                // Update Dashboard RAG status to Green
                 await updateDoc(doc(db, "surveys", vaultId), {
                     "vaultTelemetry.lastActive": Date.now()
                 });
 
-                // Inject Live Data to the UI
+                // FIXED MAPPING: Correctly points to designSpecification.roofType
                 document.getElementById('customerGreeting').innerText = `Welcome, ${data.customerProfile?.leadName || 'Customer'}`;
                 document.getElementById('vBuild').innerText = data.technicalSurvey?.buildType || "TBC";
-                document.getElementById('vRoof').innerText = data.technicalSurvey?.roofSystem || "TBC";
+                document.getElementById('vRoof').innerText = data.designSpecification?.roofType || "TBC";
 
-                // Inject U-Design Pricing if it exists
+                // Inject Pricing if Quote Scraper has saved it
                 if (data.uDesignQuote) {
                     document.getElementById('quoteContainer').innerHTML = `
                         <div class="mt-6 p-5 rounded-xl shadow-lg" style="background: rgba(229, 9, 20, 0.1); border: 1px solid rgba(229, 9, 20, 0.4);">
@@ -116,11 +111,9 @@
                     `;
                 }
 
-                // Transition UI
                 document.getElementById('loginGate').classList.add('hidden');
                 document.getElementById('vaultContent').classList.remove('hidden');
 
-                // Boot up Chat Engine
                 initChatEngine(vaultId);
 
             } catch(e) {
@@ -130,12 +123,10 @@
             }
         };
 
-        // 2. Chat Engine Logic
         function initChatEngine(id) {
             const chatWindow = document.getElementById('chat-window');
             const chatInput = document.getElementById('chat-input');
 
-            // Live listener for new messages
             const q = query(collection(db, `surveys/${id}/messages`), orderBy('timestamp'));
             onSnapshot(q, (snapshot) => {
                 chatWindow.innerHTML = '';
@@ -152,14 +143,13 @@
                         </div>
                     `;
                 });
-                chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+                chatWindow.scrollTop = chatWindow.scrollHeight; 
             });
 
-            // Send Message Event
             chatInput.addEventListener('keypress', async (e) => {
                 if(e.key === 'Enter' && chatInput.value.trim()) {
                     const text = chatInput.value.trim();
-                    chatInput.value = ''; // Clear box instantly for snappy feel
+                    chatInput.value = ''; 
                     
                     await addDoc(collection(db, `surveys/${id}/messages`), {
                         sender: 'Customer',
