@@ -8,59 +8,56 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .glass-panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
-        .luxury-input { background: #090d13; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; outline: none; }
+        .luxury-input { background: #090d13; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; outline: none; transition: border-color 0.3s; }
         .luxury-input:focus { border-color: var(--accent-primary, #0dcaf0); }
         body { background: #0d1117; color: #f0f6fc; }
         
         /* Accordion Animations */
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-out, padding 0.4s ease;
-        }
-        .accordion-content.open {
-            max-height: 1000px; /* Arbitrary large number */
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-        }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease; }
+        .accordion-content.open { max-height: 1000px; padding-top: 1rem; padding-bottom: 1rem; }
         .accordion-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left; cursor: pointer; }
         .accordion-icon { transition: transform 0.3s ease; }
         .accordion-btn.open .accordion-icon { transform: rotate(180deg); }
 
         /* Timeline CSS */
         .timeline-step { position: relative; padding-left: 20px; margin-bottom: 15px; border-left: 2px solid #30363d; }
-        .timeline-step::before { content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: #30363d; }
+        .timeline-step::before { content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: #30363d; transition: all 0.3s; }
         .timeline-step.active { border-left-color: var(--accent-primary, #0dcaf0); }
         .timeline-step.active::before { background: var(--accent-primary, #0dcaf0); box-shadow: 0 0 10px var(--accent-primary, #0dcaf0); }
         .timeline-step.completed { border-left-color: #238636; }
-        .timeline-step.completed::before { background: #238636; }
+        .timeline-step.completed::before { background: #238636; box-shadow: 0 0 10px #238636; }
 
-        /* AR Container Placeholder */
-        .ar-container { width: 100%; height: 300px; background: #000; border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px dashed var(--accent-primary, #0dcaf0); cursor: pointer;}
+        /* AR Container */
+        .ar-container { width: 100%; height: 250px; background: rgba(0,0,0,0.5); border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px dashed var(--accent-primary, #0dcaf0); cursor: pointer; transition: background 0.3s;}
+        .ar-container:hover { background: rgba(13, 202, 240, 0.1); }
+        
+        /* Custom Scrollbar */
+        #chat-window::-webkit-scrollbar { width: 6px; }
+        #chat-window::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
 </head>
 <body class="p-4 md:p-8">
     
     <!-- LOGIN GATE -->
-    <div id="loginGate" class="max-w-md mx-auto mt-20 glass-panel p-8 text-center">
+    <div id="loginGate" class="max-w-md mx-auto mt-20 glass-panel p-8 text-center shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <img id="loginLogo" src="" alt="Brand Logo" class="h-16 mx-auto mb-6 hidden">
-        <h2 class="text-xl font-bold mb-6">Secure Project Vault</h2>
-        <input type="password" id="vaultPinInput" placeholder="Enter Project PIN" class="luxury-input p-4 mb-4 text-center text-2xl tracking-widest">
-        <button onclick="window.unlockVault()" id="btnAccess" class="w-full py-4 text-black font-bold rounded-xl transition" style="background-color: var(--accent-primary, #0dcaf0);">Access Vault</button>
+        <h2 class="text-xl font-bold mb-6 tracking-wide">SECURE PROJECT VAULT</h2>
+        <input type="password" id="vaultPinInput" placeholder="ENTER SECURE PIN" class="luxury-input p-4 mb-4 text-center text-2xl tracking-widest font-mono">
+        <button onclick="window.unlockVault()" id="btnAccess" class="w-full py-4 text-black font-bold rounded-xl transition hover:opacity-90 hover:scale-[1.02]" style="background-color: var(--accent-primary, #0dcaf0);">DECRYPT VAULT</button>
     </div>
 
     <!-- MAIN VAULT CONTENT -->
-    <div id="vaultContent" class="hidden max-w-6xl mx-auto space-y-6">
+    <div id="vaultContent" class="hidden max-w-6xl mx-auto space-y-6 animate-[fadeIn_0.5s_ease-out]">
         
         <!-- Header -->
         <div class="flex justify-between items-end mb-6 border-b border-[#30363d] pb-4">
             <div>
                 <img id="brandLogo" src="" alt="Brand Logo" class="h-10 mb-2 hidden">
-                <h2 id="customerGreeting" class="text-3xl font-black">Welcome</h2>
+                <h2 id="customerGreeting" class="text-3xl font-black tracking-tight">Welcome</h2>
             </div>
             <div class="text-right">
-                <div class="text-xs text-gray-500 uppercase">Project Status</div>
-                <div id="statusBadge" class="text-sm font-bold text-[#0dcaf0]">Design Phase</div>
+                <div class="text-xs text-gray-500 uppercase tracking-widest mb-1">Project Status</div>
+                <div id="statusBadge" class="text-sm font-bold px-3 py-1 rounded-full bg-opacity-10 border" style="color: var(--accent-primary, #0dcaf0); border-color: var(--accent-primary, #0dcaf0); background-color: color-mix(in srgb, var(--accent-primary, #0dcaf0) 10%, transparent);">Design Phase</div>
             </div>
         </div>
         
@@ -70,31 +67,33 @@
             <div class="space-y-6 lg:col-span-1">
                 
                 <!-- Project Timeline -->
-                <div class="glass-panel p-6">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Live Timeline</h3>
-                    <div class="timeline-step completed"><div class="text-xs font-bold text-white">Initial Consultation</div><div class="text-[10px] text-gray-500">Completed</div></div>
-                    <div class="timeline-step active"><div class="text-xs font-bold text-white">Design & Quotation</div><div class="text-[10px] text-gray-500">In Progress</div></div>
-                    <div class="timeline-step"><div class="text-xs font-bold text-gray-400">Technical Survey</div><div class="text-[10px] text-gray-600">Pending Approval</div></div>
-                    <div class="timeline-step"><div class="text-xs font-bold text-gray-400">Manufacture</div></div>
-                    <div class="timeline-step"><div class="text-xs font-bold text-gray-400">Installation</div></div>
+                <div class="glass-panel p-6 shadow-lg">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Live Timeline</h3>
+                    <div id="timelineContainer">
+                        <div class="timeline-step completed"><div class="text-xs font-bold text-white">Initial Consultation</div><div class="text-[10px] text-[#238636]">Completed</div></div>
+                        <div class="timeline-step active"><div class="text-xs font-bold text-white">Design & Quotation</div><div class="text-[10px]" style="color: var(--accent-primary, #0dcaf0);">In Progress</div></div>
+                        <div class="timeline-step"><div class="text-xs font-bold text-gray-500">Technical Survey</div><div class="text-[10px] text-gray-600">Pending Approval</div></div>
+                        <div class="timeline-step"><div class="text-xs font-bold text-gray-500">Manufacture</div></div>
+                        <div class="timeline-step"><div class="text-xs font-bold text-gray-500">Installation</div></div>
+                    </div>
                 </div>
 
                 <!-- Scope Details (Collapsible) -->
-                <div class="glass-panel p-6">
+                <div class="glass-panel p-6 shadow-lg">
                     <button class="accordion-btn" onclick="toggleAccordion('scopeDetails')">
-                        <h3 class="text-xs font-bold text-gray-400 uppercase m-0">Project Scope</h3>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase m-0 tracking-widest">Project Scope</h3>
                         <svg class="w-4 h-4 text-gray-400 accordion-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div id="scopeDetails" class="accordion-content">
                         <div class="space-y-4">
-                            <div><label class="text-[10px] text-gray-500 uppercase">Build Type</label><div id="vBuild" class="font-bold text-sm text-white">Loading...</div></div>
-                            <div><label class="text-[10px] text-gray-500 uppercase">Roof System</label><div id="vRoof" class="font-bold text-sm text-white">Loading...</div></div>
-                            <div><label class="text-[10px] text-gray-500 uppercase">Dimensions</label><div id="vSize" class="font-bold text-sm text-white">Loading...</div></div>
+                            <div><label class="text-[10px] text-gray-500 uppercase tracking-wider">Build Type</label><div id="vBuild" class="font-bold text-sm text-white">Loading...</div></div>
+                            <div><label class="text-[10px] text-gray-500 uppercase tracking-wider">Roof System</label><div id="vRoof" class="font-bold text-sm text-white">Loading...</div></div>
+                            <div><label class="text-[10px] text-gray-500 uppercase tracking-wider">Dimensions</label><div id="vSize" class="font-bold text-sm text-white">Loading...</div></div>
                         </div>
                     </div>
                 </div>
 
-                 <!-- Quotation Module (Togglable via DB) -->
+                 <!-- Quotation Module (Injected dynamically if unhidden) -->
                  <div id="quoteContainer"></div>
             </div>
 
@@ -102,31 +101,33 @@
             <div class="space-y-6 lg:col-span-1">
                 
                 <!-- AR / 3D Viewer -->
-                <div class="glass-panel p-6">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">3D / AR Concept</h3>
-                    <div class="ar-container" onclick="alert('AR Engine Booting... Looking for JSON mesh.')">
+                <div class="glass-panel p-6 shadow-lg">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">3D / AR Concept</h3>
+                    <div class="ar-container" onclick="alert('AR Engine Booting... Looking for .gltf/.glb mesh models.')">
                         <div class="text-center">
-                            <span class="text-3xl">📱</span>
-                            <div class="text-xs text-gray-400 mt-2 uppercase font-bold">Tap to launch AR view</div>
+                            <span class="text-4xl opacity-80">📱</span>
+                            <div class="text-xs text-white mt-3 uppercase font-bold tracking-widest">Tap to launch AR view</div>
+                            <div class="text-[10px] text-gray-500 mt-1">View in your physical space</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Two-Way Uploads -->
-                <div class="glass-panel p-6">
+                <!-- Two-Way Uploads & Literature -->
+                <div class="glass-panel p-6 shadow-lg">
                     <button class="accordion-btn" onclick="toggleAccordion('uploadSection')">
-                        <h3 class="text-xs font-bold text-gray-400 uppercase m-0">Project Files & Uploads</h3>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase m-0 tracking-widest">Project Files</h3>
                         <svg class="w-4 h-4 text-gray-400 accordion-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div id="uploadSection" class="accordion-content">
-                        <div class="text-xs text-gray-400 mb-3">Share inspiration photos, site plans, or documents directly with your team.</div>
-                        <input type="file" id="clientUpload" class="luxury-input p-2 text-xs mb-2">
-                        <button class="w-full p-2 rounded bg-[#30363d] hover:bg-[#8b949e] text-xs font-bold transition">Upload to Vault</button>
+                        <div class="text-xs text-gray-400 mb-3 leading-relaxed">Share inspiration photos, site plans, or signed documents directly with your design team.</div>
+                        <input type="file" id="clientUploadInput" class="luxury-input p-2 text-xs mb-3 w-full" accept="image/*,.pdf">
+                        <button id="btnClientUpload" class="w-full p-3 rounded bg-[#30363d] hover:bg-gray-600 text-xs font-bold text-white transition tracking-widest uppercase">Upload to Vault</button>
+                        <div id="uploadStatus" class="text-[10px] text-[#0dcaf0] mt-2 hidden text-center">Uploading...</div>
                         
-                        <div class="mt-4 border-t border-[#30363d] pt-4">
-                            <div class="text-[10px] text-gray-500 uppercase mb-2">Curated Literature</div>
-                            <div id="vaultPamphletGrid" class="grid grid-cols-2 gap-2">
-                                <!-- Pamphlets inject here -->
+                        <div class="mt-6 border-t border-[#30363d] pt-5">
+                            <div class="text-[10px] text-gray-500 uppercase mb-3 tracking-widest">Curated Literature</div>
+                            <div id="vaultPamphletGrid" class="grid grid-cols-2 gap-3">
+                                <!-- Pamphlets inject here dynamically -->
                             </div>
                         </div>
                     </div>
@@ -135,28 +136,19 @@
             </div>
 
             <!-- RIGHT COLUMN: Multi-Role Comm Center -->
-            <div class="glass-panel p-6 h-[600px] flex flex-col lg:col-span-1">
-                <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Direct Comm Center</h3>
+            <div class="glass-panel p-6 h-[650px] flex flex-col lg:col-span-1 shadow-lg relative">
+                <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#238636] animate-pulse"></span> Direct Comm Center
+                </h3>
                 
                 <div id="chat-window" class="flex-grow overflow-y-auto mb-4 space-y-4 pr-2">
-                    <!-- Example of Multi-Role injection -->
-                    <div class="flex justify-start">
-                        <div class="p-3 rounded-xl max-w-[85%] bg-[#161b22] border border-[#30363d] text-gray-200">
-                            <div class="text-[9px] opacity-75 font-bold mb-1 uppercase tracking-wider text-[#0dcaf0]">Designer • Tom</div>
-                            <div class="text-sm">Hi! Let me know if you have any questions about the 3D concept.</div>
-                        </div>
-                    </div>
-                    <div class="flex justify-start">
-                        <div class="p-3 rounded-xl max-w-[85%] bg-[#161b22] border border-[#e11d48] text-gray-200">
-                            <div class="text-[9px] opacity-75 font-bold mb-1 uppercase tracking-wider text-[#e11d48]">Ops Manager • Sarah</div>
-                            <div class="text-sm">We've cleared the drainage report with the council. Ready to proceed.</div>
-                        </div>
-                    </div>
+                    <!-- Real-time Chat messages inject here -->
+                    <div class="text-center text-xs text-gray-600 mt-10">Connecting to secure server...</div>
                 </div>
                 
-                <div class="relative">
-                    <input type="text" id="chat-input" class="luxury-input p-4 pr-12" placeholder="Message the team...">
-                    <button class="absolute right-2 top-2 bottom-2 px-3 text-white rounded bg-transparent hover:bg-[#30363d] transition">➤</button>
+                <div class="relative mt-2">
+                    <input type="text" id="chat-input" class="luxury-input p-4 pr-12 text-sm" placeholder="Message the team...">
+                    <button id="btnSendChat" class="absolute right-2 top-2 bottom-2 px-4 text-black font-bold rounded-lg transition" style="background-color: var(--accent-primary, #0dcaf0);">➤</button>
                 </div>
             </div>
         </div>
@@ -172,46 +164,48 @@
         }
     </script>
 
-    <!-- INLINE FIREBASE ENGINE (To be wired in next phase) -->
+    <!-- INLINE FIREBASE ENGINE & VAULT LOGIC -->
     <script type="module">
-        import { db, doc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, BRAND_CONFIG } from './js/core-firebase.js';
+        import { db, doc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, arrayUnion, BRAND_CONFIG } from './js/core-firebase.js';
         
         const urlParams = new URLSearchParams(window.location.search);
         const vaultId = urlParams.get('id');
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqkhhz0f9/image/upload";
+        const UPLOAD_PRESET = "crm_document_uploads";
 
         window.unlockVault = async () => {
             const pinInput = document.getElementById('vaultPinInput').value;
             const btn = document.getElementById('btnAccess');
-            if(!vaultId) return alert("Invalid Secure Link.");
+            if(!vaultId) return alert("Invalid Secure Link. No Project ID detected.");
 
             btn.innerText = "Decrypting..."; btn.disabled = true;
 
             try {
                 const snap = await getDoc(doc(db, "surveys", vaultId));
-                if(!snap.exists()) { btn.innerText = "Access Vault"; btn.disabled = false; return alert("Project not found."); }
+                if(!snap.exists()) { btn.innerText = "DECRYPT VAULT"; btn.disabled = false; return alert("Project not found."); }
 
                 const data = snap.data();
                 
                 const validPin = data.customerProfile?.vaultPIN || "1234"; 
                 if(pinInput !== validPin && pinInput !== "0000") { 
-                    btn.innerText = "Access Vault"; btn.disabled = false; return alert("Incorrect PIN."); 
+                    btn.innerText = "DECRYPT VAULT"; btn.disabled = false; return alert("Incorrect PIN."); 
                 }
 
-                // TELEMETRY PING: Send a silent update to the CRM that the client is viewing the vault right now
+                // TELEMETRY PING
                 await updateDoc(doc(db, "surveys", vaultId), {
                     "vaultTelemetry.lastLogin": new Date().toISOString(),
                     "vaultTelemetry.totalViews": (data.vaultTelemetry?.totalViews || 0) + 1,
                     "vaultTelemetry.currentlyViewing": true
                 });
 
-                // Branding
+                // Apply Branding
                 const brandKey = data.brand || "COHI";
-                const brandData = BRAND_CONFIG ? BRAND_CONFIG[brandKey] : null;
-                if(brandData) {
-                    document.documentElement.style.setProperty('--accent-primary', brandData.theme);
-                    document.getElementById('statusBadge').style.color = brandData.theme;
-                    // ... Logo injection logic ...
-                }
+                const brandData = BRAND_CONFIG ? BRAND_CONFIG[brandKey] : { theme: '#0dcaf0', name: 'Secure Vault' };
+                document.documentElement.style.setProperty('--accent-primary', brandData.theme);
+                document.title = `${brandData.name} | Project Vault`;
+                
+                const mainLogo = document.getElementById('brandLogo');
+                if(mainLogo && brandData.assetPath) { mainLogo.src = `${brandData.assetPath}logo.png`; mainLogo.classList.remove('hidden'); }
 
                 // Inject Survey Data
                 document.getElementById('customerGreeting').innerText = `Welcome, ${data.customerProfile?.leadName || 'Customer'}`;
@@ -219,14 +213,27 @@
                 document.getElementById('vRoof').innerText = data.designSpecification?.roofType || "TBC";
                 document.getElementById('vSize').innerText = data.technicalSurvey?.proposedSize || "TBC";
 
-                // Quote Logic (Checking if designer has 'unhidden' it)
+                // Generate Pamphlets dynamically
+                const pamphletGrid = document.getElementById('vaultPamphletGrid');
+                let pHTML = '';
+                if(data.pamphlets) {
+                    if(data.pamphlets.brochure) pHTML += `<a href="#" class="p-2 rounded bg-[#090d13] border border-[#30363d] text-[10px] text-gray-300 hover:border-[${brandData.theme}] transition flex items-center gap-2">📄 Product Brochure</a>`;
+                    if(data.pamphlets.warranty) pHTML += `<a href="#" class="p-2 rounded bg-[#090d13] border border-[#30363d] text-[10px] text-gray-300 hover:border-[${brandData.theme}] transition flex items-center gap-2">🛡️ Warranty Details</a>`;
+                    if(data.pamphlets.planning) pHTML += `<a href="#" class="p-2 rounded bg-[#090d13] border border-[#30363d] text-[10px] text-gray-300 hover:border-[${brandData.theme}] transition flex items-center gap-2">🏛️ Planning Guide</a>`;
+                    if(data.pamphlets.sap) pHTML += `<a href="#" class="p-2 rounded bg-[#090d13] border border-[#30363d] text-[10px] text-gray-300 hover:border-[${brandData.theme}] transition flex items-center gap-2">🌡️ SAP Calculations</a>`;
+                    if(data.pamphlets.roof) pHTML += `<a href="#" class="p-2 rounded bg-[#090d13] border border-[#30363d] text-[10px] text-gray-300 hover:border-[${brandData.theme}] transition flex items-center gap-2">🏠 Roof Spec</a>`;
+                }
+                if(pHTML === '') pHTML = '<div class="text-[10px] text-gray-600 col-span-2">No literature assigned to this project yet.</div>';
+                pamphletGrid.innerHTML = pHTML;
+
+                // Conditional Quote Rendering
                 if (data.uDesignQuote && data.settings?.showQuoteToClient !== false) {
-                    const themeColor = brandData ? brandData.theme : '#0dcaf0';
                     document.getElementById('quoteContainer').innerHTML = `
-                        <div class="glass-panel p-6 mt-6 border border-[${themeColor}] shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                            <h4 style="color: ${themeColor};" class="text-xs font-bold uppercase mb-2 tracking-widest">Live Investment Summary</h4>
+                        <div class="glass-panel p-6 mt-6 border relative overflow-hidden" style="border-color: ${brandData.theme}; box-shadow: 0 0 20px color-mix(in srgb, ${brandData.theme} 20%, transparent);">
+                            <div class="absolute top-0 left-0 w-1 h-full" style="background: ${brandData.theme};"></div>
+                            <h4 class="text-[10px] font-bold uppercase mb-2 tracking-widest" style="color: ${brandData.theme};">Live Investment Summary</h4>
                             <div class="text-4xl font-black text-white mb-2">${data.uDesignQuote.totalPrice}</div>
-                            <div class="text-xs text-gray-400 mt-4"><button class="text-white underline">View Detailed Breakdown</button></div>
+                            <div class="text-xs text-gray-400 mt-4 underline cursor-pointer hover:text-white transition">View Detailed Breakdown</div>
                         </div>
                     `;
                 }
@@ -234,16 +241,135 @@
                 document.getElementById('loginGate').classList.add('hidden');
                 document.getElementById('vaultContent').classList.remove('hidden');
                 
-                // Track when they leave the page
-                window.addEventListener('beforeunload', () => {
-                    updateDoc(doc(db, "surveys", vaultId), { "vaultTelemetry.currentlyViewing": false });
-                });
+                // Initialize active systems
+                initChatEngine(vaultId, brandData.theme);
+                initUploadEngine(vaultId);
+                
+                // Track exit
+                window.addEventListener('beforeunload', () => updateDoc(doc(db, "surveys", vaultId), { "vaultTelemetry.currentlyViewing": false }));
 
             } catch(e) {
                 console.error("Vault Error:", e);
-                btn.innerText = "Access Vault"; btn.disabled = false;
+                btn.innerText = "DECRYPT VAULT"; btn.disabled = false;
             }
         };
+
+        // --- REAL-TIME CHAT ENGINE ---
+        function initChatEngine(id, themeColor) {
+            const chatWindow = document.getElementById('chat-window');
+            const chatInput = document.getElementById('chat-input');
+            const btnSend = document.getElementById('btnSendChat');
+
+            const q = query(collection(db, `surveys/${id}/messages`), orderBy('timestamp'));
+            
+            onSnapshot(q, (snapshot) => {
+                chatWindow.innerHTML = '';
+                if(snapshot.empty) {
+                    chatWindow.innerHTML = '<div class="text-center text-xs text-gray-600 mt-10">Secure channel open. Send a message to the team.</div>';
+                    return;
+                }
+
+                snapshot.forEach(docSnap => {
+                    const msg = docSnap.data();
+                    const isClient = msg.sender === 'Customer';
+                    const senderRole = msg.role || 'Design Team';
+                    
+                    // Client messages are themed colored and on the right. Staff messages are dark and on the left.
+                    chatWindow.innerHTML += `
+                        <div class="flex ${isClient ? 'justify-end' : 'justify-start'} animate-[fadeIn_0.3s_ease-out]">
+                            <div class="p-3 rounded-xl max-w-[85%] shadow-md ${isClient ? 'text-black' : 'bg-[#161b22] border border-[#30363d] text-gray-200'}" style="${isClient ? `background-color: ${themeColor};` : ''}">
+                                <div class="text-[9px] opacity-80 font-bold mb-1 uppercase tracking-wider ${isClient ? 'text-black' : 'text-[#0dcaf0]'}">${isClient ? 'You' : `${senderRole} • ${msg.sender}`}</div>
+                                <div class="text-sm leading-relaxed">${msg.text}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                chatWindow.scrollTop = chatWindow.scrollHeight; 
+            });
+
+            const sendMessage = async () => {
+                if(chatInput.value.trim()) {
+                    const text = chatInput.value.trim();
+                    chatInput.value = ''; 
+                    await addDoc(collection(db, `surveys/${id}/messages`), {
+                        sender: 'Customer',
+                        role: 'Client',
+                        text: text,
+                        timestamp: serverTimestamp()
+                    });
+                }
+            };
+
+            chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+            btnSend.addEventListener('click', sendMessage);
+        }
+
+        // --- CLIENT CLOUDINARY UPLOAD ENGINE ---
+        function initUploadEngine(id) {
+            const uploadInput = document.getElementById('clientUploadInput');
+            const btnUpload = document.getElementById('btnClientUpload');
+            const statusText = document.getElementById('uploadStatus');
+
+            btnUpload.addEventListener('click', async () => {
+                const file = uploadInput.files[0];
+                if(!file) return alert("Please select a file first.");
+
+                btnUpload.disabled = true;
+                btnUpload.innerText = "Encrypting...";
+                statusText.classList.remove('hidden');
+
+                try {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const base64Str = e.target.result;
+                        
+                        // Cloudinary Fetch
+                        const formData = new FormData();
+                        formData.append('file', base64Str);
+                        formData.append('upload_preset', UPLOAD_PRESET);
+                        
+                        statusText.innerText = "Uploading to secure server...";
+                        const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                        const data = await res.json();
+
+                        if(data.secure_url) {
+                            // Update Firebase array with the new URL
+                            statusText.innerText = "Linking to project file...";
+                            await updateDoc(doc(db, "surveys", id), {
+                                "clientUploads": arrayUnion({
+                                    url: data.secure_url,
+                                    name: file.name,
+                                    date: new Date().toISOString()
+                                })
+                            });
+                            
+                            // Also send a silent chat message notifying the team
+                            await addDoc(collection(db, `surveys/${id}/messages`), {
+                                sender: 'System', role: 'Notification',
+                                text: `Client uploaded a new file: ${file.name}`,
+                                timestamp: serverTimestamp()
+                            });
+
+                            uploadInput.value = '';
+                            btnUpload.innerText = "Upload to Vault";
+                            btnUpload.disabled = false;
+                            statusText.innerText = "File successfully secured!";
+                            setTimeout(() => statusText.classList.add('hidden'), 3000);
+                        } else {
+                            throw new Error("Cloudinary rejected upload.");
+                        }
+                    };
+                    reader.readAsDataURL(file);
+
+                } catch (err) {
+                    console.error("Upload Error:", err);
+                    alert("Upload failed. Please ensure the file is an image or valid PDF under 10MB.");
+                    btnUpload.innerText = "Upload to Vault";
+                    btnUpload.disabled = false;
+                    statusText.classList.add('hidden');
+                }
+            });
+        }
     </script>
 </body>
 </html>
