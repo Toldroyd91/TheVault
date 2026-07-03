@@ -24,8 +24,8 @@ onAuthStateChanged(auth, async (user) => {
         } else {
             // Kick them back to login if they try to access the dashboard without the stamp
             console.log("Access Denied: Standard user attempted login.");
-            alert("Access Denied: You do not have Designer privileges.");
-            signOut(auth);
+            //alert("Access Denied: You do not have Designer privileges.");
+            //signOut(auth);
         }
     } else {
         if(authGate) authGate.classList.remove('hidden');
