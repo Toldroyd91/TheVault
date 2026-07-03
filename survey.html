@@ -269,7 +269,8 @@
         const val = (id) => el(id)?.value || "";
         const checked = (id) => el(id) ? !!el(id).checked : false;
 
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqk1hz0f8/image/upload";
+        // FIXED CLOUDINARY URL WITH CORRECT CLOUD NAME
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqkhhz0f9/image/upload";
         const UPLOAD_PRESET = "crm_document_uploads";
 
         const SurveyState = {
@@ -411,7 +412,6 @@
                             btn.innerText = `Uploading ${category}...`;
                             const url = await uploadBase64ToCloudinary(base64);
                             
-                            // CRITICAL FIX: Only push to array if Cloudinary gave us a valid string.
                             if (url) {
                                 if(!uploadedPhotoData[category]) uploadedPhotoData[category] = [];
                                 uploadedPhotoData[category].push(url);
@@ -478,7 +478,7 @@
     <!-- INTERNAL SCRIPTS (SNIPER & UPLOADS) -->
     <script>
         // -----------------------------------------------------
-        // EXPERT SNIPER ENGINE (Vector Scaling, Auto-Math & Touch)
+        // EXPERT SNIPER ENGINE (Vector Scaling, Auto-Math, Override & Touch)
         // -----------------------------------------------------
         const canvas = document.getElementById('sniperCanvas');
         const ctx = canvas.getContext('2d');
@@ -662,7 +662,7 @@
             ctx.stroke();
         }
 
-        // Auto-Measurement Logic
+        // Auto-Measurement & Manual Override Logic
         markBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             if(!sniperImg) return alert("Load an image first.");
@@ -697,7 +697,15 @@
                     }
                 } else {
                     const calculatedLength = Math.round(pixelDist * calibrationRatio);
-                    lines.push({ p1: p1Index, p2: p2Index, realLength: calculatedLength });
+                    // MANUAL OVERRIDE POPUP
+                    const finalLength = prompt("Calculated measurement (mm). Edit if needed:", calculatedLength);
+                    
+                    if(finalLength && !isNaN(finalLength)) {
+                        lines.push({ p1: p1Index, p2: p2Index, realLength: Math.round(finalLength) });
+                    } else {
+                        // User hit cancel or cleared the text, remove the dropped pin
+                        window.sniperPoints.pop(); 
+                    }
                 }
             }
             drawSniper();
