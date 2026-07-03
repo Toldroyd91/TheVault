@@ -267,7 +267,7 @@
 
         const el = (id) => document.getElementById(id);
         const val = (id) => el(id)?.value || "";
-        const checked = (id) => el(id) ? el(id).checked : false;
+        const checked = (id) => el(id) ? !!el(id).checked : false;
 
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqk1hz0f8/image/upload";
         const UPLOAD_PRESET = "crm_document_uploads";
@@ -343,14 +343,25 @@
             }
         });
 
-        // Helper: Cloudinary Upload
+        // Helper: Safe Cloudinary Upload
         async function uploadBase64ToCloudinary(base64Str) {
-            const formData = new FormData();
-            formData.append('file', base64Str);
-            formData.append('upload_preset', UPLOAD_PRESET);
-            const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-            const data = await response.json();
-            return data.secure_url;
+            try {
+                const formData = new FormData();
+                formData.append('file', base64Str);
+                formData.append('upload_preset', UPLOAD_PRESET);
+                const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const data = await response.json();
+                
+                if (data.secure_url) {
+                    return data.secure_url;
+                } else {
+                    console.error("Cloudinary Error:", data);
+                    return null;
+                }
+            } catch (err) {
+                console.error("Upload Catch Error:", err);
+                return null;
+            }
         }
 
         // Action: AI Polish Reactivated
@@ -364,7 +375,6 @@
             btn.innerText = "✨ Polishing...";
             btn.disabled = true;
 
-            // Placeholder AI Formatting logic (Easily replaceable with an OpenAI/Gemini fetch call later)
             setTimeout(() => {
                 const lines = notes.split('\n').filter(line => line.trim() !== '');
                 const formattedNotes = "PROFESSIONAL SURVEY OBSERVATIONS:\n\n" + lines.map(line => `• ${line.charAt(0).toUpperCase() + line.slice(1)}`).join('\n');
@@ -383,33 +393,38 @@
             btn.disabled = true;
 
             try {
-                // 1. Auto-Save Sniper Canvas if it has been marked up
+                // 1. Auto-Save Sniper Canvas
                 if (window.sniperPoints && window.sniperPoints.length > 0) {
                     const canvas = document.getElementById('sniperCanvas');
-                    const sniperScreenshot = canvas.toDataURL('image/jpeg', 0.9); // High quality screenshot
+                    const sniperScreenshot = canvas.toDataURL('image/jpeg', 0.9);
                     if (!window.sitePhotos.sniper) window.sitePhotos.sniper = [];
                     window.sitePhotos.sniper.push(sniperScreenshot);
                 }
 
-                // 2. Photo Uploads to Cloudinary
+                // 2. SAFE Photo Uploads to Cloudinary
                 let uploadedPhotoData = SurveyState.rawAssets || { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
                 let hasUploads = false;
 
                 for (const category in window.sitePhotos) {
-                    if(window.sitePhotos[category]) {
+                    if(window.sitePhotos[category] && window.sitePhotos[category].length > 0) {
                         for (const base64 of window.sitePhotos[category]) {
                             btn.innerText = `Uploading ${category}...`;
                             const url = await uploadBase64ToCloudinary(base64);
-                            if(!uploadedPhotoData[category]) uploadedPhotoData[category] = [];
-                            uploadedPhotoData[category].push(url);
-                            hasUploads = true;
+                            
+                            // CRITICAL FIX: Only push to array if Cloudinary gave us a valid string.
+                            if (url) {
+                                if(!uploadedPhotoData[category]) uploadedPhotoData[category] = [];
+                                uploadedPhotoData[category].push(url);
+                                hasUploads = true;
+                            } else {
+                                alert(`Upload Warning: A photo in ${category} failed to save to the cloud. Check your Cloudinary Upload Preset.`);
+                            }
                         }
                     }
                 }
 
                 if (hasUploads) {
                     SurveyState.rawAssets = uploadedPhotoData;
-                    // Clear local memory
                     for (const cat in window.sitePhotos) window.sitePhotos[cat] = []; 
                     document.querySelectorAll('.photo-btn .badge').forEach(b => { 
                         b.innerText = '0'; 
@@ -428,7 +443,7 @@
                 SurveyState.compliance = { buildingRegs: val('buildingRegs'), planningPerms: val('planningPerms'), sapCalcs: val('sapCalcs') };
                 SurveyState.pamphlets = { brochure: checked('cb-brochure'), warranty: checked('cb-warranty'), planning: checked('cb-planning'), sap: checked('cb-sap'), roof: checked('cb-roof') };
                 
-                SurveyState.userId = auth.currentUser.uid; 
+                SurveyState.userId = auth.currentUser ? auth.currentUser.uid : "UNKNOWN_USER"; 
                 SurveyState.timestamps = { updatedAt: serverTimestamp() };
                 if(!SurveyState.id) SurveyState.timestamps.createdAt = serverTimestamp();
 
@@ -443,6 +458,7 @@
                 setTimeout(() => { btn.style.backgroundColor = ""; btn.innerText = "Save & Sync"; btn.disabled = false; }, 3000);
 
             } catch(err) {
+                console.error("Sync Crash Details:", err);
                 alert("Database Sync Error: " + err.message);
                 btn.innerText = "Save & Sync"; 
                 btn.disabled = false;
@@ -454,10 +470,8 @@
             e.preventDefault(); 
             if(!SurveyState.id) return alert("Please click 'Save & Sync' first to lock in the data before generating a PDF.");
             
-            // Standard JS PDF Trigger - This is ready for your PDF generator script to catch
             console.log("TRIGGERING PDF GENERATION FOR ID:", SurveyState.id);
             alert("PDF Engine Triggered. Sending data packet to processing queue...");
-            // window.location.href = `pdf_generator.html?id=${SurveyState.id}`;
         });
     </script>
 
@@ -478,7 +492,7 @@
         let isDragging = false;
         let startDragX = 0, startDragY = 0;
 
-        // Measurement State (Attached to window so Sync tool can see it and save it)
+        // Measurement State
         window.sniperPoints = []; 
         let lines = []; 
         let calibrationRatio = null; // mm per pixel
@@ -502,14 +516,12 @@
         window.addEventListener('loadSniperImage', (e) => {
             sniperImg = new Image();
             sniperImg.onload = () => {
-                // Ensure initial fit
                 imgScale = Math.min(canvas.width / sniperImg.width, canvas.height / sniperImg.height);
                 if (zoomSlider) {
                     zoomSlider.value = imgScale; 
                     zoomSlider.min = imgScale * 0.5; 
                 }
                 
-                // Center the image
                 imgX = (canvas.width - (sniperImg.width * imgScale)) / 2;
                 imgY = (canvas.height - (sniperImg.height * imgScale)) / 2;
                 
@@ -527,7 +539,6 @@
             if(!sniperImg) return;
             const newScale = parseFloat(e.target.value);
             
-            // Zoom towards center of canvas
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
             
@@ -559,7 +570,7 @@
 
         // Panning Mechanics - iPAD / TOUCH
         canvas.addEventListener('touchstart', (e) => {
-            if(!sniperImg || e.touches.length > 1) return; // Ignores multi-finger pinch to avoid glitches
+            if(!sniperImg || e.touches.length > 1) return; 
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
             
@@ -570,7 +581,7 @@
 
         canvas.addEventListener('touchmove', (e) => {
             if(!isDragging || !sniperImg || e.touches.length > 1) return;
-            e.preventDefault(); // CRITICAL: Stops webpage from scrolling while panning
+            e.preventDefault(); 
             
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
@@ -588,10 +599,8 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if(!sniperImg) return;
 
-            // 1. Draw Image Background (Scaled)
             ctx.drawImage(sniperImg, 0, 0, sniperImg.width, sniperImg.height, imgX, imgY, sniperImg.width * imgScale, sniperImg.height * imgScale);
 
-            // 2. Draw Measurements (Vector mapping)
             lines.forEach(line => {
                 const p1 = window.sniperPoints[line.p1];
                 const p2 = window.sniperPoints[line.p2];
@@ -622,14 +631,12 @@
                 ctx.fillText(text, midX - (textWidth / 2), midY + 4);
             });
 
-            // 3. Draw Dropped Pins (Vector mapping)
             window.sniperPoints.forEach((p, index) => {
                 const screenX = (p.x * imgScale) + imgX;
                 const screenY = (p.y * imgScale) + imgY;
                 
                 ctx.beginPath();
                 ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
-                // Turn the pin gray if it's part of a completed line, red if it's a new orphan pin
                 ctx.fillStyle = (index === window.sniperPoints.length - 1 && window.sniperPoints.length % 2 !== 0) ? '#E50914' : '#8b949e';
                 ctx.fill();
                 ctx.strokeStyle = '#fff';
@@ -637,7 +644,6 @@
                 ctx.stroke();
             });
 
-            // 4. Draw FIXED Center Target
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
             
@@ -683,7 +689,6 @@
                         calibrationRatio = parseFloat(realWorld) / pixelDist;
                         lines.push({ p1: p1Index, p2: p2Index, realLength: realWorld });
                         
-                        // Visual UI Feedback
                         markBtn.innerText = "🎯 Drop Pin (Calibrated)";
                         markBtn.style.backgroundColor = "#238636";
                         markBtn.style.color = "#fff";
