@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COHI | Secure Client Vault</title>
+    <title>Secure Client Vault</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
     <style>
+        /* Fallback CSS in case style.css is missing */
         .glass-panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
         .luxury-input { background: #090d13; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; outline: none; }
-        .luxury-input:focus { border-color: #0dcaf0; }
+        .luxury-input:focus { border-color: var(--accent-primary, #0dcaf0); }
         body { background: #0d1117; color: #f0f6fc; }
-        
         #chat-window::-webkit-scrollbar { width: 6px; }
         #chat-window::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
@@ -19,14 +20,16 @@
     
     <!-- LOGIN GATE -->
     <div id="loginGate" class="max-w-md mx-auto mt-20 glass-panel p-8 text-center">
+        <img id="loginLogo" src="" alt="Brand Logo" class="h-16 mx-auto mb-6 hidden">
         <h2 class="text-xl font-bold mb-6">Secure Project Vault</h2>
         <input type="password" id="vaultPinInput" placeholder="Enter Project PIN" class="luxury-input p-4 mb-4 text-center text-2xl tracking-widest">
-        <button onclick="window.unlockVault()" id="btnAccess" class="w-full py-4 bg-[#0dcaf0] hover:bg-cyan-400 transition text-black font-bold rounded-xl">Access Vault</button>
+        <button onclick="window.unlockVault()" id="btnAccess" class="w-full py-4 text-black font-bold rounded-xl transition" style="background-color: var(--accent-primary, #0dcaf0);">Access Vault</button>
         <p class="text-xs text-gray-500 mt-4">Contact your designer if you have misplaced your PIN.</p>
     </div>
 
     <!-- MAIN VAULT CONTENT -->
     <div id="vaultContent" class="hidden max-w-5xl mx-auto space-y-6">
+        <img id="brandLogo" src="" alt="Brand Logo" class="h-12 mb-2 hidden">
         <h2 id="customerGreeting" class="text-3xl font-black mb-2">Welcome</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -55,9 +58,9 @@
         </div>
     </div>
 
-    <!-- INLINE FIREBASE ENGINE -->
+    <!-- INLINE FIREBASE ENGINE & DYNAMIC BRANDING -->
     <script type="module">
-        import { db, doc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from './js/core-firebase.js';
+        import { db, doc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, BRAND_CONFIG } from './js/core-firebase.js';
 
         const urlParams = new URLSearchParams(window.location.search);
         const vaultId = urlParams.get('id');
@@ -81,7 +84,7 @@
 
                 const data = snap.data();
                 
-                // Master PIN 0000 built-in for testing
+                // PIN Validation
                 const validPin = data.customerProfile?.vaultPIN || "1234"; 
                 if(pinInput !== validPin && pinInput !== "0000") { 
                     btn.innerText = "Access Vault"; btn.disabled = false;
@@ -92,16 +95,38 @@
                     "vaultTelemetry.lastActive": Date.now()
                 });
 
-                // FIXED MAPPING: Correctly points to designSpecification.roofType
+                // --- DYNAMIC BRANDING ENGINE ---
+                const brandKey = data.brand || "COHI";
+                const brandData = BRAND_CONFIG ? BRAND_CONFIG[brandKey] : null;
+                
+                if(brandData) {
+                    document.title = `${brandData.name} | Secure Client Vault`;
+                    document.documentElement.style.setProperty('--accent-primary', brandData.theme);
+                    
+                    const loginLogo = document.getElementById('loginLogo');
+                    const mainLogo = document.getElementById('brandLogo');
+                    
+                    if(loginLogo) {
+                        loginLogo.src = `${brandData.assetPath}logo.png`;
+                        loginLogo.classList.remove('hidden');
+                    }
+                    if(mainLogo) {
+                        mainLogo.src = `${brandData.assetPath}logo.png`;
+                        mainLogo.classList.remove('hidden');
+                    }
+                }
+
+                // Inject Survey Data
                 document.getElementById('customerGreeting').innerText = `Welcome, ${data.customerProfile?.leadName || 'Customer'}`;
                 document.getElementById('vBuild').innerText = data.technicalSurvey?.buildType || "TBC";
                 document.getElementById('vRoof').innerText = data.designSpecification?.roofType || "TBC";
 
                 // Inject Pricing if Quote Scraper has saved it
                 if (data.uDesignQuote) {
+                    const themeColor = brandData ? brandData.theme : '#0dcaf0';
                     document.getElementById('quoteContainer').innerHTML = `
-                        <div class="mt-6 p-5 rounded-xl shadow-lg" style="background: rgba(229, 9, 20, 0.1); border: 1px solid rgba(229, 9, 20, 0.4);">
-                            <h4 style="color: #E50914;" class="text-xs font-bold uppercase mb-2 tracking-widest">Live Quotation</h4>
+                        <div class="mt-6 p-5 rounded-xl shadow-lg" style="background: rgba(0, 0, 0, 0.4); border: 1px solid ${themeColor};">
+                            <h4 style="color: ${themeColor};" class="text-xs font-bold uppercase mb-2 tracking-widest">Live Quotation</h4>
                             <div class="text-3xl font-black text-white mb-2">${data.uDesignQuote.totalPrice}</div>
                             <div class="text-xs text-gray-400 leading-relaxed">
                                 <b>Spec:</b> ${data.uDesignQuote.windowSpecs}<br>
@@ -130,13 +155,16 @@
             const q = query(collection(db, `surveys/${id}/messages`), orderBy('timestamp'));
             onSnapshot(q, (snapshot) => {
                 chatWindow.innerHTML = '';
+                // Pull dynamic color for chat bubbles
+                const accent = document.documentElement.style.getPropertyValue('--accent-primary') || '#0dcaf0';
+                
                 snapshot.forEach(docSnap => {
                     const msg = docSnap.data();
                     const isDesigner = msg.sender === 'Designer';
                     
                     chatWindow.innerHTML += `
                         <div class="flex ${isDesigner ? 'justify-start' : 'justify-end'}">
-                            <div class="p-4 rounded-xl max-w-[80%] shadow-md ${isDesigner ? 'bg-[#161b22] border border-[#30363d] text-gray-200' : 'bg-[#0dcaf0] text-black'}">
+                            <div class="p-4 rounded-xl max-w-[80%] shadow-md ${isDesigner ? 'bg-[#161b22] border border-[#30363d] text-gray-200' : 'text-black'}" style="${!isDesigner ? `background-color: ${accent};` : ''}">
                                 <div class="text-[10px] opacity-75 font-bold mb-1 uppercase tracking-wider">${isDesigner ? 'Your Designer' : 'You'}</div>
                                 <div class="text-sm">${msg.text}</div>
                             </div>
