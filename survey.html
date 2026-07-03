@@ -81,12 +81,12 @@
                 <h3>Project Scope & Structure</h3>
                 <div class="form-grid">
                     <div class="full-width"><label>Build Type</label><input type="text" id="buildType" placeholder="e.g. Conservatory Extension"></div>
-                    <div><label>Proposed Size</label><input type="text" id="proposedSize" placeholder="e.g. 3x3 Metres"></div>
+                    <div><label>Proposed Size</label><input type="text" id="proposedSize" placeholder="e.g. 3000x4000mm"></div>
                     <div><label>House Material</label><input type="text" id="houseMaterial" placeholder="e.g. Brick/Render"></div>
                     <div><label>Base Type</label><input type="text" id="baseType" placeholder="e.g. Concrete"></div>
                     <div><label>DPC Depth (mm)</label><input type="text" id="dpcDepth" placeholder="e.g. 150"></div>
                     <div><label>Fascia Height (mm)</label><input type="text" id="fasciaHeight" placeholder="e.g. 2400"></div>
-                    <div class="full-width"><label>Air Bricks Required</label><input type="text" id="airBricks" placeholder="e.g. 4x Telescopic"></div>
+                    <div class="full-width"><label>Air Brick Ducts Required</label><input type="text" id="airBricks" placeholder="e.g. 4x Telescopic"></div>
                 </div>
             </div>
 
@@ -96,7 +96,7 @@
                     <div><label>Access Difficulties</label><input type="text" id="accessDifficult" placeholder="e.g. Side gate only"></div>
                     <div><label>Access Width (mm)</label><input type="text" id="accessWidth" placeholder="e.g. 900"></div>
                     <div>
-                        <label>Drainage</label>
+                        <label>Plumbing to move</label>
                         <select id="drainage">
                             <option value="">Select...</option>
                             <option value="MH">MH</option>
@@ -116,10 +116,10 @@
                         <label>Roof System</label>
                         <select id="roofType">
                             <option value="">Select...</option>
-                            <option value="Edwardian roof">Edwardian roof</option>
-                            <option value="Victorian">Victorian</option>
-                            <option value="Lean-to">Lean-to</option>
-                            <option value="Gable">Gable</option>
+                            <option value="Flat Roof">Flat Roof</option>
+                            <option value="Glass/Poly Roof">Glass/Poly Roof</option>
+                            <option value="Hybrid/Livin Roof">Hybrid/Livin Roof</option>
+                            <option value="Ultra380">Ultra380</option>
                         </select>
                     </div>
                     <div><label>Roof Pitch</label><input type="text" id="roofPitch" placeholder="e.g. 25 degrees"></div>
@@ -154,7 +154,9 @@
                         <label>Building Regs Required?</label>
                         <select id="buildingRegs">
                             <option value="">Select...</option>
-                            <option value="Yes">Yes</option>
+                            <option value="New Build Full Regs">New Build Full Regs</option>
+                            <option value="Replacment With Masonary Alterations">Replacment With Masonary Alterations</option>
+                            <option value="Replacment Without Masonary Alterations">Replacment Without Masonary Alterations</option>
                             <option value="No">No</option>
                         </select>
                     </div>
@@ -162,7 +164,9 @@
                         <label>Planning Perms Required?</label>
                         <select id="planningPerms">
                             <option value="">Select...</option>
-                            <option value="Yes">Yes</option>
+                            <option value="Full Planning">Full Planning</option>
+                            <option value="NCS Prior approval Planning">NCS Prior Approval Planning</option>
+                            <option value="Full Planning">Full Planning</option>
                             <option value="No">No</option>
                         </select>
                     </div>
