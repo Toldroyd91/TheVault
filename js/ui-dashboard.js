@@ -1,37 +1,76 @@
 import { auth, db, collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, onAuthStateChanged, signInWithEmailAndPassword, signOut, BRAND_CONFIG } from './core-firebase.js';
 
+// IMPORTANT: Temporary import to trigger the Cloud Function. 
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js";
+
 // --- 1. AUTHENTICATION ENGINE ---
 const authGate = document.getElementById('authGate');
 const dashboardApp = document.getElementById('dashboardApp');
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (user) {
-        if(authGate) authGate.classList.add('hidden');
-        if(dashboardApp) dashboardApp.classList.remove('hidden');
-        const name = user.email.split('@')[0];
-        const welcomeText = document.getElementById('designerWelcome');
-        if(welcomeText) welcomeText.innerText = `Welcome, ${name.charAt(0).toUpperCase() + name.slice(1)}`;
+        // 1. Check for the VIP stamp!
+        const idTokenResult = await user.getIdTokenResult();
+
+        if (idTokenResult.claims.role === 'designer') {
+            if(authGate) authGate.classList.add('hidden');
+            if(dashboardApp) dashboardApp.classList.remove('hidden');
+            
+            // Use the secure display name from the server, fallback to email prefix
+            const displayName = idTokenResult.claims.displayName || user.email.split('@')[0];
+            const welcomeText = document.getElementById('designerWelcome');
+            if(welcomeText) welcomeText.innerText = `Welcome, ${displayName}`;
+            console.log("Welcome back, Boss.");
+        } else {
+            // Kick them back to login if they try to access the dashboard without the stamp
+            console.log("Access Denied: Standard user attempted login.");
+            alert("Access Denied: You do not have Designer privileges.");
+            signOut(auth);
+        }
     } else {
         if(authGate) authGate.classList.remove('hidden');
         if(dashboardApp) dashboardApp.classList.add('hidden');
     }
 });
 
-document.getElementById('btnLogin')?.addEventListener('click', () => {
+document.getElementById('btnLogin')?.addEventListener('click', async () => {
     const email = document.getElementById('authEmail')?.value.trim();
     const pass = document.getElementById('authPassword')?.value;
     if(!email || !pass) return alert("Please enter both email and password.");
     
     const btn = document.getElementById('btnLogin');
     const ogText = btn.innerText; 
-    btn.innerText = "Authenticating...";
+    btn.innerText = "Authenticating & Upgrading...";
     
-    signInWithEmailAndPassword(auth, email, pass)
-        .catch(err => alert("Login Failed: " + err.message))
-        .finally(() => btn.innerText = ogText);
+    try {
+        // 2. Log in standardly
+        const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+        
+        // --- TEMPORARY VIP TRIGGER: DELETE THIS BLOCK AFTER LOGGING IN ONCE ---
+        console.log("Applying VIP Stamp via Cloud Function...");
+        const functionsInstance = getFunctions();
+        const assignRole = httpsCallable(functionsInstance, 'assignUserRole');
+        
+        const result = await assignRole({ 
+            email: userCredential.user.email,
+            role: 'designer', 
+            displayName: 'Tom | Senior Designer' 
+        });
+        console.log("STAMP APPLIED:", result.data.message);
+        
+        // Force the app to refresh the token immediately so it sees the new stamp
+        await userCredential.user.getIdToken(true); 
+        window.location.reload(); 
+        // ----------------------------------------------------------------------
+
+    } catch (err) {
+        alert("Login Failed: " + err.message);
+        btn.innerText = ogText;
+    }
 });
 
 document.getElementById('btnLogout')?.addEventListener('click', () => signOut(auth));
+
 
 // --- 2. PIPELINE & RAG ENGINE ---
 const grid = document.getElementById('pipelineGrid');
