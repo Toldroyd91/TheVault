@@ -37,6 +37,10 @@ document.getElementById('btnLogin')?.addEventListener('click', async () => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, pass);
         
+        // THE FIX: Wait 2 seconds so the browser can attach your secure token
+        console.log("Waiting for auth token to settle...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         // --- TEMPORARY VIP TRIGGER ---
         console.log("Applying VIP Stamp...");
         // Use auth.app to ensure we are connecting to your specific Firebase instance
