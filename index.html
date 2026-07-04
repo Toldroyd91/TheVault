@@ -24,17 +24,12 @@
             border-radius: 16px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        /* Proactive Upgrade: Hide ugly scrollbars on the Kanban board but keep it scrollable */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-gray-900 text-white overflow-x-hidden">
+    
     <!-- AUTH GATE -->
     <div id="authGate" class="min-h-screen flex items-center justify-center p-6">
         <div class="glass-panel p-8 w-full max-w-md">
@@ -56,8 +51,10 @@
                     <p class="text-[#0dcaf0] text-sm mt-1 uppercase tracking-widest font-bold">Live Lead Pipeline</p>
                 </div>
                 <div class="flex items-center gap-4">
+                    <!-- NEW: Live Search Bar -->
+                    <input type="text" id="searchInput" placeholder="Search by name or postcode..." class="luxury-input p-3 w-64 text-sm" onkeyup="window.filterLeads()">
                     <a href="quotes.html" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold text-sm transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]">
-                        + New U-Design Quote
+                        + New Quote
                     </a>
                     <button id="btnLogout" class="text-xs text-gray-500 hover:text-gray-300 transition-colors bg-gray-800 px-4 py-3 rounded-lg">Logout</button>
                 </div>
@@ -82,8 +79,7 @@
 
         <!-- KANBAN BOARD -->
         <div class="flex gap-6 overflow-x-auto pb-8 min-h-[600px] snap-x hide-scrollbar">
-            
-            <!-- Column 1: Consultation -->
+            <!-- Columns... -->
             <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
                 <div class="flex items-center justify-between mb-4 px-2">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">1. Consultation</h3>
@@ -92,7 +88,6 @@
                 <div id="col-stage1" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="1. Consultation"></div>
             </div>
 
-            <!-- Column 2: Quote Sent -->
             <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
                 <div class="flex items-center justify-between mb-4 px-2">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">2. Quote Sent</h3>
@@ -101,7 +96,6 @@
                 <div id="col-stage2" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="2. Quote Sent"></div>
             </div>
 
-            <!-- Column 3: Technical Survey -->
             <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
                 <div class="flex items-center justify-between mb-4 px-2">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">3. Tech Survey</h3>
@@ -110,7 +104,6 @@
                 <div id="col-stage3" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="3. Technical Survey"></div>
             </div>
 
-            <!-- Column 4: Handover -->
             <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
                 <div class="flex items-center justify-between mb-4 px-2">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">4. Handover</h3>
@@ -118,7 +111,49 @@
                 </div>
                 <div id="col-stage4" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="4. Handover"></div>
             </div>
+        </div>
+    </div>
 
+    <!-- TECHNICAL DRAWER OVERLAY -->
+    <div id="drawerOverlay" class="fixed inset-0 bg-black/60 hidden z-40" onclick="window.closeDrawer()"></div>
+
+    <!-- TECHNICAL DRAWER PANEL -->
+    <div id="techDrawer" class="fixed top-0 right-0 h-full w-full max-w-lg bg-[#0f172a] border-l border-gray-800 transform translate-x-full transition-transform duration-300 ease-in-out z-50 shadow-2xl flex flex-col">
+        <!-- Drawer Header -->
+        <div class="flex justify-between items-center p-6 border-b border-gray-800 bg-slate-900/50">
+            <div>
+                <h2 id="drawerLeadName" class="text-xl font-black text-white">Loading...</h2>
+                <span id="drawerBrand" class="text-xs uppercase tracking-widest text-[#0dcaf0]">COHI</span>
+            </div>
+            <button onclick="window.closeDrawer()" class="text-gray-400 hover:text-white bg-slate-800 rounded-full w-8 h-8 flex items-center justify-center transition">✕</button>
+        </div>
+
+        <!-- Drawer Body -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            <!-- Rilla Integration -->
+            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">🎙️ Rilla Recording</h3>
+                    <a id="rillaOpenBtn" href="#" target="_blank" class="hidden text-xs text-[#0dcaf0] hover:underline">Open in Rilla ↗</a>
+                </div>
+                <input type="url" id="rillaInput" placeholder="Paste Rilla URL here..." class="luxury-input p-2 w-full text-sm mb-2">
+                <button onclick="window.saveDrawerData('rilla')" class="bg-slate-700 hover:bg-[#0dcaf0] hover:text-black text-xs text-white px-4 py-2 rounded transition w-full font-bold">Save Link</button>
+            </div>
+
+            <!-- Technical / Structural Notes -->
+            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">📐 Structural Notes</h3>
+                <textarea id="techNotesInput" rows="5" placeholder="e.g., Edwardian roof specified, cavity tray required to prevent damp, cement render for new build..." class="luxury-input p-3 w-full text-sm mb-2 resize-none"></textarea>
+                <button onclick="window.saveDrawerData('notes')" class="bg-slate-700 hover:bg-[#10b981] hover:text-white text-xs text-white px-4 py-2 rounded transition w-full font-bold">Save Specifications</button>
+            </div>
+
+            <!-- Sniper Markups Placeholder -->
+            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">🎯 Sniper Markups</h3>
+                <div id="sniperGallery" class="grid grid-cols-2 gap-2 text-center text-gray-500 text-xs italic p-4 border border-dashed border-gray-600 rounded">
+                    No markups synced yet.
+                </div>
+            </div>
         </div>
     </div>
 
