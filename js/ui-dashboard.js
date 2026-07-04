@@ -7,17 +7,13 @@ const dashboardApp = document.getElementById('dashboardApp');
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const idTokenResult = await user.getIdTokenResult();
-        
-        // MASTER KEY: Let them in if they have the stamp, OR if it's your exact email
         if (idTokenResult.claims.role === 'designer' || user.email.toLowerCase() === 'thomasoldroyd@yorkshirewindows.com') {
             if(authGate) authGate.classList.add('hidden');
             if(dashboardApp) dashboardApp.classList.remove('hidden');
-            
             const displayName = idTokenResult.claims.displayName || "Tom | Senior Designer";
             const welcomeText = document.getElementById('designerWelcome');
             if(welcomeText) welcomeText.innerText = `Welcome, ${displayName}`;
         } else {
-            console.log("Access Denied: Not a designer.");
             alert("Access Denied: You do not have Designer privileges.");
             signOut(auth);
         }
@@ -31,13 +27,10 @@ document.getElementById('btnLogin')?.addEventListener('click', async () => {
     const email = document.getElementById('authEmail')?.value.trim();
     const pass = document.getElementById('authPassword')?.value;
     if(!email || !pass) return alert("Please enter both email and password.");
-    
     const btn = document.getElementById('btnLogin');
     btn.innerText = "Authenticating...";
-    
     try {
         await signInWithEmailAndPassword(auth, email, pass);
-        // Clean login. The Master Key above handles the rest!
     } catch (err) {
         alert("Login Failed: " + err.message);
         btn.innerText = "Login";
@@ -47,8 +40,12 @@ document.getElementById('btnLogin')?.addEventListener('click', async () => {
 document.getElementById('btnLogout')?.addEventListener('click', () => signOut(auth));
 
 
-// --- 2. KANBAN PIPELINE & HUD ENGINE ---
+// --- 2. KANBAN PIPELINE, HUD, & DRAWER ENGINE ---
 const cloudinaryUrl = "https://api.cloudinary.com/v1_1/dqk1hz0f8/upload";
+
+// Global cache to power the drawer & search instantly without re-fetching
+window.leadCache = {}; 
+window.currentOpenLeadId = null;
 
 function calculateRAG(lastActiveMs) {
     if (!lastActiveMs) return { color: 'text-gray-500', dot: '⚪', label: 'No Interaction', isActionRequired: true };
@@ -59,7 +56,6 @@ function calculateRAG(lastActiveMs) {
 }
 
 onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "desc")), (snapshot) => {
-    // 1. Clear the board columns
     const cols = {
         "1. Consultation": document.getElementById('col-stage1'),
         "2. Quote Sent": document.getElementById('col-stage2'),
@@ -73,69 +69,147 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
     let surveysPending = 0;
     let actionRequired = 0;
 
-    // 2. Populate the board with leads
     snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const id = docSnap.id;
+        window.leadCache[id] = data; // Store for Drawer & Search
         
-        // Define default stage if missing
         const currentStage = data.pipelineStatus || "1. Consultation"; 
         const targetCol = cols[currentStage] || cols["1. Consultation"];
-        
         const rag = calculateRAG(data.vaultTelemetry?.lastActive);
         const brandData = BRAND_CONFIG[data.brand] || BRAND_CONFIG["YorkshireWindows"];
 
-        // HUD Math Calculation
         activeLeads++;
         if (currentStage === "3. Technical Survey") surveysPending++;
         if (rag.isActionRequired) actionRequired++;
 
-        // Build the Kanban Card HTML
+        const leadName = data.customerProfile?.leadName || 'Unnamed Lead';
+        const postcode = data.customerProfile?.postcode || 'TBC';
+
+        // Notice the onclick event added to the main div for the drawer
         const cardHTML = `
-            <div class="glass-panel p-4 cursor-grab active:cursor-grabbing border-l-4 hover:bg-[#1e293b] transition-all relative group" 
+            <div class="lead-card glass-panel p-4 cursor-grab active:cursor-grabbing border-l-4 hover:bg-[#1e293b] transition-all relative group" 
                  style="border-left-color: ${brandData.theme}" 
                  draggable="true" 
-                 ondragstart="window.dragStart(event, '${id}')">
+                 ondragstart="window.dragStart(event, '${id}')"
+                 onclick="window.openDrawer('${id}')"
+                 data-search="${leadName.toLowerCase()} ${postcode.toLowerCase()}">
                 
-                <div class="flex justify-between items-start mb-2">
-                    <h4 class="text-md font-black text-white">${data.customerProfile?.leadName || 'Unnamed Lead'}</h4>
+                <div class="flex justify-between items-start mb-2 pointer-events-none">
+                    <h4 class="text-md font-black text-white">${leadName}</h4>
                 </div>
                 
-                <div class="text-[10px] text-gray-400 mb-3 uppercase tracking-widest">${data.customerProfile?.postcode || 'TBC'}</div>
+                <div class="text-[10px] text-gray-400 mb-3 uppercase tracking-widest pointer-events-none">${postcode}</div>
                 
-                <div class="bg-slate-900/80 p-2 rounded text-[10px] flex justify-between items-center mb-3">
+                <div class="bg-slate-900/80 p-2 rounded text-[10px] flex justify-between items-center mb-3 pointer-events-none">
                     <span class="${rag.color} font-bold">${rag.dot} ${rag.label}</span>
                 </div>
 
+                <!-- stopPropagation prevents the drawer from opening when clicking these buttons -->
                 <div class="grid grid-cols-2 gap-2 mt-2">
-                    <a href="quotes.html?leadId=${id}" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/50 text-[10px] py-1.5 rounded text-center font-bold transition">🔨 Quote</a>
-                    <a href="vault.html?id=${id}" target="_blank" class="bg-[#0dcaf0]/20 hover:bg-[#0dcaf0] text-[#0dcaf0] hover:text-black border border-[#0dcaf0]/50 text-[10px] py-1.5 rounded text-center font-bold transition">🔒 Vault</a>
+                    <a href="quotes.html?leadId=${id}" onclick="event.stopPropagation()" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/50 text-[10px] py-1.5 rounded text-center font-bold transition z-10 relative">🔨 Quote</a>
+                    <a href="vault.html?id=${id}" target="_blank" onclick="event.stopPropagation()" class="bg-[#0dcaf0]/20 hover:bg-[#0dcaf0] text-[#0dcaf0] hover:text-black border border-[#0dcaf0]/50 text-[10px] py-1.5 rounded text-center font-bold transition z-10 relative">🔒 Vault</a>
                 </div>
                 
-                <!-- Quick Action Overlay (Appears on Hover) -->
-                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                    <button onclick="window.replyToClient('${id}')" class="bg-slate-800 hover:bg-[#0dcaf0] text-gray-300 hover:text-black p-1 rounded text-xs transition" title="Fast Reply">💬</button>
-                    <button onclick="document.getElementById('up_${id}').click()" class="bg-slate-800 hover:bg-emerald-500 text-gray-300 hover:text-white p-1 rounded text-xs transition" title="Override PDF">📄</button>
+                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
+                    <button onclick="event.stopPropagation(); window.replyToClient('${id}')" class="bg-slate-800 hover:bg-[#0dcaf0] text-gray-300 hover:text-black p-1 rounded text-xs transition" title="Fast Reply">💬</button>
+                    <button onclick="event.stopPropagation(); document.getElementById('up_${id}').click()" class="bg-slate-800 hover:bg-emerald-500 text-gray-300 hover:text-white p-1 rounded text-xs transition" title="Override PDF">📄</button>
                 </div>
-                <!-- Hidden PDF Uploader -->
-                <input type="file" id="up_${id}" class="hidden" accept=".pdf" onchange="window.uploadQuote('${id}', this)">
+                <input type="file" id="up_${id}" class="hidden" accept=".pdf" onclick="event.stopPropagation()" onchange="window.uploadQuote('${id}', this)">
             </div>
         `;
         
         if(targetCol) targetCol.innerHTML += cardHTML;
     });
 
-    // 3. Update HUD UI Metrics
     if(document.getElementById('hudActiveLeads')) document.getElementById('hudActiveLeads').innerText = activeLeads;
     if(document.getElementById('hudSurveys')) document.getElementById('hudSurveys').innerText = surveysPending;
     if(document.getElementById('hudAction')) document.getElementById('hudAction').innerText = actionRequired;
 
-    // 4. Update Kanban Column Counters
     if(cols["1. Consultation"]) document.getElementById('count-stage1').innerText = cols["1. Consultation"].children.length;
     if(cols["2. Quote Sent"]) document.getElementById('count-stage2').innerText = cols["2. Quote Sent"].children.length;
     if(cols["3. Technical Survey"]) document.getElementById('count-stage3').innerText = cols["3. Technical Survey"].children.length;
     if(cols["4. Handover"]) document.getElementById('count-stage4').innerText = cols["4. Handover"].children.length;
+    
+    window.filterLeads(); // Re-apply search filter if data updates
 });
+
+// --- TECHNICAL DRAWER ENGINE ---
+window.openDrawer = (id) => {
+    window.currentOpenLeadId = id;
+    const data = window.leadCache[id];
+    if(!data) return;
+
+    // Populate Data
+    document.getElementById('drawerLeadName').innerText = data.customerProfile?.leadName || 'Unnamed Lead';
+    
+    const brandData = BRAND_CONFIG[data.brand] || BRAND_CONFIG["YorkshireWindows"];
+    const brandBadge = document.getElementById('drawerBrand');
+    brandBadge.innerText = brandData.name;
+    brandBadge.style.color = brandData.theme;
+
+    // Populate Rilla & Notes if they exist
+    const rillaInput = document.getElementById('rillaInput');
+    const rillaBtn = document.getElementById('rillaOpenBtn');
+    if(data.rillaLink) {
+        rillaInput.value = data.rillaLink;
+        rillaBtn.href = data.rillaLink;
+        rillaBtn.classList.remove('hidden');
+    } else {
+        rillaInput.value = '';
+        rillaBtn.classList.add('hidden');
+    }
+
+    document.getElementById('techNotesInput').value = data.technicalNotes || '';
+
+    // Slide Drawer In
+    document.getElementById('drawerOverlay').classList.remove('hidden');
+    document.getElementById('techDrawer').classList.remove('translate-x-full');
+};
+
+window.closeDrawer = () => {
+    window.currentOpenLeadId = null;
+    document.getElementById('drawerOverlay').classList.add('hidden');
+    document.getElementById('techDrawer').classList.add('translate-x-full');
+};
+
+window.saveDrawerData = async (type) => {
+    const id = window.currentOpenLeadId;
+    if(!id) return;
+    
+    const updates = {};
+    if(type === 'rilla') {
+        const link = document.getElementById('rillaInput').value.trim();
+        updates.rillaLink = link;
+        alert("Rilla Link Synced!");
+    } else if (type === 'notes') {
+        const notes = document.getElementById('techNotesInput').value.trim();
+        updates.technicalNotes = notes;
+        alert("Structural Specifications Saved!");
+    }
+    
+    updates["timestamps.updatedAt"] = new Date().toISOString();
+    
+    try {
+        await updateDoc(doc(db, "surveys", id), updates);
+    } catch(e) {
+        console.error("Error saving drawer data:", e);
+        alert("Failed to save changes.");
+    }
+};
+
+// --- LIVE SEARCH ENGINE ---
+window.filterLeads = () => {
+    const query = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    document.querySelectorAll('.lead-card').forEach(card => {
+        const searchData = card.getAttribute('data-search');
+        if (searchData.includes(query)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+};
 
 // --- DRAG AND DROP ENGINE ---
 window.dragStart = (e, id) => {
@@ -173,7 +247,6 @@ document.querySelectorAll('.kanban-dropzone').forEach(zone => {
                     pipelineStatus: newStage,
                     "timestamps.updatedAt": new Date().toISOString()
                 });
-                console.log(`Lead ${leadId} moved to ${newStage}`);
             } catch (err) {
                 console.error("Failed to move lead:", err);
             }
@@ -186,7 +259,6 @@ window.uploadQuote = async (id, inputEl) => {
     const file = inputEl.files[0];
     if(!file) return;
     
-    // Find the quick action button to show loading state
     const overrideBtn = inputEl.previousElementSibling.querySelector('button[title="Override PDF"]');
     const ogText = overrideBtn.innerText;
     overrideBtn.innerText = "⏳";
