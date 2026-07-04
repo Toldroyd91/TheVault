@@ -51,7 +51,6 @@
                     <p class="text-[#0dcaf0] text-sm mt-1 uppercase tracking-widest font-bold">Live Lead Pipeline</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <!-- NEW: Live Search Bar -->
                     <input type="text" id="searchInput" placeholder="Search by name or postcode..." class="luxury-input p-3 w-64 text-sm" onkeyup="window.filterLeads()">
                     <a href="quotes.html" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold text-sm transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]">
                         + New Quote
@@ -61,7 +60,7 @@
             </div>
 
             <!-- Metric Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="glass-panel p-6 border-t-2 border-t-[#0dcaf0]">
                     <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Active Pipeline</div>
                     <div class="text-3xl font-black text-white" id="hudActiveLeads">0</div>
@@ -74,12 +73,15 @@
                     <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Action Required</div>
                     <div class="text-3xl font-black text-white" id="hudAction">0</div>
                 </div>
+                <div class="glass-panel p-6 border-t-2 border-t-purple-500">
+                    <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Revenue Won</div>
+                    <div class="text-3xl font-black text-white" id="hudRevenueWon">£0</div>
+                </div>
             </div>
         </header>
 
         <!-- KANBAN BOARD -->
         <div class="flex gap-6 overflow-x-auto pb-8 min-h-[600px] snap-x hide-scrollbar">
-            <!-- Columns... -->
             <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
                 <div class="flex items-center justify-between mb-4 px-2">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">1. Consultation</h3>
@@ -119,6 +121,7 @@
 
     <!-- TECHNICAL DRAWER PANEL -->
     <div id="techDrawer" class="fixed top-0 right-0 h-full w-full max-w-lg bg-[#0f172a] border-l border-gray-800 transform translate-x-full transition-transform duration-300 ease-in-out z-50 shadow-2xl flex flex-col">
+        
         <!-- Drawer Header -->
         <div class="flex justify-between items-center p-6 border-b border-gray-800 bg-slate-900/50">
             <div>
@@ -130,6 +133,49 @@
 
         <!-- Drawer Body -->
         <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            
+            <!-- Management & Scheduling -->
+            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">📅 Lead Management</h3>
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <label class="text-xs text-gray-400 mb-1 block">Lead Owner</label>
+                        <select id="ownerInput" class="luxury-input p-2 w-full text-sm bg-gray-800">
+                            <option value="Unassigned">Unassigned</option>
+                            <option value="Tom Oldroyd">Tom Oldroyd</option>
+                            <option value="Sales Team">Sales Team</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 mb-1 block">Next Follow-Up</label>
+                        <input type="date" id="followUpInput" class="luxury-input p-2 w-full text-sm bg-gray-800">
+                    </div>
+                </div>
+                <button onclick="window.saveDrawerData('management')" class="bg-slate-700 hover:bg-[#0dcaf0] hover:text-black text-xs text-white px-4 py-2 rounded transition w-full font-bold">Update Management Details</button>
+            </div>
+
+            <!-- Financials & Value -->
+            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">💷 Financial Summary</h3>
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <label class="text-xs text-gray-400 mb-1 block">Contract Value (£)</label>
+                        <input type="number" id="financeValueInput" placeholder="e.g. 25000" class="luxury-input p-2 w-full text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 mb-1 block">Finance Status</label>
+                        <select id="financeStatusInput" class="luxury-input p-2 w-full text-sm bg-gray-800">
+                            <option value="TBC">TBC</option>
+                            <option value="Cash / Self-Funded">Cash / Self-Funded</option>
+                            <option value="Application Pending">Application Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Funded">Funded</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="window.saveDrawerData('finance')" class="bg-slate-700 hover:bg-amber-500 hover:text-black text-xs text-white px-4 py-2 rounded transition w-full font-bold">Update Financials</button>
+            </div>
+
             <!-- Rilla Integration -->
             <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
                 <div class="flex items-center justify-between mb-2">
@@ -143,17 +189,19 @@
             <!-- Technical / Structural Notes -->
             <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">📐 Structural Notes</h3>
-                <textarea id="techNotesInput" rows="5" placeholder="e.g., Edwardian roof specified, cavity tray required to prevent damp, cement render for new build..." class="luxury-input p-3 w-full text-sm mb-2 resize-none"></textarea>
+                <textarea id="techNotesInput" rows="5" placeholder="e.g., Edwardian roof specified, cavity tray required to prevent damp, cement render for new builds..." class="luxury-input p-3 w-full text-sm mb-2 resize-none"></textarea>
                 <button onclick="window.saveDrawerData('notes')" class="bg-slate-700 hover:bg-[#10b981] hover:text-white text-xs text-white px-4 py-2 rounded transition w-full font-bold">Save Specifications</button>
             </div>
 
-            <!-- Sniper Markups Placeholder -->
-            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">🎯 Sniper Markups</h3>
-                <div id="sniperGallery" class="grid grid-cols-2 gap-2 text-center text-gray-500 text-xs italic p-4 border border-dashed border-gray-600 rounded">
-                    No markups synced yet.
+            <!-- Deal Archiving (Closes Deal and removes from Board) -->
+            <div class="border-t border-gray-800 pt-4 pb-2">
+                <h3 class="text-xs text-gray-500 uppercase tracking-wider mb-3 text-center">Close Deal</h3>
+                <div class="flex gap-2">
+                    <button onclick="window.closeDeal('Closed Won')" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-xs py-3 rounded font-bold transition">🏆 Mark as Won</button>
+                    <button onclick="window.closeDeal('Closed Lost')" class="flex-1 bg-slate-700 hover:bg-red-600 text-white text-xs py-3 rounded font-bold transition">❌ Mark as Lost</button>
                 </div>
             </div>
+
         </div>
     </div>
 
