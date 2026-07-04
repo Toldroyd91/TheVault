@@ -5,206 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COHI | Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
     <style>
-        .luxury-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: 8px;
-        }
-        .luxury-input:focus {
-            outline: none;
-            border-color: #0dcaf0;
-        }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
+        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .luxury-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 8px; }
+        .luxury-input:focus { outline: none; border-color: #0dcaf0; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-900 text-white overflow-x-hidden">
-    
-    <!-- AUTH GATE -->
-    <div id="authGate" class="min-h-screen flex items-center justify-center p-6">
-        <div class="glass-panel p-8 w-full max-w-md">
-            <h2 class="text-2xl font-bold mb-6 text-center text-white">COHI Concierge</h2>
-            <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input mb-4 p-3 w-full">
-            <input type="password" id="authPassword" placeholder="Password" class="luxury-input mb-4 p-3 w-full">
-            <button id="btnLogin" class="w-full bg-[#0dcaf0] hover:bg-[#0baccc] text-black font-bold py-3 rounded-lg transition-colors">Login</button>
+<body class="bg-gray-950 text-white min-h-screen">
+
+    <!-- GLOBAL NAV -->
+    <nav class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-900/50">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-xl font-black text-[#0dcaf0]">COHI<span class="text-white">COMMAND</span></a>
         </div>
-    </div>
+        <div class="flex gap-4">
+            <a href="survey.html" class="bg-[#0dcaf0] text-black px-4 py-2 rounded-lg font-bold text-xs hover:scale-105 transition">+ START NEW SURVEY</a>
+            <button id="btnLogout" class="text-gray-400 hover:text-white text-xs">Logout</button>
+        </div>
+    </nav>
 
-    <!-- MAIN DASHBOARD -->
-    <div id="dashboardApp" class="hidden min-h-screen p-8">
-        
-        <!-- EXECUTIVE HUD -->
+    <!-- DASHBOARD CONTENT -->
+    <div id="dashboardApp" class="p-4 md:p-8">
         <header class="mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h1 id="designerWelcome" class="text-3xl font-black text-white tracking-tight">Welcome</h1>
-                    <p class="text-[#0dcaf0] text-sm mt-1 uppercase tracking-widest font-bold">Live Lead Pipeline</p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <input type="text" id="searchInput" placeholder="Search by name or postcode..." class="luxury-input p-3 w-64 text-sm" onkeyup="window.filterLeads()">
-                    <a href="quotes.html" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold text-sm transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]">
-                        + New Quote
-                    </a>
-                    <button id="btnLogout" class="text-xs text-gray-500 hover:text-gray-300 transition-colors bg-gray-800 px-4 py-3 rounded-lg">Logout</button>
-                </div>
-            </div>
-
-            <!-- Metric Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="glass-panel p-6 border-t-2 border-t-[#0dcaf0]">
-                    <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Active Pipeline</div>
-                    <div class="text-3xl font-black text-white" id="hudActiveLeads">0</div>
-                </div>
-                <div class="glass-panel p-6 border-t-2 border-t-[#10b981]">
-                    <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Surveys Pending</div>
-                    <div class="text-3xl font-black text-white" id="hudSurveys">0</div>
-                </div>
-                <div class="glass-panel p-6 border-t-2 border-t-amber-400">
-                    <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Action Required</div>
-                    <div class="text-3xl font-black text-white" id="hudAction">0</div>
-                </div>
-                <div class="glass-panel p-6 border-t-2 border-t-purple-500">
-                    <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Revenue Won</div>
-                    <div class="text-3xl font-black text-white" id="hudRevenueWon">£0</div>
-                </div>
-            </div>
+            <h1 id="designerWelcome" class="text-2xl md:text-3xl font-black mb-2">Welcome</h1>
+            <input type="text" id="searchInput" placeholder="Search leads..." class="luxury-input p-3 w-full max-w-sm" onkeyup="window.filterLeads()">
         </header>
 
-        <!-- KANBAN BOARD -->
-        <div class="flex gap-6 overflow-x-auto pb-8 min-h-[600px] snap-x hide-scrollbar">
-            <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
-                <div class="flex items-center justify-between mb-4 px-2">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">1. Consultation</h3>
-                    <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400" id="count-stage1">0</span>
-                </div>
-                <div id="col-stage1" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="1. Consultation"></div>
-            </div>
-
-            <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
-                <div class="flex items-center justify-between mb-4 px-2">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">2. Quote Sent</h3>
-                    <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400" id="count-stage2">0</span>
-                </div>
-                <div id="col-stage2" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="2. Quote Sent"></div>
-            </div>
-
-            <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
-                <div class="flex items-center justify-between mb-4 px-2">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">3. Tech Survey</h3>
-                    <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400" id="count-stage3">0</span>
-                </div>
-                <div id="col-stage3" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="3. Technical Survey"></div>
-            </div>
-
-            <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
-                <div class="flex items-center justify-between mb-4 px-2">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">4. Handover</h3>
-                    <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400" id="count-stage4">0</span>
-                </div>
-                <div id="col-stage4" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="4. Handover"></div>
-            </div>
+        <!-- KANBAN BOARD (Responsive) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-8">
+            <!-- Kanban Columns injected here via JS -->
         </div>
     </div>
-
-    <!-- TECHNICAL DRAWER OVERLAY -->
-    <div id="drawerOverlay" class="fixed inset-0 bg-black/60 hidden z-40" onclick="window.closeDrawer()"></div>
-
-    <!-- TECHNICAL DRAWER PANEL -->
-    <div id="techDrawer" class="fixed top-0 right-0 h-full w-full max-w-lg bg-[#0f172a] border-l border-gray-800 transform translate-x-full transition-transform duration-300 ease-in-out z-50 shadow-2xl flex flex-col">
-        
-        <!-- Drawer Header -->
-        <div class="flex justify-between items-center p-6 border-b border-gray-800 bg-slate-900/50">
-            <div>
-                <h2 id="drawerLeadName" class="text-xl font-black text-white">Loading...</h2>
-                <span id="drawerBrand" class="text-xs uppercase tracking-widest text-[#0dcaf0]">COHI</span>
-            </div>
-            <button onclick="window.closeDrawer()" class="text-gray-400 hover:text-white bg-slate-800 rounded-full w-8 h-8 flex items-center justify-center transition">✕</button>
-        </div>
-
-        <!-- Drawer Body -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-            
-            <!-- Management & Scheduling -->
-            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">📅 Lead Management</h3>
-                <div class="grid grid-cols-2 gap-4 mb-3">
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Lead Owner</label>
-                        <select id="ownerInput" class="luxury-input p-2 w-full text-sm bg-gray-800">
-                            <option value="Unassigned">Unassigned</option>
-                            <option value="Tom Oldroyd">Tom Oldroyd</option>
-                            <option value="Sales Team">Sales Team</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Next Follow-Up</label>
-                        <input type="date" id="followUpInput" class="luxury-input p-2 w-full text-sm bg-gray-800">
-                    </div>
-                </div>
-                <button onclick="window.saveDrawerData('management')" class="bg-slate-700 hover:bg-[#0dcaf0] hover:text-black text-xs text-white px-4 py-2 rounded transition w-full font-bold">Update Management Details</button>
-            </div>
-
-            <!-- Financials & Value -->
-            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">💷 Financial Summary</h3>
-                <div class="grid grid-cols-2 gap-4 mb-3">
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Contract Value (£)</label>
-                        <input type="number" id="financeValueInput" placeholder="e.g. 25000" class="luxury-input p-2 w-full text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 mb-1 block">Finance Status</label>
-                        <select id="financeStatusInput" class="luxury-input p-2 w-full text-sm bg-gray-800">
-                            <option value="TBC">TBC</option>
-                            <option value="Cash / Self-Funded">Cash / Self-Funded</option>
-                            <option value="Application Pending">Application Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Funded">Funded</option>
-                        </select>
-                    </div>
-                </div>
-                <button onclick="window.saveDrawerData('finance')" class="bg-slate-700 hover:bg-amber-500 hover:text-black text-xs text-white px-4 py-2 rounded transition w-full font-bold">Update Financials</button>
-            </div>
-
-            <!-- Rilla Integration -->
-            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">🎙️ Rilla Recording</h3>
-                    <a id="rillaOpenBtn" href="#" target="_blank" class="hidden text-xs text-[#0dcaf0] hover:underline">Open in Rilla ↗</a>
-                </div>
-                <input type="url" id="rillaInput" placeholder="Paste Rilla URL here..." class="luxury-input p-2 w-full text-sm mb-2">
-                <button onclick="window.saveDrawerData('rilla')" class="bg-slate-700 hover:bg-[#0dcaf0] hover:text-black text-xs text-white px-4 py-2 rounded transition w-full font-bold">Save Link</button>
-            </div>
-
-            <!-- Technical / Structural Notes -->
-            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">📐 Structural Notes</h3>
-                <textarea id="techNotesInput" rows="5" placeholder="e.g., Edwardian roof specified, cavity tray required to prevent damp, cement render for new builds..." class="luxury-input p-3 w-full text-sm mb-2 resize-none"></textarea>
-                <button onclick="window.saveDrawerData('notes')" class="bg-slate-700 hover:bg-[#10b981] hover:text-white text-xs text-white px-4 py-2 rounded transition w-full font-bold">Save Specifications</button>
-            </div>
-
-            <!-- Deal Archiving (Closes Deal and removes from Board) -->
-            <div class="border-t border-gray-800 pt-4 pb-2">
-                <h3 class="text-xs text-gray-500 uppercase tracking-wider mb-3 text-center">Close Deal</h3>
-                <div class="flex gap-2">
-                    <button onclick="window.closeDeal('Closed Won')" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-xs py-3 rounded font-bold transition">🏆 Mark as Won</button>
-                    <button onclick="window.closeDeal('Closed Lost')" class="flex-1 bg-slate-700 hover:bg-red-600 text-white text-xs py-3 rounded font-bold transition">❌ Mark as Lost</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
+    
     <script type="module" src="js/ui-dashboard.js"></script>
 </body>
 </html>
