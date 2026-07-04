@@ -24,9 +24,18 @@
             border-radius: 16px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+        /* Proactive Upgrade: Hide ugly scrollbars on the Kanban board but keep it scrollable */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-gray-900 text-white overflow-x-hidden">
+    <!-- AUTH GATE -->
     <div id="authGate" class="min-h-screen flex items-center justify-center p-6">
         <div class="glass-panel p-8 w-full max-w-md">
             <h2 class="text-2xl font-bold mb-6 text-center text-white">COHI Concierge</h2>
@@ -36,22 +45,81 @@
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD -->
     <div id="dashboardApp" class="hidden min-h-screen p-8">
-        <header class="flex justify-between items-center mb-10 border-b border-gray-800 pb-6">
-            <div>
-                <h1 id="designerWelcome" class="text-3xl font-black text-white">Welcome</h1>
-                <p class="text-gray-400 text-sm mt-1">Lead Management Pipeline</p>
+        
+        <!-- EXECUTIVE HUD -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 id="designerWelcome" class="text-3xl font-black text-white tracking-tight">Welcome</h1>
+                    <p class="text-[#0dcaf0] text-sm mt-1 uppercase tracking-widest font-bold">Live Lead Pipeline</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="quotes.html" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold text-sm transition-all shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                        + New U-Design Quote
+                    </a>
+                    <button id="btnLogout" class="text-xs text-gray-500 hover:text-gray-300 transition-colors bg-gray-800 px-4 py-3 rounded-lg">Logout</button>
+                </div>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="quotes.html" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-bold text-sm transition-all shadow-lg shadow-red-900/20">
-                    Build Quote
-                </a>
-                <button id="btnLogout" class="text-xs text-gray-500 hover:text-gray-300 transition-colors bg-gray-800 px-3 py-2 rounded">Logout</button>
+
+            <!-- Metric Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-panel p-6 border-t-2 border-t-[#0dcaf0]">
+                    <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Active Pipeline</div>
+                    <div class="text-3xl font-black text-white" id="hudActiveLeads">0</div>
+                </div>
+                <div class="glass-panel p-6 border-t-2 border-t-[#10b981]">
+                    <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Surveys Pending</div>
+                    <div class="text-3xl font-black text-white" id="hudSurveys">0</div>
+                </div>
+                <div class="glass-panel p-6 border-t-2 border-t-amber-400">
+                    <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Action Required</div>
+                    <div class="text-3xl font-black text-white" id="hudAction">0</div>
+                </div>
             </div>
         </header>
 
-        <div id="pipelineGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- KANBAN BOARD -->
+        <div class="flex gap-6 overflow-x-auto pb-8 min-h-[600px] snap-x hide-scrollbar">
+            
+            <!-- Column 1: Consultation -->
+            <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">1. Consultation</h3>
+                    <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400" id="count-stage1">0</span>
+                </div>
+                <div id="col-stage1" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="1. Consultation"></div>
             </div>
+
+            <!-- Column 2: Quote Sent -->
+            <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">2. Quote Sent</h3>
+                    <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400" id="count-stage2">0</span>
+                </div>
+                <div id="col-stage2" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="2. Quote Sent"></div>
+            </div>
+
+            <!-- Column 3: Technical Survey -->
+            <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">3. Tech Survey</h3>
+                    <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400" id="count-stage3">0</span>
+                </div>
+                <div id="col-stage3" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="3. Technical Survey"></div>
+            </div>
+
+            <!-- Column 4: Handover -->
+            <div class="min-w-[320px] max-w-[320px] flex-1 flex flex-col snap-center">
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">4. Handover</h3>
+                    <span class="bg-gray-800 text-xs px-2 py-1 rounded text-gray-400" id="count-stage4">0</span>
+                </div>
+                <div id="col-stage4" class="kanban-dropzone flex-1 bg-[#0f172a]/40 border border-gray-800 rounded-xl p-3 space-y-4 transition-colors" data-stage="4. Handover"></div>
+            </div>
+
+        </div>
     </div>
 
     <script type="module" src="js/ui-dashboard.js"></script>
