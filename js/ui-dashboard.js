@@ -43,7 +43,6 @@ document.getElementById('btnLogout')?.addEventListener('click', () => signOut(au
 // --- 2. KANBAN PIPELINE, HUD, & DRAWER ENGINE ---
 const cloudinaryUrl = "https://api.cloudinary.com/v1_1/dqk1hz0f8/upload";
 
-// Global cache to power the drawer & search instantly without re-fetching
 window.leadCache = {}; 
 window.currentOpenLeadId = null;
 
@@ -68,13 +67,23 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
     let activeLeads = 0;
     let surveysPending = 0;
     let actionRequired = 0;
+    let wonRevenue = 0;
 
     snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const id = docSnap.id;
-        window.leadCache[id] = data; // Store for Drawer & Search
+        window.leadCache[id] = data; 
         
         const currentStage = data.pipelineStatus || "1. Consultation"; 
+        
+        // Handle Archived Deals (Keep out of Kanban, calculate revenue)
+        if (currentStage === "Closed Won") {
+            wonRevenue += parseInt(data.contractValue || 0);
+            return; 
+        } else if (currentStage === "Closed Lost") {
+            return;
+        }
+
         const targetCol = cols[currentStage] || cols["1. Consultation"];
         const rag = calculateRAG(data.vaultTelemetry?.lastActive);
         const brandData = BRAND_CONFIG[data.brand] || BRAND_CONFIG["YorkshireWindows"];
@@ -85,27 +94,38 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
 
         const leadName = data.customerProfile?.leadName || 'Unnamed Lead';
         const postcode = data.customerProfile?.postcode || 'TBC';
+        const contractValue = data.contractValue ? `£${parseInt(data.contractValue).toLocaleString()}` : 'Value TBC';
+        const financeStatus = data.financeStatus || 'TBC';
+        const owner = data.owner || 'Unassigned';
+        const followUp = data.followUpDate ? `📅 ${data.followUpDate}` : '';
 
-        // Notice the onclick event added to the main div for the drawer
         const cardHTML = `
             <div class="lead-card glass-panel p-4 cursor-grab active:cursor-grabbing border-l-4 hover:bg-[#1e293b] transition-all relative group" 
                  style="border-left-color: ${brandData.theme}" 
                  draggable="true" 
                  ondragstart="window.dragStart(event, '${id}')"
                  onclick="window.openDrawer('${id}')"
-                 data-search="${leadName.toLowerCase()} ${postcode.toLowerCase()}">
+                 data-search="${leadName.toLowerCase()} ${postcode.toLowerCase()} ${owner.toLowerCase()}">
                 
-                <div class="flex justify-between items-start mb-2 pointer-events-none">
+                <div class="flex justify-between items-start mb-1 pointer-events-none">
                     <h4 class="text-md font-black text-white">${leadName}</h4>
                 </div>
                 
-                <div class="text-[10px] text-gray-400 mb-3 uppercase tracking-widest pointer-events-none">${postcode}</div>
+                <div class="flex justify-between text-[10px] text-gray-400 mb-2 uppercase tracking-widest pointer-events-none">
+                    <span>${postcode}</span>
+                    <span class="text-[#0dcaf0]">${owner}</span>
+                </div>
+                
+                <div class="flex justify-between items-center mb-3 pointer-events-none">
+                    <span class="text-xs font-black text-amber-400">${contractValue}</span>
+                    <span class="text-[9px] px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-gray-300 uppercase">${financeStatus}</span>
+                </div>
                 
                 <div class="bg-slate-900/80 p-2 rounded text-[10px] flex justify-between items-center mb-3 pointer-events-none">
                     <span class="${rag.color} font-bold">${rag.dot} ${rag.label}</span>
+                    <span class="text-gray-300">${followUp}</span>
                 </div>
 
-                <!-- stopPropagation prevents the drawer from opening when clicking these buttons -->
                 <div class="grid grid-cols-2 gap-2 mt-2">
                     <a href="quotes.html?leadId=${id}" onclick="event.stopPropagation()" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/50 text-[10px] py-1.5 rounded text-center font-bold transition z-10 relative">🔨 Quote</a>
                     <a href="vault.html?id=${id}" target="_blank" onclick="event.stopPropagation()" class="bg-[#0dcaf0]/20 hover:bg-[#0dcaf0] text-[#0dcaf0] hover:text-black border border-[#0dcaf0]/50 text-[10px] py-1.5 rounded text-center font-bold transition z-10 relative">🔒 Vault</a>
@@ -122,16 +142,18 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
         if(targetCol) targetCol.innerHTML += cardHTML;
     });
 
+    // Update HUD 
     if(document.getElementById('hudActiveLeads')) document.getElementById('hudActiveLeads').innerText = activeLeads;
     if(document.getElementById('hudSurveys')) document.getElementById('hudSurveys').innerText = surveysPending;
     if(document.getElementById('hudAction')) document.getElementById('hudAction').innerText = actionRequired;
+    if(document.getElementById('hudRevenueWon')) document.getElementById('hudRevenueWon').innerText = `£${wonRevenue.toLocaleString()}`;
 
     if(cols["1. Consultation"]) document.getElementById('count-stage1').innerText = cols["1. Consultation"].children.length;
     if(cols["2. Quote Sent"]) document.getElementById('count-stage2').innerText = cols["2. Quote Sent"].children.length;
     if(cols["3. Technical Survey"]) document.getElementById('count-stage3').innerText = cols["3. Technical Survey"].children.length;
     if(cols["4. Handover"]) document.getElementById('count-stage4').innerText = cols["4. Handover"].children.length;
     
-    window.filterLeads(); // Re-apply search filter if data updates
+    window.filterLeads(); 
 });
 
 // --- TECHNICAL DRAWER ENGINE ---
@@ -140,7 +162,6 @@ window.openDrawer = (id) => {
     const data = window.leadCache[id];
     if(!data) return;
 
-    // Populate Data
     document.getElementById('drawerLeadName').innerText = data.customerProfile?.leadName || 'Unnamed Lead';
     
     const brandData = BRAND_CONFIG[data.brand] || BRAND_CONFIG["YorkshireWindows"];
@@ -148,7 +169,13 @@ window.openDrawer = (id) => {
     brandBadge.innerText = brandData.name;
     brandBadge.style.color = brandData.theme;
 
-    // Populate Rilla & Notes if they exist
+    // Populate Fields
+    document.getElementById('ownerInput').value = data.owner || 'Unassigned';
+    document.getElementById('followUpInput').value = data.followUpDate || '';
+    document.getElementById('financeValueInput').value = data.contractValue || '';
+    document.getElementById('financeStatusInput').value = data.financeStatus || 'TBC';
+    document.getElementById('techNotesInput').value = data.technicalNotes || '';
+
     const rillaInput = document.getElementById('rillaInput');
     const rillaBtn = document.getElementById('rillaOpenBtn');
     if(data.rillaLink) {
@@ -160,9 +187,6 @@ window.openDrawer = (id) => {
         rillaBtn.classList.add('hidden');
     }
 
-    document.getElementById('techNotesInput').value = data.technicalNotes || '';
-
-    // Slide Drawer In
     document.getElementById('drawerOverlay').classList.remove('hidden');
     document.getElementById('techDrawer').classList.remove('translate-x-full');
 };
@@ -178,14 +202,20 @@ window.saveDrawerData = async (type) => {
     if(!id) return;
     
     const updates = {};
-    if(type === 'rilla') {
-        const link = document.getElementById('rillaInput').value.trim();
-        updates.rillaLink = link;
+    if(type === 'management') {
+        updates.owner = document.getElementById('ownerInput').value;
+        updates.followUpDate = document.getElementById('followUpInput').value;
+        alert("Management Details Updated!");
+    } else if(type === 'rilla') {
+        updates.rillaLink = document.getElementById('rillaInput').value.trim();
         alert("Rilla Link Synced!");
     } else if (type === 'notes') {
-        const notes = document.getElementById('techNotesInput').value.trim();
-        updates.technicalNotes = notes;
+        updates.technicalNotes = document.getElementById('techNotesInput').value.trim();
         alert("Structural Specifications Saved!");
+    } else if (type === 'finance') {
+        updates.contractValue = document.getElementById('financeValueInput').value.trim();
+        updates.financeStatus = document.getElementById('financeStatusInput').value;
+        alert("Financials Updated!");
     }
     
     updates["timestamps.updatedAt"] = new Date().toISOString();
@@ -195,6 +225,23 @@ window.saveDrawerData = async (type) => {
     } catch(e) {
         console.error("Error saving drawer data:", e);
         alert("Failed to save changes.");
+    }
+};
+
+window.closeDeal = async (status) => {
+    const id = window.currentOpenLeadId;
+    if(!id) return;
+    if(confirm(`Are you sure you want to mark this deal as ${status}? It will be removed from the active pipeline.`)) {
+        try {
+            await updateDoc(doc(db, "surveys", id), { 
+                pipelineStatus: status,
+                "timestamps.updatedAt": new Date().toISOString()
+            });
+            window.closeDrawer();
+        } catch (err) {
+            console.error("Failed to close deal:", err);
+            alert("Failed to close deal.");
+        }
     }
 };
 
