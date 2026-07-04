@@ -1,8 +1,5 @@
 import { auth, db, collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, onAuthStateChanged, signInWithEmailAndPassword, signOut, BRAND_CONFIG } from './core-firebase.js';
 
-// Bulletproof import for Cloud Functions
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js";
-
 // --- 1. AUTHENTICATION ENGINE ---
 const authGate = document.getElementById('authGate');
 const dashboardApp = document.getElementById('dashboardApp');
@@ -10,15 +7,19 @@ const dashboardApp = document.getElementById('dashboardApp');
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const idTokenResult = await user.getIdTokenResult();
-        // Check for the VIP stamp (or bypass if you are still setting up)
-        if (idTokenResult.claims.role === 'designer') {
+        
+        // MASTER KEY: Let them in if they have the stamp, OR if it's your exact email
+        if (idTokenResult.claims.role === 'designer' || user.email.toLowerCase() === 'ThomasOldroyd@YorkshireWindows.com') {
             if(authGate) authGate.classList.add('hidden');
             if(dashboardApp) dashboardApp.classList.remove('hidden');
-            const displayName = idTokenResult.claims.displayName || user.email.split('@')[0];
+            
+            const displayName = idTokenResult.claims.displayName || "Tom | Senior Designer";
             const welcomeText = document.getElementById('designerWelcome');
             if(welcomeText) welcomeText.innerText = `Welcome, ${displayName}`;
         } else {
-            console.log("Waiting for designer stamp...");
+            console.log("Access Denied: Not a designer.");
+            alert("Access Denied: You do not have Designer privileges.");
+            signOut(auth);
         }
     } else {
         if(authGate) authGate.classList.remove('hidden');
@@ -35,27 +36,8 @@ document.getElementById('btnLogin')?.addEventListener('click', async () => {
     btn.innerText = "Authenticating...";
     
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-        
-        // THE FIX: Wait 2 seconds so the browser can attach your secure token
-        console.log("Waiting for auth token to settle...");
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // --- TEMPORARY VIP TRIGGER ---
-        console.log("Applying VIP Stamp...");
-        // Use auth.app to ensure we are connecting to your specific Firebase instance
-        const functionsInstance = getFunctions(auth.app);
-        const assignRole = httpsCallable(functionsInstance, 'assignUserRole');
-        
-        const result = await assignRole({ 
-            email: userCredential.user.email,
-            role: 'designer', 
-            displayName: 'Tom | Senior Designer' 
-        });
-        
-        await userCredential.user.getIdToken(true); 
-        window.location.reload(); 
-
+        await signInWithEmailAndPassword(auth, email, pass);
+        // Clean login. The Master Key above handles the rest!
     } catch (err) {
         alert("Login Failed: " + err.message);
         btn.innerText = "Login";
