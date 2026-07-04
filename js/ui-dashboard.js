@@ -9,7 +9,7 @@ onAuthStateChanged(auth, async (user) => {
         const idTokenResult = await user.getIdTokenResult();
         
         // MASTER KEY: Let them in if they have the stamp, OR if it's your exact email
-        if (idTokenResult.claims.role === 'designer' || user.email.toLowerCase() === 'ThomasOldroyd@YorkshireWindows.com') {
+        if (idTokenResult.claims.role === 'designer' || user.email.toLowerCase() === 'thomasoldroyd@yorkshirewindows.com') {
             if(authGate) authGate.classList.add('hidden');
             if(dashboardApp) dashboardApp.classList.remove('hidden');
             
