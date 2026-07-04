@@ -187,6 +187,27 @@ window.openDrawer = (id) => {
         rillaBtn.classList.add('hidden');
     }
 
+    // --- AUTO-PULL SNIPER MARKUPS FROM SURVEY ---
+    const gallery = document.getElementById('sniperGallery');
+    // We look for arrays named surveyPhotos or sniperMarkups in the database
+    const markups = data.surveyPhotos || data.sniperMarkups || []; 
+    
+    if (markups.length > 0) {
+        gallery.innerHTML = ''; // Clear placeholder
+        gallery.classList.remove('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
+        
+        markups.forEach(url => {
+            gallery.innerHTML += `
+                <a href="${url}" target="_blank" class="block">
+                    <img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-700 hover:border-[#0dcaf0] transition cursor-pointer shadow-md">
+                </a>
+            `;
+        });
+    } else {
+        gallery.innerHTML = 'No site photos or markups synced from survey yet.';
+        gallery.classList.add('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
+    }
+
     document.getElementById('drawerOverlay').classList.remove('hidden');
     document.getElementById('techDrawer').classList.remove('translate-x-full');
 };
