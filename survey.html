@@ -273,7 +273,6 @@
         const val = (id) => el(id)?.value || "";
         const checked = (id) => el(id) ? !!el(id).checked : false;
 
-        // FIXED CLOUDINARY URL WITH CORRECT CLOUD NAME
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqkhhz0f9/image/upload";
         const UPLOAD_PRESET = "crm_document_uploads";
 
@@ -289,13 +288,11 @@
             rawAssets: {}
         };
 
-        // Populate Brand Dropdown
         const brandSelect = el('brandSelect');
         if (brandSelect && BRAND_CONFIG) {
             brandSelect.innerHTML = Object.entries(BRAND_CONFIG).map(([key, data]) => `<option value="${key}">${data.name}</option>`).join('');
         }
 
-        // Initialize Data on Load
         onAuthStateChanged(auth, async (user) => {
             if(!user) {
                 console.warn("Security Notice: Not logged in. Saves will fail.");
@@ -314,29 +311,28 @@
                     if(el('apptDate')) el('apptDate').value = SurveyState.customerProfile?.apptDate || "";
                     if(el('revisitDate')) el('revisitDate').value = SurveyState.customerProfile?.revisitDate || "";
                     
-                    if(el('buildType')) el('buildType').value = SurveyState.technicalSurvey?.buildType || "";
-                    if(el('proposedSize')) el('proposedSize').value = SurveyState.technicalSurvey?.proposedSize || "";
-                    if(el('houseMaterial')) el('houseMaterial').value = SurveyState.technicalSurvey?.houseMaterial || "";
+                    if(el('buildType')) el('buildType').value = SurveyState.projectSpecs?.buildType || "";
+                    if(el('proposedSize')) el('proposedSize').value = SurveyState.projectSpecs?.proposedSize || "";
+                    if(el('houseMaterial')) el('houseMaterial').value = SurveyState.projectSpecs?.houseMaterial || "";
                     if(el('baseType')) el('baseType').value = SurveyState.technicalSurvey?.baseType || "";
                     if(el('dpcDepth')) el('dpcDepth').value = SurveyState.technicalSurvey?.dpcDepth || "";
                     if(el('fasciaHeight')) el('fasciaHeight').value = SurveyState.technicalSurvey?.fasciaHeight || "";
                     if(el('airBricks')) el('airBricks').value = SurveyState.technicalSurvey?.airBricks || "";
                     
-                    if(el('accessDifficult')) el('accessDifficult').value = SurveyState.logistics?.accessDifficult || "";
-                    if(el('accessWidth')) el('accessWidth').value = SurveyState.logistics?.accessWidth || "";
+                    if(el('accessDifficult')) el('accessDifficult').value = SurveyState.projectSpecs?.accessIssues || "";
+                    if(el('accessWidth')) el('accessWidth').value = SurveyState.projectSpecs?.accessWidth || "";
                     if(el('drainage')) el('drainage').value = SurveyState.logistics?.drainage || "";
-                    if(el('wallObstacles')) el('wallObstacles').value = SurveyState.logistics?.wallObstacles || "";
+                    if(el('wallObstacles')) el('wallObstacles').value = SurveyState.projectSpecs?.wallObstacles || "";
                     
-                    if(el('roofType')) el('roofType').value = SurveyState.designSpecification?.roofType || "";
+                    if(el('roofType')) el('roofType').value = SurveyState.projectSpecs?.roofStyle || "";
                     if(el('roofPitch')) el('roofPitch').value = SurveyState.designSpecification?.roofPitch || "";
-                    if(el('frameColour')) el('frameColour').value = SurveyState.designSpecification?.frameColour || "";
-                    if(el('internalFrameColour')) el('internalFrameColour').value = SurveyState.designSpecification?.internalFrameColour || "";
                     
-                    if(el('buildingRegs')) el('buildingRegs').value = SurveyState.compliance?.buildingRegs || "";
-                    if(el('planningPerms')) el('planningPerms').value = SurveyState.compliance?.planningPerms || "";
+                    // We extract the base colour if it was merged, but for simplicity we'll just populate what we can
+                    if(el('buildingRegs')) el('buildingRegs').value = SurveyState.projectSpecs?.buildingRegs || "";
+                    if(el('planningPerms')) el('planningPerms').value = SurveyState.projectSpecs?.planningPerms || "";
                     if(el('sapCalcs')) el('sapCalcs').value = SurveyState.compliance?.sapCalcs || "";
                     
-                    if(el('designerNotes')) el('designerNotes').value = SurveyState.technicalSurvey?.designerNotes || "";
+                    if(el('designerNotes')) el('designerNotes').value = SurveyState.designerInsights?.prep || "";
                     if(el('includeNotesInPack')) el('includeNotesInPack').checked = SurveyState.technicalSurvey?.includeNotesInPack !== false;
 
                     if(el('cb-brochure')) el('cb-brochure').checked = !!SurveyState.pamphlets?.brochure;
@@ -348,7 +344,6 @@
             }
         });
 
-        // Helper: Safe Cloudinary Upload
         async function uploadBase64ToCloudinary(base64Str) {
             try {
                 const formData = new FormData();
@@ -369,7 +364,6 @@
             }
         }
 
-        // Action: AI Polish Reactivated
         el('btn-ai-polish')?.addEventListener('click', (e) => {
             e.preventDefault();
             const notesEl = el('designerNotes');
@@ -390,7 +384,6 @@
             }, 800);
         });
 
-        // Action: Save & Sync
         el('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const btn = e.target;
@@ -421,7 +414,7 @@
                                 uploadedPhotoData[category].push(url);
                                 hasUploads = true;
                             } else {
-                                alert(`Upload Warning: A photo in ${category} failed to save to the cloud. Check your Cloudinary Upload Preset.`);
+                                alert(`Upload Warning: A photo in ${category} failed to save to the cloud.`);
                             }
                         }
                     }
@@ -438,14 +431,69 @@
 
                 btn.innerText = "Syncing Everything...";
 
-                // 3. Data Mapping
+                // ==========================================
+                // 3. MASTER DATA MAPPING (FIXED FOR PDF ENGINE)
+                // ==========================================
                 SurveyState.brand = val('brandSelect') || "YorkshireWindows";
-                SurveyState.customerProfile = { leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode'), apptDate: val('apptDate'), revisitDate: val('revisitDate') };
-                SurveyState.technicalSurvey = { buildType: val('buildType'), proposedSize: val('proposedSize'), houseMaterial: val('houseMaterial'), baseType: val('baseType'), dpcDepth: val('dpcDepth'), fasciaHeight: val('fasciaHeight'), airBricks: val('airBricks'), designerNotes: val('designerNotes'), includeNotesInPack: checked('includeNotesInPack') };
-                SurveyState.logistics = { accessDifficult: val('accessDifficult'), accessWidth: val('accessWidth'), drainage: val('drainage'), wallObstacles: val('wallObstacles') };
-                SurveyState.designSpecification = { roofType: val('roofType'), roofPitch: val('roofPitch'), frameColour: val('frameColour'), internalFrameColour: val('internalFrameColour') };
-                SurveyState.compliance = { buildingRegs: val('buildingRegs'), planningPerms: val('planningPerms'), sapCalcs: val('sapCalcs') };
-                SurveyState.pamphlets = { brochure: checked('cb-brochure'), warranty: checked('cb-warranty'), planning: checked('cb-planning'), sap: checked('cb-sap'), roof: checked('cb-roof') };
+                SurveyState.pipelineStatus = SurveyState.pipelineStatus || "1. Consultation";
+                SurveyState.owner = SurveyState.owner || "Thomas Oldroyd";
+
+                SurveyState.customerProfile = {
+                    leadName: val('clientName'),
+                    customerNum: val('clientNum'),
+                    postcode: val('postCode'),
+                    apptDate: val('apptDate'),
+                    revisitDate: val('revisitDate'),
+                    vaultPIN: SurveyState.customerProfile?.vaultPIN || Math.floor(1000 + Math.random() * 9000).toString()
+                };
+
+                // Map specific data points to PDF targets
+                SurveyState.projectSpecs = {
+                    buildType: val('buildType'),
+                    proposedSize: val('proposedSize'),
+                    roofStyle: val('roofType'),
+                    frameColour: val('frameColour') + (val('internalFrameColour') ? ' / Int: ' + val('internalFrameColour') : ''),
+                    buildingRegs: val('buildingRegs'),
+                    planningPerms: val('planningPerms'),
+                    houseMaterial: val('houseMaterial'),
+                    wallObstacles: val('wallObstacles'),
+                    accessWidth: val('accessWidth'),
+                    accessIssues: val('accessDifficult')
+                };
+
+                // Map extra legacy technical fields into designer insights so they print
+                SurveyState.designerInsights = {
+                    prep: val('designerNotes'), 
+                    design: `Base Type: ${val('baseType') || 'N/A'}\nDPC Depth: ${val('dpcDepth') ? val('dpcDepth') + 'mm' : 'N/A'}\nFascia Height: ${val('fasciaHeight') ? val('fasciaHeight') + 'mm' : 'N/A'}\n${val('airBricks') ? 'Air Bricks: ' + val('airBricks') : ''}`
+                };
+
+                // Funnel uploaded arrays into the new specific Media Object slots
+                SurveyState.media = {
+                    front: uploadedPhotoData.front?.[0] || null,
+                    side: uploadedPhotoData.side?.[0] || null,
+                    rear: uploadedPhotoData.back?.[0] || null,
+                    sketch: uploadedPhotoData.sniper?.[0] || null,
+                    surveyGallery: [
+                        ...(uploadedPhotoData.front?.slice(1) || []),
+                        ...(uploadedPhotoData.side?.slice(1) || []),
+                        ...(uploadedPhotoData.back?.slice(1) || []),
+                        ...(uploadedPhotoData.trees || []),
+                        ...(uploadedPhotoData.brick || [])
+                    ],
+                    accessGallery: [
+                        ...(uploadedPhotoData.access || []),
+                        ...(uploadedPhotoData.drainage || [])
+                    ],
+                    miscGallery: uploadedPhotoData.misc || []
+                };
+
+                SurveyState.pamphlets = {
+                    brochure: checked('cb-brochure'),
+                    warranty: checked('cb-warranty'),
+                    planning: checked('cb-planning'),
+                    sap: checked('cb-sap'),
+                    roof: checked('cb-roof')
+                };
                 
                 SurveyState.userId = auth.currentUser ? auth.currentUser.uid : "UNKNOWN_USER"; 
                 SurveyState.timestamps = { updatedAt: serverTimestamp() };
@@ -469,13 +517,12 @@
             }
         });
 
-        // Action: PDF Engine Reactivated
         el('btn-generate-pdf')?.addEventListener('click', (e) => { 
             e.preventDefault(); 
             if(!SurveyState.id) return alert("Please click 'Save & Sync' first to lock in the data before generating a PDF.");
             
-            console.log("TRIGGERING PDF GENERATION FOR ID:", SurveyState.id);
-            alert("PDF Engine Triggered. Sending data packet to processing queue...");
+            // Redirect to the vault to generate the report
+            window.location.href = `vault.html?id=${SurveyState.id}`;
         });
     </script>
 
@@ -490,18 +537,15 @@
         const markBtn = document.getElementById('btn-sniper-mark');
         let sniperImg = null;
 
-        // Camera State
         let imgScale = 1;
         let imgX = 0, imgY = 0;
         let isDragging = false;
         let startDragX = 0, startDragY = 0;
 
-        // Measurement State
         window.sniperPoints = []; 
         let lines = []; 
-        let calibrationRatio = null; // mm per pixel
+        let calibrationRatio = null; 
 
-        // Load Sniper Image
         document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -538,7 +582,6 @@
             sniperImg.src = e.detail;
         });
 
-        // Zoom Slider Logic
         zoomSlider?.addEventListener('input', (e) => {
             if(!sniperImg) return;
             const newScale = parseFloat(e.target.value);
@@ -553,7 +596,6 @@
             drawSniper();
         });
 
-        // Panning Mechanics - MOUSE
         canvas.addEventListener('mousedown', (e) => {
             if(!sniperImg) return;
             isDragging = true;
@@ -572,7 +614,6 @@
         canvas.addEventListener('mouseup', () => { isDragging = false; canvas.style.cursor = 'grab'; });
         canvas.addEventListener('mouseleave', () => { isDragging = false; canvas.style.cursor = 'grab'; });
 
-        // Panning Mechanics - iPAD / TOUCH
         canvas.addEventListener('touchstart', (e) => {
             if(!sniperImg || e.touches.length > 1) return; 
             const touch = e.touches[0];
@@ -598,7 +639,6 @@
         canvas.addEventListener('touchend', () => { isDragging = false; });
         canvas.addEventListener('touchcancel', () => { isDragging = false; });
 
-        // Core Drawing Loop
         function drawSniper() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if(!sniperImg) return;
@@ -666,7 +706,6 @@
             ctx.stroke();
         }
 
-        // Auto-Measurement & Manual Override Logic
         markBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             if(!sniperImg) return alert("Load an image first.");
@@ -701,13 +740,11 @@
                     }
                 } else {
                     const calculatedLength = Math.round(pixelDist * calibrationRatio);
-                    // MANUAL OVERRIDE POPUP
                     const finalLength = prompt("Calculated measurement (mm). Edit if needed:", calculatedLength);
                     
                     if(finalLength && !isNaN(finalLength)) {
                         lines.push({ p1: p1Index, p2: p2Index, realLength: Math.round(finalLength) });
                     } else {
-                        // User hit cancel or cleared the text, remove the dropped pin
                         window.sniperPoints.pop(); 
                     }
                 }
@@ -730,9 +767,6 @@
             }
         }
 
-        // -----------------------------------------------------
-        // SITE MEDIA UPLOAD HANDLER
-        // -----------------------------------------------------
         window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
 
         window.handlePhotoUpload = function(input, category) {
@@ -755,9 +789,6 @@
             input.value = ''; 
         };
 
-        // -----------------------------------------------------
-        // SMART PAMPHLET AUTO-TICKERS
-        // -----------------------------------------------------
         document.getElementById('planningPerms')?.addEventListener('change', (e) => {
             const cb = document.getElementById('cb-planning');
             if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== '');
