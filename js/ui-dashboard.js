@@ -52,7 +52,7 @@ const cloudinaryUrl = "https://api.cloudinary.com/v1_1/dqkhhz0f9/upload";
 window.leadCache = {}; 
 window.currentOpenLeadId = null;
 window.currentFilterMode = 'all';
-window.allLeadsData = []; // Full database clone for financial calculations
+window.allLeadsData = []; 
 
 // --- INIT FINANCIAL SETTINGS ---
 const initFinances = () => {
@@ -61,33 +61,43 @@ const initFinances = () => {
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-    // Auto-fill dates to current month if not saved
-    document.getElementById('finStartDate').value = prefs.start || firstDay.toISOString().split('T')[0];
-    document.getElementById('finEndDate').value = prefs.end || lastDay.toISOString().split('T')[0];
-    document.getElementById('finMonthlyTarget').value = prefs.monthly || 50000;
-    document.getElementById('finYearlyTarget').value = prefs.yearly || 600000;
-    document.getElementById('finCommProfile').value = prefs.comm || "1";
+    const sd = document.getElementById('finStartDate');
+    const ed = document.getElementById('finEndDate');
+    
+    if(sd) sd.value = prefs.start || firstDay.toISOString().split('T')[0];
+    if(ed) ed.value = prefs.end || lastDay.toISOString().split('T')[0];
+    
+    const mt = document.getElementById('finMonthlyTarget');
+    const yt = document.getElementById('finYearlyTarget');
+    const cp = document.getElementById('finCommProfile');
+    
+    if(mt) mt.value = prefs.monthly || 50000;
+    if(yt) yt.value = prefs.yearly || 600000;
+    if(cp) cp.value = prefs.comm || "1";
 };
-// Run on load
 document.addEventListener("DOMContentLoaded", initFinances);
 
 // --- FINANCIAL CALCULATOR ENGINE ---
 window.calcFinances = () => {
-    const sDate = new Date(document.getElementById('finStartDate').value);
-    const eDate = new Date(document.getElementById('finEndDate').value);
-    eDate.setHours(23, 59, 59, 999); // Force end of day inclusion
+    const sDateInput = document.getElementById('finStartDate')?.value;
+    const eDateInput = document.getElementById('finEndDate')?.value;
     
-    const mTarget = parseFloat(document.getElementById('finMonthlyTarget').value) || 0;
-    const yTarget = parseFloat(document.getElementById('finYearlyTarget').value) || 0;
-    const commRate = parseFloat(document.getElementById('finCommProfile').value) / 100;
+    if(!sDateInput || !eDateInput) return; // Wait for DOM
+    
+    const sDate = new Date(sDateInput);
+    const eDate = new Date(eDateInput);
+    eDate.setHours(23, 59, 59, 999); 
+    
+    const mTarget = parseFloat(document.getElementById('finMonthlyTarget')?.value) || 0;
+    const yTarget = parseFloat(document.getElementById('finYearlyTarget')?.value) || 0;
+    const commRate = parseFloat(document.getElementById('finCommProfile')?.value) / 100;
 
-    // Save preferences to memory
     localStorage.setItem('cohi_finances', JSON.stringify({
-        start: document.getElementById('finStartDate').value,
-        end: document.getElementById('finEndDate').value,
+        start: sDateInput,
+        end: eDateInput,
         monthly: mTarget,
         yearly: yTarget,
-        comm: document.getElementById('finCommProfile').value
+        comm: document.getElementById('finCommProfile')?.value
     }));
 
     let pipeline = 0;
@@ -100,42 +110,39 @@ window.calcFinances = () => {
         const status = data.pipelineStatus || "1. Consultation";
         
         if (status !== "Closed Won" && status !== "Closed Lost") {
-            // It's active in the pipeline
             pipeline += val;
         } else if (status === "Closed Won") {
             const updatedStr = data.timestamps?.updatedAt;
             if(updatedStr) {
                 const d = new Date(updatedStr);
-                
-                // Track Period Sold
-                if (d >= sDate && d <= eDate) {
-                    soldPeriod += val;
-                }
-                
-                // Track YTD Sold
-                if (d.getFullYear() === currentYear) {
-                    soldYTD += val;
-                }
+                if (d >= sDate && d <= eDate) soldPeriod += val;
+                if (d.getFullYear() === currentYear) soldYTD += val;
             }
         }
     });
 
-    // Commission Formula: Remove 20% UK VAT to find Net, then multiply by rate
     const commPeriod = (soldPeriod / 1.2) * commRate;
 
-    // Output to UI
-    document.getElementById('hudPipeline').innerText = `£${pipeline.toLocaleString()}`;
-    document.getElementById('hudSoldPeriod').innerText = `£${soldPeriod.toLocaleString()}`;
-    document.getElementById('hudCommPeriod').innerText = `£${commPeriod.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    const elPipe = document.getElementById('hudPipeline');
+    const elSold = document.getElementById('hudSoldPeriod');
+    const elComm = document.getElementById('hudCommPeriod');
+    
+    if(elPipe) elPipe.innerText = `£${pipeline.toLocaleString()}`;
+    if(elSold) elSold.innerText = `£${soldPeriod.toLocaleString()}`;
+    if(elComm) elComm.innerText = `£${commPeriod.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
     
     const mPerc = mTarget > 0 ? ((soldPeriod / mTarget) * 100).toFixed(1) : 0;
     const yPerc = yTarget > 0 ? ((soldYTD / yTarget) * 100).toFixed(1) : 0;
     
-    document.getElementById('hudMonthlyVs').innerText = `${mPerc}%`;
-    document.getElementById('barMonthly').style.width = `${Math.min(mPerc, 100)}%`;
+    const elMVs = document.getElementById('hudMonthlyVs');
+    const elMBar = document.getElementById('barMonthly');
+    const elYVs = document.getElementById('hudYearlyVs');
+    const elYBar = document.getElementById('barYearly');
     
-    document.getElementById('hudYearlyVs').innerText = `${yPerc}%`;
-    document.getElementById('barYearly').style.width = `${Math.min(yPerc, 100)}%`;
+    if(elMVs) elMVs.innerText = `${mPerc}%`;
+    if(elMBar) elMBar.style.width = `${Math.min(mPerc, 100)}%`;
+    if(elYVs) elYVs.innerText = `${yPerc}%`;
+    if(elYBar) elYBar.style.width = `${Math.min(yPerc, 100)}%`;
 };
 
 // --- RAG CALCULATOR ---
@@ -162,20 +169,20 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
     let actionRequired = 0;
     let allTimeWon = 0;
 
-    window.allLeadsData = []; // Reset financial engine data array
+    window.allLeadsData = []; 
 
     snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const id = docSnap.id;
         
         window.leadCache[id] = data; 
-        window.allLeadsData.push({ id, ...data }); // Push to financial memory
+        window.allLeadsData.push({ id, ...data }); 
 
         const currentStage = data.pipelineStatus || "1. Consultation"; 
         
         if (currentStage === "Closed Won") {
             allTimeWon++;
-            return; // Hide from active kanban board
+            return; 
         } else if (currentStage === "Closed Lost") {
             return;
         }
@@ -243,18 +250,21 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
         if(targetCol) targetCol.innerHTML += cardHTML;
     });
 
-    // Populate the Interactive Filter Counters
-    if(document.getElementById('hudActiveLeads')) document.getElementById('hudActiveLeads').innerText = activeLeads;
-    if(document.getElementById('hudSurveys')) document.getElementById('hudSurveys').innerText = surveysPending;
-    if(document.getElementById('hudAction')) document.getElementById('hudAction').innerText = actionRequired;
-    if(document.getElementById('hudTotalWon')) document.getElementById('hudTotalWon').innerText = allTimeWon;
+    const elActive = document.getElementById('hudActiveLeads');
+    const elSurv = document.getElementById('hudSurveys');
+    const elAct = document.getElementById('hudAction');
+    const elWon = document.getElementById('hudTotalWon');
+
+    if(elActive) elActive.innerText = activeLeads;
+    if(elSurv) elSurv.innerText = surveysPending;
+    if(elAct) elAct.innerText = actionRequired;
+    if(elWon) elWon.innerText = allTimeWon;
 
     if(cols["1. Consultation"]) document.getElementById('count-stage1').innerText = cols["1. Consultation"].children.length;
     if(cols["2. Quote Sent"]) document.getElementById('count-stage2').innerText = cols["2. Quote Sent"].children.length;
     if(cols["3. Technical Survey"]) document.getElementById('count-stage3').innerText = cols["3. Technical Survey"].children.length;
     if(cols["4. Handover"]) document.getElementById('count-stage4').innerText = cols["4. Handover"].children.length;
     
-    // Trigger Filters & Financial Recalculations automatically
     window.applyFilters(); 
     window.calcFinances();
 });
@@ -262,14 +272,15 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
 // --- FILTERING ENGINE ---
 window.filterByMetric = (mode) => {
     window.currentFilterMode = mode;
-    document.getElementById('btnClearFilters').classList.remove('hidden');
+    document.getElementById('btnClearFilters')?.classList.remove('hidden');
     window.applyFilters();
 };
 
 window.clearFilters = () => {
     window.currentFilterMode = 'all';
-    document.getElementById('searchInput').value = '';
-    document.getElementById('btnClearFilters').classList.add('hidden');
+    const sInput = document.getElementById('searchInput');
+    if(sInput) sInput.value = '';
+    document.getElementById('btnClearFilters')?.classList.add('hidden');
     window.applyFilters();
 };
 
@@ -287,26 +298,30 @@ window.applyFilters = () => {
         if (query && !searchData.includes(query)) show = false;
         if (mode === 'action' && !isAction) show = false;
         if (mode === 'survey' && !isSurvey) show = false;
-        if (mode === 'won') show = false; // "Won" deals are archived, hide kanban when exploring this
+        if (mode === 'won') show = false; 
 
         card.style.display = show ? 'block' : 'none';
     });
 };
 
 window.filterLeads = () => {
-    if(document.getElementById('searchInput').value.trim() !== '') {
-        document.getElementById('btnClearFilters').classList.remove('hidden');
+    if(document.getElementById('searchInput')?.value.trim() !== '') {
+        document.getElementById('btnClearFilters')?.classList.remove('hidden');
     }
     window.applyFilters();
 };
 
 // --- TECHNICAL DRAWER CONTROLS ---
 window.calculateVAT = () => {
-    const val = parseFloat(document.getElementById('financeValueInput').value) || 0;
+    const val = parseFloat(document.getElementById('financeValueInput')?.value) || 0;
     const net = val / 1.2;
     const vat = val - net;
-    document.getElementById('netCalc').innerText = `£${net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    document.getElementById('vatCalc').innerText = `£${vat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    
+    const nc = document.getElementById('netCalc');
+    const vc = document.getElementById('vatCalc');
+    
+    if(nc) nc.innerText = `£${net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    if(vc) vc.innerText = `£${vat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 };
 
 window.openDrawer = (id) => {
@@ -317,48 +332,61 @@ window.openDrawer = (id) => {
     document.getElementById('drawerLeadName').innerText = data.customerProfile?.leadName || 'Unnamed Lead';
     const brandData = BRAND_CONFIG[data.brand] || BRAND_CONFIG["YorkshireWindows"];
     const brandBadge = document.getElementById('drawerBrand');
-    brandBadge.innerText = brandData.name;
-    brandBadge.style.color = brandData.theme;
+    if(brandBadge) {
+        brandBadge.innerText = brandData.name;
+        brandBadge.style.color = brandData.theme;
+    }
 
-    document.getElementById('ownerInput').value = data.owner || 'Unassigned';
-    document.getElementById('followUpInput').value = data.followUpDate || '';
-    document.getElementById('financeValueInput').value = data.contractValue || '';
-    document.getElementById('financeStatusInput').value = data.financeStatus || 'TBC';
-    document.getElementById('techNotesInput').value = data.technicalNotes || '';
+    const oIn = document.getElementById('ownerInput');
+    const fIn = document.getElementById('followUpInput');
+    const fvIn = document.getElementById('financeValueInput');
+    const fsIn = document.getElementById('financeStatusInput');
+    const tnIn = document.getElementById('techNotesInput');
+
+    if(oIn) oIn.value = data.owner || 'Unassigned';
+    if(fIn) fIn.value = data.followUpDate || '';
+    if(fvIn) fvIn.value = data.contractValue || '';
+    if(fsIn) fsIn.value = data.financeStatus || 'TBC';
+    if(tnIn) tnIn.value = data.technicalNotes || '';
+    
     window.calculateVAT();
 
     const rillaInput = document.getElementById('rillaInput');
     const rillaBtn = document.getElementById('rillaOpenBtn');
-    if(data.rillaLink) {
-        rillaInput.value = data.rillaLink;
-        rillaBtn.href = data.rillaLink;
-        rillaBtn.classList.remove('hidden');
-    } else {
-        rillaInput.value = '';
-        rillaBtn.classList.add('hidden');
+    if(rillaInput && rillaBtn) {
+        if(data.rillaLink) {
+            rillaInput.value = data.rillaLink;
+            rillaBtn.href = data.rillaLink;
+            rillaBtn.classList.remove('hidden');
+        } else {
+            rillaInput.value = '';
+            rillaBtn.classList.add('hidden');
+        }
     }
 
     const gallery = document.getElementById('sniperGallery');
-    const markups = data.surveyPhotos || data.sniperMarkups || []; 
-    if (markups.length > 0) {
-        gallery.innerHTML = '';
-        gallery.classList.remove('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
-        markups.forEach(url => {
-            gallery.innerHTML += `<a href="${url}" target="_blank" class="block"><img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-700 hover:border-[#0dcaf0] transition cursor-pointer shadow-md"></a>`;
-        });
-    } else {
-        gallery.innerHTML = 'No site photos synced yet.';
-        gallery.classList.add('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
+    if(gallery) {
+        const markups = data.surveyPhotos || data.sniperMarkups || []; 
+        if (markups.length > 0) {
+            gallery.innerHTML = '';
+            gallery.classList.remove('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
+            markups.forEach(url => {
+                gallery.innerHTML += `<a href="${url}" target="_blank" class="block"><img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-700 hover:border-[#0dcaf0] transition cursor-pointer shadow-md"></a>`;
+            });
+        } else {
+            gallery.innerHTML = 'No site photos synced yet.';
+            gallery.classList.add('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
+        }
     }
 
-    document.getElementById('drawerOverlay').classList.remove('hidden');
-    document.getElementById('techDrawer').classList.remove('translate-x-full');
+    document.getElementById('drawerOverlay')?.classList.remove('hidden');
+    document.getElementById('techDrawer')?.classList.remove('translate-x-full');
 };
 
 window.closeDrawer = () => {
     window.currentOpenLeadId = null;
-    document.getElementById('drawerOverlay').classList.add('hidden');
-    document.getElementById('techDrawer').classList.add('translate-x-full');
+    document.getElementById('drawerOverlay')?.classList.add('hidden');
+    document.getElementById('techDrawer')?.classList.add('translate-x-full');
 };
 
 window.saveDrawerData = async (type) => {
@@ -367,15 +395,15 @@ window.saveDrawerData = async (type) => {
     
     const updates = {};
     if(type === 'management') {
-        updates.owner = document.getElementById('ownerInput').value;
-        updates.followUpDate = document.getElementById('followUpInput').value;
+        updates.owner = document.getElementById('ownerInput')?.value;
+        updates.followUpDate = document.getElementById('followUpInput')?.value;
     } else if(type === 'rilla') {
-        updates.rillaLink = document.getElementById('rillaInput').value.trim();
+        updates.rillaLink = document.getElementById('rillaInput')?.value.trim();
     } else if (type === 'notes') {
-        updates.technicalNotes = document.getElementById('techNotesInput').value.trim();
+        updates.technicalNotes = document.getElementById('techNotesInput')?.value.trim();
     } else if (type === 'finance') {
-        updates.contractValue = document.getElementById('financeValueInput').value.trim();
-        updates.financeStatus = document.getElementById('financeStatusInput').value;
+        updates.contractValue = document.getElementById('financeValueInput')?.value.trim();
+        updates.financeStatus = document.getElementById('financeStatusInput')?.value;
     }
     updates["timestamps.updatedAt"] = new Date().toISOString();
     
