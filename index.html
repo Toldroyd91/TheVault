@@ -6,12 +6,34 @@
     <title>COHI | Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .luxury-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 8px; }
-        .luxury-input:focus { outline: none; border-color: #0dcaf0; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .metric-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5); }
+        .glass-panel { 
+            background: rgba(15, 23, 42, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 16px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+        }
+        .luxury-input { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: white; 
+            border-radius: 8px; 
+        }
+        .luxury-input:focus { 
+            outline: none; 
+            border-color: #0dcaf0; 
+        }
+        .hide-scrollbar::-webkit-scrollbar { 
+            display: none; 
+        }
+        .metric-card { 
+            cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+        }
+        .metric-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5); 
+        }
     </style>
 </head>
 <body class="bg-gray-950 text-white min-h-screen flex flex-col">
