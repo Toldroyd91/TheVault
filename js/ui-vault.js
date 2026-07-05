@@ -171,13 +171,92 @@ async function attemptDecrypt() {
                 uiGallery.innerHTML = '<div class="text-xs text-gray-500 italic col-span-2 p-4 bg-[#161b22] border border-[#30363d] rounded-lg">Site imagery is currently processing.</div>';
             }
             
-            const qc = document.getElementById('quoteContainer');
-            if(qc && data.uDesignBridge?.quotePdfUrl) {
-                qc.innerHTML = `<div class="mt-6 animate-[fadeIn_0.5s_ease-out]"><a href="${data.uDesignBridge.quotePdfUrl}" target="_blank" download class="w-full flex items-center justify-between p-4 rounded-xl text-black font-bold hover:scale-[1.02] transition shadow-[0_0_15px_rgba(13,202,240,0.3)]" style="background-color: ${brandData.theme}"><span>📄 View Official Proposal</span><span>⬇️</span></a></div>`;
+            // ---------------------------------------------------------
+            // THE SALES FUNNEL ENGINE (TEASE VS UNLOCK LOGIC)
+            // ---------------------------------------------------------
+            const financialContainer = document.getElementById('quoteContainer');
+            
+            if (financialContainer) {
+                const accessLevel = data.vaultAccessLevel || 'survey_only';
+
+                // STAGE 1: Survey Only (No designs yet)
+                if (accessLevel === 'survey_only') {
+                    financialContainer.innerHTML = `
+                        <div class="mt-6 p-6 rounded-xl border border-[#30363d] bg-[#161b22] text-center">
+                            <p class="text-sm text-gray-400">Your Lead Designer is currently compiling your bespoke UDesign architectural renders.</p>
+                            <div class="mt-4 inline-block px-4 py-2 bg-[#090d13] border border-[#30363d] rounded-lg text-xs font-bold uppercase tracking-widest text-[#0dcaf0] animate-pulse">Design Phase in Progress...</div>
+                        </div>`;
+                } 
+                
+                // STAGE 2: Design Tease (Designs are ready, price is locked)
+                else if (accessLevel === 'design_tease') {
+                    // Render the UDesign photos directly into the main gallery to show them off
+                    if (data.uDesignData?.renders && data.uDesignData.renders.length > 0) {
+                        data.uDesignData.renders.forEach(url => {
+                            uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border-2 border-[#E50914] shadow-[0_0_15px_rgba(229,9,20,0.3)] hover:scale-105 transition h-24"><img src="${url}" class="w-full h-full object-cover"></a>`;
+                        });
+                    }
+
+                    financialContainer.innerHTML = `
+                        <div class="mt-8 relative rounded-xl overflow-hidden border border-[#30363d] bg-[url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')] bg-cover bg-center h-64">
+                            <!-- Frosted Glass Lock Overlay -->
+                            <div class="absolute inset-0 backdrop-blur-xl bg-[#090d13]/80 flex flex-col items-center justify-center p-6 text-center z-10">
+                                <div class="w-16 h-16 bg-[#161b22] rounded-full flex items-center justify-center border border-[#30363d] mb-4 shadow-xl">
+                                    <span class="text-2xl">🔒</span>
+                                </div>
+                                <h3 class="text-xl font-black text-white uppercase tracking-widest mb-2">Bespoke Investment Proposal Ready</h3>
+                                <p class="text-sm text-gray-400 max-w-md">Your architectural blueprints and structural calculations are complete. Please book your follow-up design appointment to unlock your financial breakdown and digital contract.</p>
+                                <button onclick="window.location.href='mailto:sales@cohomeimprovements.com?subject=Book Follow Up'" class="mt-6 px-6 py-3 bg-[#0dcaf0] text-black font-black uppercase tracking-widest text-xs rounded-lg hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(13,202,240,0.4)]">Request Appointment</button>
+                            </div>
+                        </div>`;
+                }
+
+                // STAGE 3: Full Access (Flicked during the meeting)
+                else if (accessLevel === 'full_access') {
+                    // Ensure UDesign renders stay visible in the gallery
+                    if (data.uDesignData?.renders && data.uDesignData.renders.length > 0) {
+                        data.uDesignData.renders.forEach(url => {
+                            uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border-2 border-[#238636] shadow-[0_0_15px_rgba(35,134,54,0.3)] hover:scale-105 transition h-24"><img src="${url}" class="w-full h-full object-cover"></a>`;
+                        });
+                    }
+
+                    const totalVal = data.uDesignData?.totalPrice || 0;
+                    const depositVal = data.uDesignData?.deposit || 0;
+                    const total = parseFloat(totalVal).toLocaleString('en-GB', {style: 'currency', currency: 'GBP'});
+                    const deposit = parseFloat(depositVal).toLocaleString('en-GB', {style: 'currency', currency: 'GBP'});
+
+                    financialContainer.innerHTML = `
+                        <div class="mt-8 animate-[fadeIn_0.8s_ease-out]">
+                            <h3 class="text-sm font-black text-[#238636] uppercase tracking-widest mb-4 pb-2 border-b border-[#30363d] flex items-center gap-2">
+                                <span>🔓</span> Official Investment Breakdown
+                            </h3>
+                            
+                            <div class="bg-[#161b22] rounded-xl border border-[#30363d] overflow-hidden shadow-2xl">
+                                <div class="p-6 border-b border-[#30363d] flex justify-between items-center bg-[#090d13]">
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Contract Total</p>
+                                        <p class="text-4xl font-black text-white tracking-tighter">${total}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Agreed Deposit</p>
+                                        <p class="text-xl font-bold text-[#0dcaf0]">${deposit}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-6 bg-[#161b22]">
+                                    <p class="text-xs text-gray-400 leading-relaxed mb-6">By digitally signing below, you confirm acceptance of the designs finalized by your surveyor and agree to the payment summary outlined above. Ground conditions are subject to test digs.</p>
+                                    
+                                    <button class="w-full py-4 bg-[#238636] hover:bg-green-600 text-white font-black text-lg uppercase tracking-widest rounded-xl transition shadow-[0_0_20px_rgba(35,134,54,0.4)] flex justify-center items-center gap-2">
+                                        <span>✍️</span> ACCEPT & DIGITALLY SIGN
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                }
             }
         });
 
-        // Chat logic remains unchanged
+        // Chat Logic
         const chatRef = collection(db, `surveys/${projectId}/messages`);
         onSnapshot(query(chatRef, orderBy("timestamp", "asc")), (msgSnap) => {
             const win = document.getElementById('chat-window');
