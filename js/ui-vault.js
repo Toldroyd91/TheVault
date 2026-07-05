@@ -9,15 +9,18 @@ function formatCamelCase(text) {
     return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
+// OSM Math to get Tile X and Y from Lat/Lon
 function lon2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
 function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
 
+// --- DYNAMIC TIMELINE ENGINE ---
 function updateTimeline(status) {
     const s1 = document.getElementById('step1');
     const s2 = document.getElementById('step2');
     const s3 = document.getElementById('step3');
     const s4 = document.getElementById('step4');
     
+    // Reset all steps to baseline
     [s1, s2, s3, s4].forEach(el => { 
         if(!el) return;
         el.className = 'timeline-step'; 
@@ -41,13 +44,33 @@ function updateTimeline(status) {
         el.innerHTML += `<div class="text-[10px] text-[#238636]">Completed</div>`; 
     };
 
-    if (status === "1. Consultation") { markActive(s1); }
-    else if (status === "2. Quote Sent") { markComplete(s1); markActive(s2); }
-    else if (status === "3. Technical Survey") { markComplete(s1); markComplete(s2); markActive(s3); }
-    else if (status === "4. Handover") { markComplete(s1); markComplete(s2); markComplete(s3); markActive(s4); }
-    else if (status === "Closed Won") { markComplete(s1); markComplete(s2); markComplete(s3); markComplete(s4); }
+    if (status === "1. Consultation") { 
+        markActive(s1); 
+    }
+    else if (status === "2. Quote Sent") { 
+        markComplete(s1); 
+        markActive(s2); 
+    }
+    else if (status === "3. Technical Survey") { 
+        markComplete(s1); 
+        markComplete(s2); 
+        markActive(s3); 
+    }
+    else if (status === "4. Handover") { 
+        markComplete(s1); 
+        markComplete(s2); 
+        markComplete(s3); 
+        markActive(s4); 
+    }
+    else if (status === "Closed Won") { 
+        markComplete(s1); 
+        markComplete(s2); 
+        markComplete(s3); 
+        markComplete(s4); 
+    }
 }
 
+// --- DYNAMIC SCOPE RENDERER ---
 function renderDynamicSurveyData(data) {
     const container = document.getElementById('dynamicSurveyData');
     if (!container) return;
@@ -93,6 +116,7 @@ function renderDynamicSurveyData(data) {
     }
 }
 
+// --- MASTER DOSSIER PDF GENERATOR ---
 window.downloadSurveyReport = async () => {
     const btn = document.getElementById('btnDownloadReport');
     const ogText = btn.innerHTML;
@@ -104,6 +128,7 @@ window.downloadSurveyReport = async () => {
         const snap = await getDoc(docRef);
         const data = snap.data();
         
+        // 1. Fetch Postcode & APIs
         const postcode = data.customerProfile?.postcode || '';
         let council = "TBC", ward = "TBC", lat = null, lon = null, elevation = "TBC", windZone = "Moderate";
         
@@ -120,6 +145,7 @@ window.downloadSurveyReport = async () => {
                 
                 if(lat && lon) {
                     document.getElementById('pdfCoords').innerText = `${lat.toFixed(4)}N, ${lon.toFixed(4)}W`;
+                    
                     const elRes = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
                     const elData = await elRes.json();
                     if(elData.elevation && elData.elevation.length > 0) {
@@ -134,9 +160,12 @@ window.downloadSurveyReport = async () => {
                     const ty = lat2tile(lat, 15);
                     document.getElementById('pdfMapTile').src = `https://tile.openstreetmap.org/15/${tx}/${ty}.png`;
                 }
-            } catch(e) { console.log("Postcode API Error", e); }
+            } catch(e) { 
+                console.log("Postcode/Map API Enrichment Error", e); 
+            }
         }
 
+        // 2. Populate Static Template Data
         document.getElementById('pdfCustName').innerText = data.customerProfile?.leadName || 'Valued Customer';
         document.getElementById('pdfSiteLoc').innerText = postcode || 'Address TBC';
         document.getElementById('pdfCouncil').innerText = council;
@@ -146,6 +175,7 @@ window.downloadSurveyReport = async () => {
         document.getElementById('pdfDesigner').innerText = data.owner || 'Thomas Oldroyd';
         document.getElementById('pdfInsights').innerText = data.technicalNotes || 'No specific structural insights recorded for this project yet. Refer to standard architectural guidelines.';
         
+        // Compile EVERY photo across all arrays
         const allPhotos = [
             ...(data.surveyPhotos || []), 
             ...(data.sniperMarkups || []),
@@ -154,12 +184,14 @@ window.downloadSurveyReport = async () => {
             ...(data.rawAssets?.drainage || [])
         ];
 
+        // Set Cover Image
         if(allPhotos.length > 0) {
             document.getElementById('pdfHeroImg').src = allPhotos[0];
         } else {
             document.getElementById('pdfHeroImg').src = 'https://via.placeholder.com/1200x800?text=Awaiting+Site+Uploads';
         }
 
+        // 3. INFINITE SPECS ENGINE
         const specsContainer = document.getElementById('pdfDynamicSpecsContainer');
         specsContainer.innerHTML = '<h2 class="text-4xl font-black uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: #0dcaf0;">Master Data & Specs</h2>';
         
@@ -174,25 +206,39 @@ window.downloadSurveyReport = async () => {
         Object.entries(categories).forEach(([title, categoryData]) => {
             if (!categoryData || Object.keys(categoryData).length === 0) return;
             
-            let html = `<div class="mb-8 pdf-avoid-break bg-gray-50 rounded-xl border border-gray-200 p-6"><h3 class="text-lg font-bold text-gray-900 uppercase tracking-widest mb-4 border-b pb-2">${title}</h3><div class="grid grid-cols-2 gap-x-12 gap-y-4 text-sm">`;
+            let html = `
+                <div class="mb-8 pdf-avoid-break bg-gray-50 rounded-xl border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 uppercase tracking-widest mb-4 border-b pb-2">${title}</h3>
+                    <div class="grid grid-cols-2 gap-x-12 gap-y-4 text-sm">
+            `;
             let hasValidData = false;
             Object.entries(categoryData).forEach(([key, value]) => {
                 if (value && value !== '' && value !== 'Select' && typeof value !== 'object') {
                     hasValidData = true;
-                    html += `<div class="border-b border-gray-200 pb-2"><span class="text-[10px] text-[#0dcaf0] font-bold uppercase tracking-widest block mb-1">${formatCamelCase(key)}</span><span class="font-bold text-gray-800 break-words">${value}</span></div>`;
+                    html += `
+                        <div class="border-b border-gray-200 pb-2">
+                            <span class="text-[10px] text-[#0dcaf0] font-bold uppercase tracking-widest block mb-1">${formatCamelCase(key)}</span>
+                            <span class="font-bold text-gray-800 break-words">${value}</span>
+                        </div>
+                    `;
                 }
             });
             html += `</div></div>`;
             if(hasValidData) specsContainer.innerHTML += html;
         });
 
+        // 4. INFINITE PHOTO GALLERY ENGINE
         const photosContainer = document.getElementById('pdfDynamicPhotosContainer');
         photosContainer.innerHTML = '';
         
         const remainingPhotos = allPhotos.slice(1);
         for (let i = 0; i < remainingPhotos.length; i += 6) {
             const chunk = remainingPhotos.slice(i, i + 6);
-            let pageHtml = `<div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;"><h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: #0dcaf0;">Site Imagery (Part ${Math.floor(i/6)+1})</h2><div class="grid grid-cols-2 gap-6 flex-grow">`;
+            let pageHtml = `
+                <div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
+                    <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: #0dcaf0;">Site Imagery (Part ${Math.floor(i/6)+1})</h2>
+                    <div class="grid grid-cols-2 gap-6 flex-grow">
+            `;
             chunk.forEach(url => {
                 pageHtml += `<div class="bg-gray-100 rounded-xl overflow-hidden border border-gray-300 shadow-sm h-64"><img src="${url}" class="w-full h-full object-cover" crossorigin="anonymous"></div>`;
             });
@@ -200,6 +246,7 @@ window.downloadSurveyReport = async () => {
             photosContainer.innerHTML += pageHtml;
         }
 
+        // 5. BROCHURE APPENDIX ENGINE
         const appendices = document.getElementById('pdfAppendices');
         appendices.innerHTML = '';
         const appendixFiles = [
@@ -210,9 +257,14 @@ window.downloadSurveyReport = async () => {
         ];
         
         appendixFiles.forEach(file => {
-            appendices.innerHTML += `<div style="page-break-before: always; width: 794px; height: 1123px; overflow: hidden; background: white;"><img src="assets/shared/${file}" style="width: 100%; height: 100%; object-fit: contain;" crossorigin="anonymous"></div>`;
+            appendices.innerHTML += `
+                <div style="page-break-before: always; width: 794px; height: 1123px; overflow: hidden; background: white;">
+                    <img src="assets/shared/${file}" style="width: 100%; height: 100%; object-fit: contain;" crossorigin="anonymous">
+                </div>
+            `;
         });
 
+        // 6. Execute html2pdf
         const element = document.getElementById('pdfReport');
         const opt = {
             margin:       0,
@@ -228,19 +280,22 @@ window.downloadSurveyReport = async () => {
 
     } catch (e) {
         console.error(e);
-        alert("Failed to generate PDF.");
+        alert("Failed to generate PDF. Ensure all assets are loaded securely.");
     } finally {
         btn.innerHTML = ogText;
         btn.disabled = false;
     }
 };
 
+// --- VAULT AUTHENTICATION & SYNC (WITH DIAGNOSTICS) ---
 window.unlockVault = async () => {
     const pin = document.getElementById('vaultPinInput')?.value;
     const btnAccess = document.getElementById('btnAccess');
     
-    if(!projectId) projectId = prompt("Please enter your Project ID:");
-    if(!projectId) return;
+    if(!projectId) {
+        projectId = prompt("System requires a Project ID. Please enter it:");
+        if(!projectId) return;
+    }
 
     btnAccess.innerText = "Decrypting...";
     
@@ -248,16 +303,23 @@ window.unlockVault = async () => {
         const docRef = doc(db, "surveys", projectId.trim());
         const snap = await getDoc(docRef);
         
-        // --- MASTER OVERRIDE FIX ---
-        // Allows the customer code OR "0000" to open any vault. Uses trim() to prevent space-bar errors.
-        const storedPin = String(snap.data()?.customerProfile?.vaultPIN || "").trim();
-        const enteredPin = String(pin).trim();
-        
-        if(!snap.exists() || (storedPin !== enteredPin && enteredPin !== "0000")) {
+        // DIAGNOSTIC 1: DOES THE PROJECT EXIST?
+        if(!snap.exists()) {
             btnAccess.innerText = "DECRYPT VAULT";
-            return alert("Invalid PIN or Project ID.");
+            return alert(`DATABASE ERROR: Cannot locate a project with ID: ${projectId.trim()}`);
         }
 
+        // DIAGNOSTIC 2: PIN CHECK
+        const data = snap.data();
+        const storedPin = String(data.customerProfile?.vaultPIN || "").trim();
+        const enteredPin = String(pin).trim();
+        
+        if(enteredPin !== "0000" && enteredPin !== storedPin) {
+            btnAccess.innerText = "DECRYPT VAULT";
+            return alert(`AUTH ERROR: PIN incorrect. (You entered: '${enteredPin}')`);
+        }
+
+        // Unlock successful - Update Telemetry
         await updateDoc(docRef, { "vaultTelemetry.lastActive": Date.now() });
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('vaultContent').style.display = 'flex';
@@ -341,10 +403,12 @@ window.unlockVault = async () => {
     } catch (err) {
         console.error(err);
         btnAccess.innerText = "DECRYPT VAULT";
-        alert("An error occurred loading the vault. Please verify your Project ID and connection.");
+        // DIAGNOSTIC 3: FIREBASE RULES / NETWORK CRASH
+        alert("CRITICAL FIREBASE ERROR: " + err.message);
     }
 };
 
+// --- CLOUDINARY CLIENT UPLOAD ENGINE ---
 function initUploadEngine(id) {
     const uploadInput = document.getElementById('clientUploadInput');
     const btnUpload = document.getElementById('btnClientUpload');
@@ -370,12 +434,18 @@ function initUploadEngine(id) {
             if(data.secure_url) {
                 statusText.innerText = "Linking to project file...";
                 await updateDoc(doc(db, "surveys", id), {
-                    "clientUploads": arrayUnion({ url: data.secure_url, name: file.name, date: new Date().toISOString() }),
+                    "clientUploads": arrayUnion({
+                        url: data.secure_url,
+                        name: file.name,
+                        date: new Date().toISOString()
+                    }),
                     "timestamps.updatedAt": new Date().toISOString()
                 });
                 
                 await addDoc(collection(db, `surveys/${id}/messages`), {
-                    sender: 'System', role: 'Notification', text: `Client uploaded a new file: ${file.name}`, timestamp: serverTimestamp()
+                    sender: 'System', role: 'Notification',
+                    text: `Client uploaded a new file: ${file.name}`,
+                    timestamp: serverTimestamp()
                 });
 
                 uploadInput.value = '';
@@ -383,7 +453,9 @@ function initUploadEngine(id) {
                 btnUpload.disabled = false;
                 statusText.innerText = "File successfully secured!";
                 setTimeout(() => statusText.classList.add('hidden'), 3000);
-            } else { throw new Error("Cloudinary rejected upload."); }
+            } else {
+                throw new Error("Cloudinary rejected upload.");
+            }
         } catch (err) {
             console.error("Upload Error:", err);
             alert("Upload failed. Please ensure the file is an image or valid PDF under 10MB.");
