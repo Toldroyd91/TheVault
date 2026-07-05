@@ -4,14 +4,12 @@ import {
     signOut, BRAND_CONFIG 
 } from './core-firebase.js';
 
-// --- 1. SECURE AUTHENTICATION ENGINE ---
 const authGate = document.getElementById('authGate');
 const dashboardApp = document.getElementById('dashboardApp');
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const idTokenResult = await user.getIdTokenResult();
-        // Check for custom claims or explicit master email access
         if (idTokenResult.claims.role === 'designer' || user.email.toLowerCase() === 'thomasoldroyd@yorkshirewindows.com') {
             if(authGate) authGate.classList.add('hidden');
             if(dashboardApp) dashboardApp.classList.remove('hidden');
@@ -32,7 +30,6 @@ onAuthStateChanged(auth, async (user) => {
 document.getElementById('btnLogin')?.addEventListener('click', async () => {
     const email = document.getElementById('authEmail')?.value.trim();
     const pass = document.getElementById('authPassword')?.value;
-    
     if(!email || !pass) return alert("Please enter both your secure email and password.");
     
     const btn = document.getElementById('btnLogin');
@@ -47,29 +44,110 @@ document.getElementById('btnLogin')?.addEventListener('click', async () => {
     }
 });
 
-document.getElementById('btnLogout')?.addEventListener('click', () => {
-    signOut(auth);
-});
+document.getElementById('btnLogout')?.addEventListener('click', () => signOut(auth));
 
-// --- 2. GLOBAL SYSTEM VARIABLES ---
 const cloudinaryUrl = "https://api.cloudinary.com/v1_1/dqkhhz0f9/upload";
+
+// --- GLOBAL APP STATE ---
 window.leadCache = {}; 
 window.currentOpenLeadId = null;
 window.currentFilterMode = 'all';
+window.allLeadsData = []; // Full database clone for financial calculations
 
-// --- 3. RAG STATUS CALCULATOR (Red, Amber, Green) ---
+// --- INIT FINANCIAL SETTINGS ---
+const initFinances = () => {
+    const prefs = JSON.parse(localStorage.getItem('cohi_finances') || '{}');
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    // Auto-fill dates to current month if not saved
+    document.getElementById('finStartDate').value = prefs.start || firstDay.toISOString().split('T')[0];
+    document.getElementById('finEndDate').value = prefs.end || lastDay.toISOString().split('T')[0];
+    document.getElementById('finMonthlyTarget').value = prefs.monthly || 50000;
+    document.getElementById('finYearlyTarget').value = prefs.yearly || 600000;
+    document.getElementById('finCommProfile').value = prefs.comm || "1";
+};
+// Run on load
+document.addEventListener("DOMContentLoaded", initFinances);
+
+// --- FINANCIAL CALCULATOR ENGINE ---
+window.calcFinances = () => {
+    const sDate = new Date(document.getElementById('finStartDate').value);
+    const eDate = new Date(document.getElementById('finEndDate').value);
+    eDate.setHours(23, 59, 59, 999); // Force end of day inclusion
+    
+    const mTarget = parseFloat(document.getElementById('finMonthlyTarget').value) || 0;
+    const yTarget = parseFloat(document.getElementById('finYearlyTarget').value) || 0;
+    const commRate = parseFloat(document.getElementById('finCommProfile').value) / 100;
+
+    // Save preferences to memory
+    localStorage.setItem('cohi_finances', JSON.stringify({
+        start: document.getElementById('finStartDate').value,
+        end: document.getElementById('finEndDate').value,
+        monthly: mTarget,
+        yearly: yTarget,
+        comm: document.getElementById('finCommProfile').value
+    }));
+
+    let pipeline = 0;
+    let soldPeriod = 0;
+    let soldYTD = 0;
+    const currentYear = new Date().getFullYear();
+
+    window.allLeadsData.forEach(data => {
+        const val = parseFloat(data.contractValue) || 0;
+        const status = data.pipelineStatus || "1. Consultation";
+        
+        if (status !== "Closed Won" && status !== "Closed Lost") {
+            // It's active in the pipeline
+            pipeline += val;
+        } else if (status === "Closed Won") {
+            const updatedStr = data.timestamps?.updatedAt;
+            if(updatedStr) {
+                const d = new Date(updatedStr);
+                
+                // Track Period Sold
+                if (d >= sDate && d <= eDate) {
+                    soldPeriod += val;
+                }
+                
+                // Track YTD Sold
+                if (d.getFullYear() === currentYear) {
+                    soldYTD += val;
+                }
+            }
+        }
+    });
+
+    // Commission Formula: Remove 20% UK VAT to find Net, then multiply by rate
+    const commPeriod = (soldPeriod / 1.2) * commRate;
+
+    // Output to UI
+    document.getElementById('hudPipeline').innerText = `£${pipeline.toLocaleString()}`;
+    document.getElementById('hudSoldPeriod').innerText = `£${soldPeriod.toLocaleString()}`;
+    document.getElementById('hudCommPeriod').innerText = `£${commPeriod.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    
+    const mPerc = mTarget > 0 ? ((soldPeriod / mTarget) * 100).toFixed(1) : 0;
+    const yPerc = yTarget > 0 ? ((soldYTD / yTarget) * 100).toFixed(1) : 0;
+    
+    document.getElementById('hudMonthlyVs').innerText = `${mPerc}%`;
+    document.getElementById('barMonthly').style.width = `${Math.min(mPerc, 100)}%`;
+    
+    document.getElementById('hudYearlyVs').innerText = `${yPerc}%`;
+    document.getElementById('barYearly').style.width = `${Math.min(yPerc, 100)}%`;
+};
+
+// --- RAG CALCULATOR ---
 function calculateRAG(lastActiveMs) {
     if (!lastActiveMs) return { color: 'text-gray-500', dot: '⚪', label: 'No Interaction', isActionRequired: true };
-    
     const hoursSince = (Date.now() - lastActiveMs) / (1000 * 60 * 60);
-    
     if (hoursSince < 24) return { color: 'text-emerald-400', dot: '🟢', label: 'Highly Engaged', isActionRequired: false };
     if (hoursSince < 72) return { color: 'text-amber-400', dot: '🟡', label: 'Action Required', isActionRequired: true };
-    
     return { color: 'text-rose-500', dot: '🔴', label: 'Going Cold', isActionRequired: true };
 }
 
-// --- 4. REAL-TIME PIPELINE ENGINE ---
+// --- REAL-TIME DATABASE SYNC ---
 onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "desc")), (snapshot) => {
     const cols = {
         "1. Consultation": document.getElementById('col-stage1'),
@@ -77,26 +155,27 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
         "3. Technical Survey": document.getElementById('col-stage3'),
         "4. Handover": document.getElementById('col-stage4')
     };
-    
-    // Clear existing columns before re-rendering to prevent duplicates
     Object.values(cols).forEach(col => { if(col) col.innerHTML = ''; });
 
     let activeLeads = 0;
     let surveysPending = 0;
     let actionRequired = 0;
-    let wonRevenue = 0;
+    let allTimeWon = 0;
+
+    window.allLeadsData = []; // Reset financial engine data array
 
     snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const id = docSnap.id;
-        window.leadCache[id] = data; 
         
+        window.leadCache[id] = data; 
+        window.allLeadsData.push({ id, ...data }); // Push to financial memory
+
         const currentStage = data.pipelineStatus || "1. Consultation"; 
         
-        // Revenue calculations (Exclude from active kanban view)
         if (currentStage === "Closed Won") {
-            wonRevenue += parseInt(data.contractValue || 0);
-            return; 
+            allTimeWon++;
+            return; // Hide from active kanban board
         } else if (currentStage === "Closed Lost") {
             return;
         }
@@ -116,7 +195,6 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
         const owner = data.owner || 'Unassigned';
         const followUp = data.followUpDate ? `📅 ${data.followUpDate}` : '';
 
-        // Inject Data Attributes for HUD Filtering Engine
         const isAction = rag.isActionRequired ? 'true' : 'false';
         const isSurvey = currentStage === "3. Technical Survey" ? 'true' : 'false';
 
@@ -165,22 +243,23 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
         if(targetCol) targetCol.innerHTML += cardHTML;
     });
 
-    // Populate the HUD Metrics
+    // Populate the Interactive Filter Counters
     if(document.getElementById('hudActiveLeads')) document.getElementById('hudActiveLeads').innerText = activeLeads;
     if(document.getElementById('hudSurveys')) document.getElementById('hudSurveys').innerText = surveysPending;
     if(document.getElementById('hudAction')) document.getElementById('hudAction').innerText = actionRequired;
-    if(document.getElementById('hudRevenueWon')) document.getElementById('hudRevenueWon').innerText = `£${wonRevenue.toLocaleString()}`;
+    if(document.getElementById('hudTotalWon')) document.getElementById('hudTotalWon').innerText = allTimeWon;
 
-    // Populate Kanban Column Counters
     if(cols["1. Consultation"]) document.getElementById('count-stage1').innerText = cols["1. Consultation"].children.length;
     if(cols["2. Quote Sent"]) document.getElementById('count-stage2').innerText = cols["2. Quote Sent"].children.length;
     if(cols["3. Technical Survey"]) document.getElementById('count-stage3').innerText = cols["3. Technical Survey"].children.length;
     if(cols["4. Handover"]) document.getElementById('count-stage4').innerText = cols["4. Handover"].children.length;
     
+    // Trigger Filters & Financial Recalculations automatically
     window.applyFilters(); 
+    window.calcFinances();
 });
 
-// --- 5. HUD FILTERING SYSTEM ---
+// --- FILTERING ENGINE ---
 window.filterByMetric = (mode) => {
     window.currentFilterMode = mode;
     document.getElementById('btnClearFilters').classList.remove('hidden');
@@ -205,12 +284,10 @@ window.applyFilters = () => {
         
         let show = true;
         
-        // Check Text Search
         if (query && !searchData.includes(query)) show = false;
-        
-        // Check HUD Mode
         if (mode === 'action' && !isAction) show = false;
         if (mode === 'survey' && !isSurvey) show = false;
+        if (mode === 'won') show = false; // "Won" deals are archived, hide kanban when exploring this
 
         card.style.display = show ? 'block' : 'none';
     });
@@ -223,41 +300,33 @@ window.filterLeads = () => {
     window.applyFilters();
 };
 
-// --- 6. FINANCIAL AUTO-CALCULATOR ---
+// --- TECHNICAL DRAWER CONTROLS ---
 window.calculateVAT = () => {
     const val = parseFloat(document.getElementById('financeValueInput').value) || 0;
     const net = val / 1.2;
     const vat = val - net;
-    
     document.getElementById('netCalc').innerText = `£${net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     document.getElementById('vatCalc').innerText = `£${vat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 };
 
-// --- 7. TECHNICAL SLIDE-OUT DRAWER ---
 window.openDrawer = (id) => {
     window.currentOpenLeadId = id;
     const data = window.leadCache[id];
     if(!data) return;
 
-    // Load Header Info
     document.getElementById('drawerLeadName').innerText = data.customerProfile?.leadName || 'Unnamed Lead';
-    
     const brandData = BRAND_CONFIG[data.brand] || BRAND_CONFIG["YorkshireWindows"];
     const brandBadge = document.getElementById('drawerBrand');
     brandBadge.innerText = brandData.name;
     brandBadge.style.color = brandData.theme;
 
-    // Load Input Fields
     document.getElementById('ownerInput').value = data.owner || 'Unassigned';
     document.getElementById('followUpInput').value = data.followUpDate || '';
     document.getElementById('financeValueInput').value = data.contractValue || '';
     document.getElementById('financeStatusInput').value = data.financeStatus || 'TBC';
     document.getElementById('techNotesInput').value = data.technicalNotes || '';
-    
-    // Trigger VAT Calculation on load
     window.calculateVAT();
 
-    // Load Rilla Sync
     const rillaInput = document.getElementById('rillaInput');
     const rillaBtn = document.getElementById('rillaOpenBtn');
     if(data.rillaLink) {
@@ -269,10 +338,8 @@ window.openDrawer = (id) => {
         rillaBtn.classList.add('hidden');
     }
 
-    // Load Site Photos into Sniper Gallery
     const gallery = document.getElementById('sniperGallery');
     const markups = data.surveyPhotos || data.sniperMarkups || []; 
-    
     if (markups.length > 0) {
         gallery.innerHTML = '';
         gallery.classList.remove('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
@@ -280,11 +347,10 @@ window.openDrawer = (id) => {
             gallery.innerHTML += `<a href="${url}" target="_blank" class="block"><img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-700 hover:border-[#0dcaf0] transition cursor-pointer shadow-md"></a>`;
         });
     } else {
-        gallery.innerHTML = 'No site photos or markups synced from survey yet.';
+        gallery.innerHTML = 'No site photos synced yet.';
         gallery.classList.add('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
     }
 
-    // Display the Drawer Overlay
     document.getElementById('drawerOverlay').classList.remove('hidden');
     document.getElementById('techDrawer').classList.remove('translate-x-full');
 };
@@ -300,7 +366,6 @@ window.saveDrawerData = async (type) => {
     if(!id) return;
     
     const updates = {};
-    
     if(type === 'management') {
         updates.owner = document.getElementById('ownerInput').value;
         updates.followUpDate = document.getElementById('followUpInput').value;
@@ -312,78 +377,47 @@ window.saveDrawerData = async (type) => {
         updates.contractValue = document.getElementById('financeValueInput').value.trim();
         updates.financeStatus = document.getElementById('financeStatusInput').value;
     }
-    
-    // Always update timestamp to keep timeline accurate
     updates["timestamps.updatedAt"] = new Date().toISOString();
     
     try {
         await updateDoc(doc(db, "surveys", id), updates);
         alert("System Updated Successfully!");
-    } catch(e) {
-        console.error("Error saving drawer data:", e);
-        alert("Failed to save changes. Check console for details.");
-    }
+    } catch(e) { console.error("Error saving drawer data:", e); }
 };
 
 window.closeDeal = async (status) => {
     const id = window.currentOpenLeadId;
     if(!id) return;
-    
-    if(confirm(`Are you sure you want to mark this deal as ${status}? It will be permanently removed from the active kanban pipeline.`)) {
+    if(confirm(`Mark deal as ${status}? It will be removed from the active kanban pipeline.`)) {
         try {
             await updateDoc(doc(db, "surveys", id), { 
                 pipelineStatus: status,
                 "timestamps.updatedAt": new Date().toISOString()
             });
             window.closeDrawer();
-        } catch (err) {
-            console.error("Failed to close deal:", err);
-            alert("Failed to close deal.");
-        }
+        } catch (err) { console.error("Failed to close deal:", err); }
     }
 };
 
-// --- 8. DRAG AND DROP PIPELINE CONTROLLER ---
-window.dragStart = (e, id) => {
-    e.dataTransfer.setData("text/plain", id);
-    e.target.style.opacity = "0.5";
-};
-
-document.addEventListener("dragend", (e) => {
-    e.target.style.opacity = "1";
-});
+// --- DRAG AND DROP ---
+window.dragStart = (e, id) => { e.dataTransfer.setData("text/plain", id); e.target.style.opacity = "0.5"; };
+document.addEventListener("dragend", (e) => { e.target.style.opacity = "1"; });
 
 document.querySelectorAll('.kanban-dropzone').forEach(zone => {
-    zone.addEventListener('dragover', e => {
-        e.preventDefault();
-        zone.classList.add('bg-slate-800/60', 'border-[#0dcaf0]', 'border-dashed', 'border-2');
-    });
-    
-    zone.addEventListener('dragleave', e => {
-        zone.classList.remove('bg-slate-800/60', 'border-[#0dcaf0]', 'border-dashed', 'border-2');
-    });
-    
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('bg-slate-800/60', 'border-[#0dcaf0]', 'border-dashed', 'border-2'); });
+    zone.addEventListener('dragleave', e => { zone.classList.remove('bg-slate-800/60', 'border-[#0dcaf0]', 'border-dashed', 'border-2'); });
     zone.addEventListener('drop', async e => {
         e.preventDefault();
         zone.classList.remove('bg-slate-800/60', 'border-[#0dcaf0]', 'border-dashed', 'border-2');
-        
         const leadId = e.dataTransfer.getData("text/plain");
         const newStage = zone.getAttribute('data-stage');
-        
         if (leadId && newStage) {
-            try {
-                await updateDoc(doc(db, "surveys", leadId), { 
-                    pipelineStatus: newStage,
-                    "timestamps.updatedAt": new Date().toISOString()
-                });
-            } catch (err) {
-                console.error("Failed to move lead pipeline status:", err);
-            }
+            try { await updateDoc(doc(db, "surveys", leadId), { pipelineStatus: newStage, "timestamps.updatedAt": new Date().toISOString() }); } 
+            catch (err) { console.error("Failed to move lead:", err); }
         }
     });
 });
 
-// --- 9. MANUAL QUICK ACTIONS ---
 window.uploadQuote = async (id, inputEl) => {
     const file = inputEl.files[0];
     if(!file) return;
@@ -399,43 +433,17 @@ window.uploadQuote = async (id, inputEl) => {
     try {
         const res = await fetch(cloudinaryUrl, { method: 'POST', body: fd });
         const json = await res.json();
-        
-        // Push to Firebase and automatically shift to Quote Sent status
-        await updateDoc(doc(db, "surveys", id), { 
-            "uDesignBridge.quotePdfUrl": json.secure_url, 
-            pipelineStatus: "2. Quote Sent",
-            "timestamps.updatedAt": new Date().toISOString()
-        });
-        
-        alert("Official Quote securely deployed to Customer Vault!");
-    } catch(e) { 
-        console.error(e); 
-        alert("Upload failed. Ensure the document is a valid PDF under the size limit."); 
-    } finally { 
-        overrideBtn.innerText = ogText;
-        inputEl.value = ''; // Reset input
-    }
+        await updateDoc(doc(db, "surveys", id), { "uDesignBridge.quotePdfUrl": json.secure_url, pipelineStatus: "2. Quote Sent", "timestamps.updatedAt": new Date().toISOString() });
+        alert("Quote securely deployed to Customer Vault!");
+    } catch(e) { console.error(e); alert("Upload failed."); } 
+    finally { overrideBtn.innerText = ogText; inputEl.value = ''; }
 };
 
 window.replyToClient = async (id) => {
-    const msg = prompt("Fast Reply to Vault Comm Center (Pre-fill text provided):", "Hi, just checking in to see if you had any questions on the design?");
-    
-    if(!msg) return; // User cancelled
-    
+    const msg = prompt("Fast Reply to Vault Comm Center:", "Hi, just checking in to see if you had any questions on the design?");
+    if(!msg) return;
     try {
-        await addDoc(collection(db, `surveys/${id}/messages`), { 
-            sender: 'Designer', 
-            text: msg, 
-            timestamp: serverTimestamp() 
-        });
-        
-        // Update the last active telemetry so the client sees fresh action
-        await updateDoc(doc(db, "surveys", id), { 
-            "vaultTelemetry.lastActive": Date.now(),
-            "timestamps.updatedAt": new Date().toISOString()
-        });
-    } catch (e) {
-        console.error("Failed to send rapid reply:", e);
-        alert("Failed to send message to Vault.");
-    }
+        await addDoc(collection(db, `surveys/${id}/messages`), { sender: 'Designer', text: msg, timestamp: serverTimestamp() });
+        await updateDoc(doc(db, "surveys", id), { "vaultTelemetry.lastActive": Date.now(), "timestamps.updatedAt": new Date().toISOString() });
+    } catch (e) { console.error(e); }
 };
