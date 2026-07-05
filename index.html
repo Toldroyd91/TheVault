@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COHI | Command Center</title>
+    <!-- PWA Hooks for Field Use -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
@@ -235,6 +242,18 @@
         </div>
     </div>
 
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('PWA Service Worker registered successfully.', reg);
+                }).catch(err => {
+                    console.warn('PWA Service Worker registration failed:', err);
+                });
+            });
+        }
+    </script>
     <script type="module" src="js/ui-dashboard.js"></script>
 </body>
 </html>
