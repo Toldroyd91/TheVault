@@ -9,7 +9,7 @@
     <style>
         body { background: #0d1117; color: #f0f6fc; }
         .glass-panel { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
-        .luxury-input { background: #090d13; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; outline: none; transition: border-color 0.3s;}
+        .luxury-input { background: #090d13; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; outline: none; transition: border-color 0.3s; }
         .luxury-input:focus { border-color: var(--accent-primary, #0dcaf0); }
         
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease; }
@@ -25,16 +25,17 @@
         .timeline-step.completed { border-left-color: #238636; }
         .timeline-step.completed::before { background: #238636; box-shadow: 0 0 10px #238636; }
 
-        .ar-container { width: 100%; height: 200px; background: rgba(0,0,0,0.5); border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px dashed var(--accent-primary, #0dcaf0); cursor: pointer; transition: background 0.3s;}
+        .ar-container { width: 100%; height: 200px; background: rgba(0,0,0,0.5); border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px dashed var(--accent-primary, #0dcaf0); cursor: pointer; transition: background 0.3s; }
         .ar-container:hover { background: rgba(13, 202, 240, 0.1); }
         #chat-window::-webkit-scrollbar { width: 6px; }
         #chat-window::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
         .pdf-avoid-break { page-break-inside: avoid; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
     
-    <!-- GLOBAL NAV -->
+    <!-- GLOBAL NAV BAR -->
     <nav class="flex justify-between items-center px-4 md:px-6 py-4 border-b border-[#30363d] bg-[#161b22]">
         <a href="index.html" class="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-widest transition">← Back to Dashboard</a>
         <div class="font-black text-[#0dcaf0] tracking-widest text-lg">SECURE VAULT</div>
@@ -47,9 +48,10 @@
         <button onclick="window.unlockVault()" id="btnAccess" class="w-full py-4 bg-[#0dcaf0] hover:bg-cyan-400 text-black font-bold rounded-lg transition shadow-[0_0_15px_rgba(13,202,240,0.3)]">DECRYPT VAULT</button>
     </div>
 
-    <!-- VAULT CONTENT -->
-    <div id="vaultContent" class="hidden p-4 md:p-8 space-y-6 flex-grow">
+    <!-- VAULT APPARATUS CONTENT -->
+    <div id="vaultContent" class="hidden p-4 md:p-8 space-y-6 flex-grow flex-col">
         
+        <!-- Welcome Dynamic Banner -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-[#30363d] pb-4 gap-4">
             <div>
                 <img id="brandLogo" src="" alt="Brand Logo" class="h-10 mb-2 hidden">
@@ -66,9 +68,10 @@
             </div>
         </div>
         
+        <!-- Functional Layout Splitting Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- LEFT: Timeline & Scope -->
+            <!-- COLUMN 1: Live Timeline & Scope Specs -->
             <div class="space-y-6">
                 <div class="glass-panel p-6 shadow-lg">
                     <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Live Timeline</h3>
@@ -95,9 +98,8 @@
                 <div id="quoteContainer"></div>
             </div>
 
-            <!-- MIDDLE: Gallery, AR & Uploads -->
+            <!-- COLUMN 2: Site Media Elements, AR Concept & Asset Intake -->
             <div class="space-y-6">
-                <!-- NEW: Customer Image Gallery -->
                 <div class="glass-panel p-6 shadow-lg">
                     <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Site Imagery</h3>
                     <div id="vaultImageGallery" class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto hide-scrollbar pr-1">
@@ -107,7 +109,7 @@
 
                 <div class="glass-panel p-6 shadow-lg">
                     <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">3D / AR Concept</h3>
-                    <div class="ar-container" onclick="alert('AR Engine Booting...')">
+                    <div class="ar-container" onclick="alert('AR Concept Engine Booting...')">
                         <div class="text-center">
                             <span class="text-4xl opacity-80">📱</span>
                             <div class="text-xs text-white mt-3 uppercase font-bold tracking-widest">Tap to launch AR view</div>
@@ -128,13 +130,13 @@
                 </div>
             </div>
 
-            <!-- RIGHT: Chat -->
-            <div class="glass-panel p-6 h-[500px] md:h-auto flex flex-col shadow-lg relative">
+            <!-- COLUMN 3: Collaborative Communications Frame -->
+            <div class="glass-panel p-6 h-[500px] lg:h-auto flex flex-col shadow-lg relative">
                 <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-[#238636] animate-pulse"></span> Comm Center
                 </h3>
                 <div id="chat-window" class="flex-grow overflow-y-auto mb-4 space-y-4 pr-2">
-                    <div class="text-center text-xs text-gray-600 mt-10">Connecting...</div>
+                    <div class="text-center text-xs text-gray-600 mt-10">Connecting to secure comms server...</div>
                 </div>
                 <div class="relative mt-2">
                     <input type="text" id="chat-input" class="luxury-input p-4 pr-12 text-sm" placeholder="Message the team...">
@@ -144,10 +146,13 @@
         </div>
     </div>
 
-    <!-- HIDDEN INFINITE PDF REPORT TEMPLATE -->
+    <!-- ========================================== -->
+    <!-- HIDDEN INFINITE PDF REPORT RENDERING SHELL -->
+    <!-- ========================================== -->
     <div id="pdfTemplateWrapper" style="position: absolute; left: -9999px; top: 0; width: 794px; background: white; z-index: -1;">
         <div id="pdfReport" class="bg-white text-gray-900 font-sans p-0 m-0">
-            <!-- PAGE 1: COVER -->
+            
+            <!-- COVER PAGE (A4 BOUNDARIES) -->
             <div class="relative h-[1123px] w-[794px] overflow-hidden flex flex-col bg-white">
                 <div class="h-[65%] bg-gray-100 relative">
                     <img id="pdfHeroImg" src="" class="w-full h-full object-cover" crossorigin="anonymous">
@@ -167,46 +172,41 @@
                 </div>
             </div>
 
-            <!-- PAGE 2: ENVIRONMENTAL -->
+            <!-- GEOGRAPHICAL & TOPOGRAPHICAL PAGE -->
             <div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
                 <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: #0dcaf0;">Environmental Analysis</h2>
                 <p class="text-sm text-gray-600 mb-8 leading-relaxed">Prior to finalizing your structural design, we conduct a topographical and environmental review of your location. This ensures all foundations, wind-load calculations, and structural tolerances exceed the specific requirements of your exact geographical coordinates.</p>
+                
                 <div class="w-full h-64 bg-gray-200 rounded-xl mb-8 overflow-hidden relative border border-gray-300">
                     <img id="pdfMapTile" src="" class="w-full h-full object-cover opacity-80 mix-blend-multiply" crossorigin="anonymous">
                     <div class="absolute inset-0 border-4 border-[#0dcaf0]/20 rounded-xl pointer-events-none"></div>
                     <div class="absolute bottom-2 right-2 bg-white px-2 py-1 rounded text-[8px] text-gray-500">© OpenStreetMap contributors</div>
                     <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-red-600 bg-red-600/30"></div>
                 </div>
+                
                 <div class="grid grid-cols-2 gap-6 mb-8">
                     <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Exact Coordinates</p><p id="pdfCoords" class="text-xl font-bold text-gray-900 font-mono">Fetching...</p></div>
                     <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Planning Ward</p><p id="pdfWard" class="text-xl font-bold text-gray-900">Fetching...</p></div>
                 </div>
+                
                 <div class="grid grid-cols-3 gap-4">
                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Topographical Elev.</p><p id="pdfElevation" class="text-2xl font-black text-gray-800">...</p></div>
                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Structural Wind Zone</p><p id="pdfWind" class="text-2xl font-black text-gray-800">...</p></div>
                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Ground Condition</p><p class="text-lg font-black text-[#238636] mt-2">Satisfactory</p></div>
                 </div>
-                <div class="mt-8">
+                
+                <div class="mt-8 flex-grow">
                     <h3 class="text-sm font-bold bg-gray-100 p-3 mb-4 uppercase tracking-widest text-gray-700">Designer Insights & Preparation</h3>
                     <p id="pdfInsights" class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap px-2">...</p>
                 </div>
             </div>
 
-            <!-- DYNAMIC SPECS & PHOTOS -->
+            <!-- PROGRAMMATIC TARGET CONTAINERS FOR EXTENDED PAGES -->
             <div id="pdfDynamicSpecsContainer" class="bg-white p-12 text-gray-900" style="page-break-before: always; min-height: 1123px;"></div>
             <div id="pdfDynamicPhotosContainer"></div>
             <div id="pdfAppendices"></div>
         </div>
     </div>
 
-    <script>
-        function toggleAccordion(id) {
-            const content = document.getElementById(id);
-            const btn = content.previousElementSibling;
-            content.classList.toggle('open');
-            btn.classList.toggle('open');
-        }
-    </script>
-    <script type="module" src="js/ui-vault.js"></script>
 </body>
 </html>
