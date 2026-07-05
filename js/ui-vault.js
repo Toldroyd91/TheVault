@@ -50,16 +50,15 @@ function updateTimeline(status) {
     else if (status === "Closed Won") { markComplete(s1); markComplete(s2); markComplete(s3); markComplete(s4); }
 }
 
-// --- DYNAMIC SCOPE RENDERER ---
+// --- UPGRADED DYNAMIC SCOPE RENDERER (PREMIUM UI) ---
 function renderDynamicSurveyData(data) {
     const container = document.getElementById('dynamicSurveyData');
     if (!container) return;
     container.innerHTML = '';
 
     const categoriesToRender = {
-        'Technical Survey': data.technicalSurvey,
-        'Design Specification': data.designSpecification,
-        'Logistics & Access': data.logistics,
+        'Design & Architecture': data.projectSpecs,
+        'Designer Insights': data.designerInsights,
         'Compliance': data.compliance
     };
 
@@ -68,14 +67,18 @@ function renderDynamicSurveyData(data) {
     Object.entries(categoriesToRender).forEach(([title, categoryData]) => {
         if (!categoryData || Object.keys(categoryData).length === 0) return;
         
-        let html = `<div class="mb-5"><h4 class="text-[11px] font-bold text-[#0dcaf0] uppercase tracking-widest mb-3 pb-1 border-b border-[#30363d]">${title}</h4><div class="grid grid-cols-2 gap-3">`;
+        let html = `<div class="mb-6 bg-[#161b22] p-5 rounded-xl border border-[#30363d] shadow-lg"><h4 class="text-sm font-black text-[#0dcaf0] uppercase tracking-widest mb-4 pb-2 border-b border-[#30363d]">${title}</h4><div class="grid grid-cols-2 gap-4">`;
         let categoryHasData = false;
         
         Object.entries(categoryData).forEach(([key, value]) => {
             if (value && value !== '' && value !== 'Select' && typeof value !== 'object') {
                 categoryHasData = true;
                 hasData = true;
-                html += `<div class="bg-[#090d13] p-2.5 rounded-lg border border-[#30363d]"><label class="text-[9px] text-gray-500 uppercase tracking-widest block mb-1">${formatCamelCase(key)}</label><div class="font-bold text-xs text-white break-words">${value}</div></div>`;
+                html += `
+                    <div class="bg-[#090d13] p-3 rounded-lg border border-[#30363d] shadow-inner">
+                        <label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">${formatCamelCase(key)}</label>
+                        <div class="font-bold text-sm text-white break-words whitespace-pre-wrap">${value}</div>
+                    </div>`;
             }
         });
         html += `</div></div>`;
@@ -83,7 +86,7 @@ function renderDynamicSurveyData(data) {
     });
 
     if (!hasData) {
-        container.innerHTML = '<div class="text-xs text-gray-500 italic">No technical specifications have been finalized for this project yet.</div>';
+        container.innerHTML = '<div class="text-xs text-gray-500 italic p-4 bg-[#161b22] rounded-lg border border-[#30363d]">Site scope is currently being finalized.</div>';
     }
 }
 
@@ -105,14 +108,12 @@ async function attemptDecrypt() {
         const docRef = doc(db, "surveys", projectId.trim());
         const snap = await getDoc(docRef);
         
-        // DIAGNOSTIC 1: DOES THE PROJECT EXIST?
         if(!snap.exists()) {
             btnAccess.innerText = originalText;
             btnAccess.disabled = false;
             return alert(`DATABASE ERROR: Cannot locate a project with ID: ${projectId.trim()}`);
         }
 
-        // DIAGNOSTIC 2: PIN CHECK
         const data = snap.data();
         const storedPin = String(data.customerProfile?.vaultPIN || "").trim();
         const enteredPin = String(pinInput.value).trim();
@@ -120,10 +121,9 @@ async function attemptDecrypt() {
         if(enteredPin !== "0000" && enteredPin !== storedPin) {
             btnAccess.innerText = originalText;
             btnAccess.disabled = false;
-            return alert(`AUTH ERROR: PIN incorrect. (You entered: '${enteredPin}')`);
+            return alert(`AUTH ERROR: PIN incorrect.`);
         }
 
-        // Unlock successful - Update Telemetry
         await updateDoc(docRef, { "vaultTelemetry.lastActive": Date.now() });
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('vaultContent').style.display = 'flex';
@@ -134,7 +134,7 @@ async function attemptDecrypt() {
             const brandData = BRAND_CONFIG[brandId] || BRAND_CONFIG["YorkshireWindows"];
             
             document.documentElement.style.setProperty('--accent-primary', brandData.theme);
-            document.title = `${brandData.name} | Project Vault`;
+            document.title = `${brandData.name} | Secure Vault`;
             
             const mainLogo = document.getElementById('brandLogo');
             if(mainLogo && brandData.assetPath) { 
@@ -143,26 +143,32 @@ async function attemptDecrypt() {
             }
 
             document.getElementById('customerGreeting').innerText = `Welcome, ${data.customerProfile?.leadName || 'Customer'}`;
-            document.getElementById('statusBadge').innerText = data.pipelineStatus || "Design Phase";
+            document.getElementById('statusBadge').innerText = data.pipelineStatus || "Consultation";
             
             updateTimeline(data.pipelineStatus || "1. Consultation");
             renderDynamicSurveyData(data);
             
-            const allPhotos = [
-                ...(data.surveyPhotos || []), 
-                ...(data.sniperMarkups || []),
-                ...(data.rawAssets?.elevations || []),
-                ...(data.rawAssets?.access || []),
-                ...(data.rawAssets?.drainage || [])
-            ];
+            // Build UI Gallery from structured media object
             const uiGallery = document.getElementById('vaultImageGallery');
-            if (allPhotos.length > 0 && uiGallery) {
-                uiGallery.innerHTML = '';
-                allPhotos.forEach(url => {
-                    uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border border-[#30363d] hover:border-[#0dcaf0] transition h-24"><img src="${url}" class="w-full h-full object-cover"></a>`;
-                });
-            } else if (uiGallery) {
-                uiGallery.innerHTML = '<div class="text-xs text-gray-500 italic col-span-2">No site images available.</div>';
+            let hasImages = false;
+            if (uiGallery) uiGallery.innerHTML = '';
+
+            const appendToGallery = (url) => {
+                if(!url) return;
+                hasImages = true;
+                uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border border-[#30363d] hover:border-[#0dcaf0] transition h-24 shadow-md"><img src="${url}" class="w-full h-full object-cover"></a>`;
+            };
+
+            if(data.media) {
+                appendToGallery(data.media.front);
+                appendToGallery(data.media.side);
+                appendToGallery(data.media.rear);
+                appendToGallery(data.media.sketch);
+                (data.media.surveyGallery || []).slice(0, 4).forEach(appendToGallery);
+            }
+            
+            if (!hasImages && uiGallery) {
+                uiGallery.innerHTML = '<div class="text-xs text-gray-500 italic col-span-2 p-4 bg-[#161b22] border border-[#30363d] rounded-lg">Site imagery is currently processing.</div>';
             }
             
             const qc = document.getElementById('quoteContainer');
@@ -171,6 +177,7 @@ async function attemptDecrypt() {
             }
         });
 
+        // Chat logic remains unchanged
         const chatRef = collection(db, `surveys/${projectId}/messages`);
         onSnapshot(query(chatRef, orderBy("timestamp", "asc")), (msgSnap) => {
             const win = document.getElementById('chat-window');
@@ -208,16 +215,14 @@ async function attemptDecrypt() {
         console.error(err);
         btnAccess.innerText = originalText;
         btnAccess.disabled = false;
-        // DIAGNOSTIC 3: FIREBASE RULES / NETWORK CRASH
         alert("CRITICAL FIREBASE ERROR: " + err.message);
     }
 }
 
-// Bind Authentication
 if (btnAccess) btnAccess.addEventListener('click', attemptDecrypt);
 if (pinInput) pinInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptDecrypt(); });
 
-// Bind PDF download to the button
+// --- UPGRADED HIGH-FIDELITY PDF ENGINE ---
 const btnDownload = document.getElementById('btnDownloadReport');
 if (btnDownload) {
     btnDownload.addEventListener('click', async () => {
@@ -232,6 +237,7 @@ if (btnDownload) {
             
             const postcode = data.customerProfile?.postcode || '';
             let council = "TBC", ward = "TBC", lat = null, lon = null, elevation = "TBC", windZone = "Moderate";
+            let mapTileUrl = '';
             
             if(postcode) {
                 try {
@@ -245,7 +251,6 @@ if (btnDownload) {
                     }
                     
                     if(lat && lon) {
-                        document.getElementById('pdfCoords').innerText = `${lat.toFixed(4)}N, ${lon.toFixed(4)}W`;
                         const elRes = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
                         const elData = await elRes.json();
                         if(elData.elevation && elData.elevation.length > 0) {
@@ -255,90 +260,179 @@ if (btnDownload) {
                             else if (elev > 75) windZone = "High Exposure";
                             else windZone = "Standard Load";
                         }
+
                         const tx = lon2tile(lon, 15);
                         const ty = lat2tile(lat, 15);
-                        document.getElementById('pdfMapTile').src = `https://tile.openstreetmap.org/15/${tx}/${ty}.png`;
+                        mapTileUrl = `https://tile.openstreetmap.org/15/${tx}/${ty}.png`;
                     }
-                } catch(e) { console.log("Postcode API Error", e); }
+                } catch(e) { console.log("Postcode/Map API Enrichment Error", e); }
             }
 
-            document.getElementById('pdfCustName').innerText = data.customerProfile?.leadName || 'Valued Customer';
-            document.getElementById('pdfSiteLoc').innerText = postcode || 'Address TBC';
-            document.getElementById('pdfCouncil').innerText = council;
-            document.getElementById('pdfWard').innerText = ward;
-            document.getElementById('pdfElevation').innerText = elevation;
-            document.getElementById('pdfWind').innerText = windZone;
-            document.getElementById('pdfDesigner').innerText = data.owner || 'Thomas Oldroyd';
-            document.getElementById('pdfInsights').innerText = data.technicalNotes || 'No specific structural insights recorded for this project yet. Refer to standard architectural guidelines.';
-            
-            const allPhotos = [
-                ...(data.surveyPhotos || []), 
-                ...(data.sniperMarkups || []),
-                ...(data.rawAssets?.elevations || []),
-                ...(data.rawAssets?.access || []),
-                ...(data.rawAssets?.drainage || [])
-            ];
+            const brandData = BRAND_CONFIG[data.brand] || BRAND_CONFIG["YorkshireWindows"];
+            const heroImg = data.media?.front || data.media?.rear || 'https://via.placeholder.com/1200x800?text=Awaiting+Site+Uploads';
+            const brandLogoWatermark = `${brandData.assetPath}logo.png`; 
 
-            if(allPhotos.length > 0) {
-                document.getElementById('pdfHeroImg').src = allPhotos[0];
-            } else {
-                document.getElementById('pdfHeroImg').src = 'https://via.placeholder.com/1200x800?text=Awaiting+Site+Uploads';
+            // Create temporary container for PDF rendering
+            let pdfContainer = document.getElementById('hiddenPdfContainer');
+            if(!pdfContainer) {
+                pdfContainer = document.createElement('div');
+                pdfContainer.id = 'hiddenPdfContainer';
+                document.body.appendChild(pdfContainer);
             }
-
-            const specsContainer = document.getElementById('pdfDynamicSpecsContainer');
-            specsContainer.innerHTML = '<h2 class="text-4xl font-black uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: #0dcaf0;">Master Data & Specs</h2>';
             
-            const categories = {
-                'Customer Profile': data.customerProfile,
-                'Technical Survey': data.technicalSurvey,
-                'Design Specification': data.designSpecification,
-                'Logistics & Access': data.logistics,
-                'Compliance Requirements': data.compliance
+            pdfContainer.innerHTML = `
+                <!-- PAGE 1: COVER PAGE -->
+                <div class="relative h-[1123px] w-[794px] overflow-hidden flex flex-col bg-white">
+                    <div class="absolute inset-0 z-0 flex items-center justify-center opacity-5 pointer-events-none">
+                        <img src="${brandLogoWatermark}" style="width: 80%;" crossorigin="anonymous">
+                    </div>
+                    <div class="h-[65%] relative z-10">
+                        <img src="${heroImg}" class="w-full h-full object-cover" crossorigin="anonymous">
+                        <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
+                    </div>
+                    <div class="h-[35%] bg-white p-12 flex flex-col justify-between z-10">
+                        <div>
+                            <h1 class="text-6xl font-black text-gray-900 tracking-tighter mb-8 uppercase">Master Site <br>Dossier.</h1>
+                            <div class="grid grid-cols-2 gap-y-6 gap-x-12 text-sm">
+                                <div><p class="text-gray-500 font-bold tracking-widest uppercase text-[10px] mb-1">Customer Name</p><p class="text-xl font-bold">${data.customerProfile?.leadName || 'Valued Customer'}</p></div>
+                                <div><p class="text-gray-500 font-bold tracking-widest uppercase text-[10px] mb-1">Local Authority</p><p class="text-lg font-bold text-[#0dcaf0]">${council}</p></div>
+                                <div><p class="text-gray-500 font-bold tracking-widest uppercase text-[10px] mb-1">Site Location</p><p class="text-xl font-bold">${postcode || 'TBC'}</p></div>
+                                <div><p class="text-gray-500 font-bold tracking-widest uppercase text-[10px] mb-1">Lead Designer</p><p class="text-lg font-bold">${data.owner || 'Thomas Oldroyd'}</p></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end items-end border-t border-gray-200 pt-4">
+                            <p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase">CO HOME IMPROVEMENTS | CONFIDENTIAL MASTER REPORT</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 2: ENVIRONMENTAL ANALYSIS -->
+                <div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
+                    <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: ${brandData.theme};">Environmental Analysis</h2>
+                    <p class="text-sm text-gray-600 mb-8 leading-relaxed">Prior to finalizing your structural design, we conduct a topographical and environmental review of your location. This ensures all foundations, wind-load calculations, and structural tolerances exceed the specific requirements of your exact geographical coordinates.</p>
+                    
+                    <div class="w-full h-64 bg-gray-200 rounded-xl mb-8 overflow-hidden relative border border-gray-300">
+                        ${mapTileUrl ? `<img src="${mapTileUrl}" class="w-full h-full object-cover opacity-80 mix-blend-multiply" crossorigin="anonymous">` : ''}
+                        <div class="absolute inset-0 border-4 rounded-xl pointer-events-none" style="border-color: ${brandData.theme}33;"></div>
+                        <div class="absolute bottom-2 right-2 bg-white px-2 py-1 rounded text-[8px] text-gray-500">© OpenStreetMap contributors</div>
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-red-600 bg-red-600/30"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Exact Coordinates</p><p class="text-xl font-bold text-gray-900 font-mono">${lat ? `${lat.toFixed(4)}N, ${lon.toFixed(4)}W` : 'Fetching...'}</p></div>
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Planning Ward</p><p class="text-xl font-bold text-gray-900">${ward}</p></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Topographical Elev.</p><p class="text-2xl font-black text-gray-800">${elevation}</p></div>
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Structural Wind Zone</p><p class="text-2xl font-black text-gray-800">${windZone}</p></div>
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Ground Condition</p><p class="text-lg font-black text-[#238636] mt-2">Satisfactory</p></div>
+                    </div>
+                </div>
+
+                <!-- PAGE 3: DESIGNER SURVEY & PROJECT SPECS -->
+                <div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
+                    <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: ${brandData.theme};">Project Specifications</h2>
+                    
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-200 pb-2">Design & Architecture</h3>
+                    <div class="grid grid-cols-3 gap-y-6 gap-x-4 mb-8">
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Build Type</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.buildType || 'TBC'}</p></div>
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Proposed Size</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.proposedSize || 'TBC'}</p></div>
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Roof Style</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.roofStyle || 'TBC'}</p></div>
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Frame Colour</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.frameColour || 'TBC'}</p></div>
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Building Regs</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.buildingRegs || 'TBC'}</p></div>
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Planning Perms</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.planningPerms || 'TBC'}</p></div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-200 pb-2">Structural & Access Logistics</h3>
+                    <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">House Material</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.houseMaterial || 'TBC'}</p></div>
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Wall Obstacles</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.wallObstacles || 'TBC'}</p></div>
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Access Width</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.accessWidth || 'TBC'}</p></div>
+                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Access Issues</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.accessIssues || 'TBC'}</p></div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-200 pb-2">Designer Insights</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[10px] text-gray-900 font-bold uppercase tracking-widest mb-1">Site Preparation & Structural Requirements</p>
+                            <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${data.designerInsights?.prep || 'No structural insights recorded.'}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-900 font-bold uppercase tracking-widest mb-1">Design & Layout</p>
+                            <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${data.designerInsights?.design || 'No layout insights recorded.'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 4: PROPERTY ELEVATIONS -->
+                <div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
+                    <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: ${brandData.theme};">Property Elevations</h2>
+                    <div class="grid grid-cols-2 gap-6 flex-grow">
+                        <div class="flex flex-col">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Front Elevation</p>
+                            <div class="flex-grow bg-gray-100 rounded-xl border border-gray-300 overflow-hidden relative">
+                                ${data.media?.front ? `<img src="${data.media.front}" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous">` : `<div class="flex items-center justify-center h-full text-xs text-gray-400">Awaiting Upload</div>`}
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Side Elevation</p>
+                            <div class="flex-grow bg-gray-100 rounded-xl border border-gray-300 overflow-hidden relative">
+                                ${data.media?.side ? `<img src="${data.media.side}" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous">` : `<div class="flex items-center justify-center h-full text-xs text-gray-400">Awaiting Upload</div>`}
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-[10px] font-bold text-[#0dcaf0] uppercase tracking-widest mb-2">Rear Elevation (Primary Focus)</p>
+                            <div class="flex-grow bg-gray-100 rounded-xl border-2 border-[#0dcaf0] overflow-hidden relative shadow-md">
+                                ${data.media?.rear ? `<img src="${data.media.rear}" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous">` : `<div class="flex items-center justify-center h-full text-xs text-gray-400">Awaiting Upload</div>`}
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-[10px] font-bold text-[#238636] uppercase tracking-widest mb-2">Designer Sketch / Measurements</p>
+                            <div class="flex-grow bg-gray-100 rounded-xl border-2 border-[#238636] overflow-hidden relative shadow-md">
+                                ${data.media?.sketch ? `<img src="${data.media.sketch}" class="absolute inset-0 w-full h-full object-contain bg-white" crossorigin="anonymous">` : `<div class="flex items-center justify-center h-full text-xs text-gray-400">Awaiting Upload</div>`}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // PAGE 5+: SUPPLEMENTARY GALLERIES ENGINE
+            const generateGallery = (title, urls, emptyMsg) => {
+                if (!urls || urls.length === 0) return '';
+                let html = '';
+                for (let i = 0; i < urls.length; i += 6) {
+                    const chunk = urls.slice(i, i + 6);
+                    html += `<div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
+                                <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: ${brandData.theme};">${title} ${urls.length > 6 ? `(Part ${Math.floor(i/6)+1})` : ''}</h2>
+                                <div class="grid grid-cols-2 gap-6 flex-grow">`;
+                    chunk.forEach(url => {
+                        html += `<div class="relative w-full h-0 pb-[75%] bg-gray-100 rounded-xl overflow-hidden border border-gray-300 shadow-sm">
+                                    <img src="${url}" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous">
+                                 </div>`;
+                    });
+                    html += `</div></div>`;
+                }
+                return html;
             };
 
-            Object.entries(categories).forEach(([title, categoryData]) => {
-                if (!categoryData || Object.keys(categoryData).length === 0) return;
-                
-                let html = `<div class="mb-8 pdf-avoid-break bg-gray-50 rounded-xl border border-gray-200 p-6"><h3 class="text-lg font-bold text-gray-900 uppercase tracking-widest mb-4 border-b pb-2">${title}</h3><div class="grid grid-cols-2 gap-x-12 gap-y-4 text-sm">`;
-                let hasValidData = false;
-                Object.entries(categoryData).forEach(([key, value]) => {
-                    if (value && value !== '' && value !== 'Select' && typeof value !== 'object') {
-                        hasValidData = true;
-                        html += `<div class="border-b border-gray-200 pb-2"><span class="text-[10px] text-[#0dcaf0] font-bold uppercase tracking-widest block mb-1">${formatCamelCase(key)}</span><span class="font-bold text-gray-800 break-words">${value}</span></div>`;
-                    }
-                });
-                html += `</div></div>`;
-                if(hasValidData) specsContainer.innerHTML += html;
-            });
+            pdfContainer.innerHTML += generateGallery('Survey Uploads', data.media?.surveyGallery);
+            pdfContainer.innerHTML += generateGallery('Access & Logistics', data.media?.accessGallery);
+            pdfContainer.innerHTML += generateGallery('Miscellaneous Site Images', data.media?.miscGallery);
 
-            const photosContainer = document.getElementById('pdfDynamicPhotosContainer');
-            photosContainer.innerHTML = '';
-            
-            const remainingPhotos = allPhotos.slice(1);
-            for (let i = 0; i < remainingPhotos.length; i += 6) {
-                const chunk = remainingPhotos.slice(i, i + 6);
-                let pageHtml = `<div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;"><h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: #0dcaf0;">Site Imagery (Part ${Math.floor(i/6)+1})</h2><div class="grid grid-cols-2 gap-6 flex-grow">`;
-                chunk.forEach(url => {
-                    pageHtml += `<div class="bg-gray-100 rounded-xl overflow-hidden border border-gray-300 shadow-sm h-64"><img src="${url}" class="w-full h-full object-cover" crossorigin="anonymous"></div>`;
-                });
-                pageHtml += `</div></div>`;
-                photosContainer.innerHTML += pageHtml;
-            }
-
-            const appendices = document.getElementById('pdfAppendices');
-            appendices.innerHTML = '';
+            // PAGE APPENDICES: BROCHURES
             const appendixFiles = [
                 'why-choose-us.jpg', 'who-we-are.jpg', 'journey.jpg', 
                 'journey-1.jpg', 'journey-2.jpg', 'tailored.jpg', 
-                'piling.jpg', 'sap-calcs.jpg', 'planning.jpg', 
                 'cavity.jpg', 'protecting-home.jpg'
             ];
             
             appendixFiles.forEach(file => {
-                appendices.innerHTML += `<div style="page-break-before: always; width: 794px; height: 1123px; overflow: hidden; background: white;"><img src="assets/shared/${file}" style="width: 100%; height: 100%; object-fit: contain;" crossorigin="anonymous"></div>`;
+                pdfContainer.innerHTML += `<div style="page-break-before: always; width: 794px; height: 1123px; overflow: hidden; background: white;"><img src="assets/shared/${file}" style="width: 100%; height: 100%; object-fit: contain;" crossorigin="anonymous"></div>`;
             });
 
-            const element = document.getElementById('pdfReport');
+            pdfContainer.style.display = 'block';
+
             const opt = {
                 margin:       0,
                 filename:     `${data.customerProfile?.leadName?.replace(/\s+/g, '_') || 'Project'}_Master_Report.pdf`,
@@ -347,13 +441,15 @@ if (btnDownload) {
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            element.style.display = 'block';
-            await html2pdf().set(opt).from(element).save();
-            element.style.display = 'none';
+            await html2pdf().set(opt).from(pdfContainer).save();
+            
+            // Clean up invisible renderer
+            pdfContainer.innerHTML = '';
+            pdfContainer.style.display = 'none';
 
         } catch (e) {
             console.error(e);
-            alert("Failed to generate PDF. Ensure all assets are loaded securely.");
+            alert("Failed to generate PDF. Check console for details.");
         } finally {
             btnDownload.innerHTML = ogText;
             btnDownload.disabled = false;
