@@ -1,6 +1,5 @@
 import { auth, db, collection, query, orderBy, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, onAuthStateChanged, signInWithEmailAndPassword, signOut, BRAND_CONFIG } from './core-firebase.js';
 
-// --- 1. AUTHENTICATION ENGINE ---
 const authGate = document.getElementById('authGate');
 const dashboardApp = document.getElementById('dashboardApp');
 
@@ -33,18 +32,17 @@ document.getElementById('btnLogin')?.addEventListener('click', async () => {
         await signInWithEmailAndPassword(auth, email, pass);
     } catch (err) {
         alert("Login Failed: " + err.message);
-        btn.innerText = "Login";
+        btn.innerText = "SECURE LOGIN";
     }
 });
 
 document.getElementById('btnLogout')?.addEventListener('click', () => signOut(auth));
 
-
-// --- 2. KANBAN PIPELINE, HUD, & DRAWER ENGINE ---
-const cloudinaryUrl = "https://api.cloudinary.com/v1_1/dqk1hz0f8/upload";
+const cloudinaryUrl = "https://api.cloudinary.com/v1_1/dqkhhz0f9/upload";
 
 window.leadCache = {}; 
 window.currentOpenLeadId = null;
+window.currentFilterMode = 'all';
 
 function calculateRAG(lastActiveMs) {
     if (!lastActiveMs) return { color: 'text-gray-500', dot: '⚪', label: 'No Interaction', isActionRequired: true };
@@ -76,7 +74,6 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
         
         const currentStage = data.pipelineStatus || "1. Consultation"; 
         
-        // Handle Archived Deals (Keep out of Kanban, calculate revenue)
         if (currentStage === "Closed Won") {
             wonRevenue += parseInt(data.contractValue || 0);
             return; 
@@ -99,13 +96,19 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
         const owner = data.owner || 'Unassigned';
         const followUp = data.followUpDate ? `📅 ${data.followUpDate}` : '';
 
+        // Add filter data attributes
+        const isAction = rag.isActionRequired ? 'true' : 'false';
+        const isSurvey = currentStage === "3. Technical Survey" ? 'true' : 'false';
+
         const cardHTML = `
             <div class="lead-card glass-panel p-4 cursor-grab active:cursor-grabbing border-l-4 hover:bg-[#1e293b] transition-all relative group" 
                  style="border-left-color: ${brandData.theme}" 
                  draggable="true" 
                  ondragstart="window.dragStart(event, '${id}')"
                  onclick="window.openDrawer('${id}')"
-                 data-search="${leadName.toLowerCase()} ${postcode.toLowerCase()} ${owner.toLowerCase()}">
+                 data-search="${leadName.toLowerCase()} ${postcode.toLowerCase()} ${owner.toLowerCase()}"
+                 data-action="${isAction}"
+                 data-survey="${isSurvey}">
                 
                 <div class="flex justify-between items-start mb-1 pointer-events-none">
                     <h4 class="text-md font-black text-white">${leadName}</h4>
@@ -142,7 +145,6 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
         if(targetCol) targetCol.innerHTML += cardHTML;
     });
 
-    // Update HUD 
     if(document.getElementById('hudActiveLeads')) document.getElementById('hudActiveLeads').innerText = activeLeads;
     if(document.getElementById('hudSurveys')) document.getElementById('hudSurveys').innerText = surveysPending;
     if(document.getElementById('hudAction')) document.getElementById('hudAction').innerText = actionRequired;
@@ -153,10 +155,55 @@ onSnapshot(query(collection(db, "surveys"), orderBy("timestamps.updatedAt", "des
     if(cols["3. Technical Survey"]) document.getElementById('count-stage3').innerText = cols["3. Technical Survey"].children.length;
     if(cols["4. Handover"]) document.getElementById('count-stage4').innerText = cols["4. Handover"].children.length;
     
-    window.filterLeads(); 
+    window.applyFilters(); 
 });
 
-// --- TECHNICAL DRAWER ENGINE ---
+window.filterByMetric = (mode) => {
+    window.currentFilterMode = mode;
+    document.getElementById('btnClearFilters').classList.remove('hidden');
+    window.applyFilters();
+};
+
+window.clearFilters = () => {
+    window.currentFilterMode = 'all';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('btnClearFilters').classList.add('hidden');
+    window.applyFilters();
+};
+
+window.applyFilters = () => {
+    const query = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const mode = window.currentFilterMode;
+
+    document.querySelectorAll('.lead-card').forEach(card => {
+        const searchData = card.getAttribute('data-search');
+        const isAction = card.getAttribute('data-action') === 'true';
+        const isSurvey = card.getAttribute('data-survey') === 'true';
+        
+        let show = true;
+        if (query && !searchData.includes(query)) show = false;
+        if (mode === 'action' && !isAction) show = false;
+        if (mode === 'survey' && !isSurvey) show = false;
+
+        card.style.display = show ? 'block' : 'none';
+    });
+};
+
+window.filterLeads = () => {
+    if(document.getElementById('searchInput').value.trim() !== '') {
+        document.getElementById('btnClearFilters').classList.remove('hidden');
+    }
+    window.applyFilters();
+};
+
+window.calculateVAT = () => {
+    const val = parseFloat(document.getElementById('financeValueInput').value) || 0;
+    const net = val / 1.2;
+    const vat = val - net;
+    document.getElementById('netCalc').innerText = `£${net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('vatCalc').innerText = `£${vat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+};
+
 window.openDrawer = (id) => {
     window.currentOpenLeadId = id;
     const data = window.leadCache[id];
@@ -169,12 +216,12 @@ window.openDrawer = (id) => {
     brandBadge.innerText = brandData.name;
     brandBadge.style.color = brandData.theme;
 
-    // Populate Fields
     document.getElementById('ownerInput').value = data.owner || 'Unassigned';
     document.getElementById('followUpInput').value = data.followUpDate || '';
     document.getElementById('financeValueInput').value = data.contractValue || '';
     document.getElementById('financeStatusInput').value = data.financeStatus || 'TBC';
     document.getElementById('techNotesInput').value = data.technicalNotes || '';
+    window.calculateVAT();
 
     const rillaInput = document.getElementById('rillaInput');
     const rillaBtn = document.getElementById('rillaOpenBtn');
@@ -187,21 +234,14 @@ window.openDrawer = (id) => {
         rillaBtn.classList.add('hidden');
     }
 
-    // --- AUTO-PULL SNIPER MARKUPS FROM SURVEY ---
     const gallery = document.getElementById('sniperGallery');
-    // We look for arrays named surveyPhotos or sniperMarkups in the database
     const markups = data.surveyPhotos || data.sniperMarkups || []; 
     
     if (markups.length > 0) {
-        gallery.innerHTML = ''; // Clear placeholder
+        gallery.innerHTML = '';
         gallery.classList.remove('p-4', 'border-dashed', 'text-center', 'text-gray-500', 'italic');
-        
         markups.forEach(url => {
-            gallery.innerHTML += `
-                <a href="${url}" target="_blank" class="block">
-                    <img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-700 hover:border-[#0dcaf0] transition cursor-pointer shadow-md">
-                </a>
-            `;
+            gallery.innerHTML += `<a href="${url}" target="_blank" class="block"><img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-700 hover:border-[#0dcaf0] transition cursor-pointer shadow-md"></a>`;
         });
     } else {
         gallery.innerHTML = 'No site photos or markups synced from survey yet.';
@@ -226,23 +266,19 @@ window.saveDrawerData = async (type) => {
     if(type === 'management') {
         updates.owner = document.getElementById('ownerInput').value;
         updates.followUpDate = document.getElementById('followUpInput').value;
-        alert("Management Details Updated!");
     } else if(type === 'rilla') {
         updates.rillaLink = document.getElementById('rillaInput').value.trim();
-        alert("Rilla Link Synced!");
     } else if (type === 'notes') {
         updates.technicalNotes = document.getElementById('techNotesInput').value.trim();
-        alert("Structural Specifications Saved!");
     } else if (type === 'finance') {
         updates.contractValue = document.getElementById('financeValueInput').value.trim();
         updates.financeStatus = document.getElementById('financeStatusInput').value;
-        alert("Financials Updated!");
     }
-    
     updates["timestamps.updatedAt"] = new Date().toISOString();
     
     try {
         await updateDoc(doc(db, "surveys", id), updates);
+        alert("System Updated!");
     } catch(e) {
         console.error("Error saving drawer data:", e);
         alert("Failed to save changes.");
@@ -266,20 +302,6 @@ window.closeDeal = async (status) => {
     }
 };
 
-// --- LIVE SEARCH ENGINE ---
-window.filterLeads = () => {
-    const query = document.getElementById('searchInput')?.value.toLowerCase() || '';
-    document.querySelectorAll('.lead-card').forEach(card => {
-        const searchData = card.getAttribute('data-search');
-        if (searchData.includes(query)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-};
-
-// --- DRAG AND DROP ENGINE ---
 window.dragStart = (e, id) => {
     e.dataTransfer.setData("text/plain", id);
     e.target.style.opacity = "0.5";
@@ -292,19 +314,16 @@ document.addEventListener("dragend", (e) => {
 document.querySelectorAll('.kanban-dropzone').forEach(zone => {
     zone.addEventListener('dragover', e => {
         e.preventDefault();
-        zone.classList.add('bg-slate-800/60');
-        zone.classList.add('border-[#0dcaf0]');
+        zone.classList.add('bg-slate-800/60', 'border-[#0dcaf0]', 'border-dashed', 'border-2');
     });
     
     zone.addEventListener('dragleave', e => {
-        zone.classList.remove('bg-slate-800/60');
-        zone.classList.remove('border-[#0dcaf0]');
+        zone.classList.remove('bg-slate-800/60', 'border-[#0dcaf0]', 'border-dashed', 'border-2');
     });
     
     zone.addEventListener('drop', async e => {
         e.preventDefault();
-        zone.classList.remove('bg-slate-800/60');
-        zone.classList.remove('border-[#0dcaf0]');
+        zone.classList.remove('bg-slate-800/60', 'border-[#0dcaf0]', 'border-dashed', 'border-2');
         
         const leadId = e.dataTransfer.getData("text/plain");
         const newStage = zone.getAttribute('data-stage');
@@ -322,7 +341,6 @@ document.querySelectorAll('.kanban-dropzone').forEach(zone => {
     });
 });
 
-// --- MANUAL ACTIONS ---
 window.uploadQuote = async (id, inputEl) => {
     const file = inputEl.files[0];
     if(!file) return;
@@ -352,7 +370,7 @@ window.uploadQuote = async (id, inputEl) => {
 };
 
 window.replyToClient = async (id) => {
-    const msg = prompt("Fast Reply:");
+    const msg = prompt("Fast Reply (Pre-fill: 'Hi, just checking in to see if you had any questions?'):", "Hi, just checking in to see if you had any questions on the design?");
     if(!msg) return;
     await addDoc(collection(db, `surveys/${id}/messages`), { 
         sender: 'Designer', 
