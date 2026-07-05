@@ -16,7 +16,7 @@
 </head>
 <body class="bg-gray-950 text-white min-h-screen flex flex-col">
 
-    <!-- 1. SECURE LOGIN GATE -->
+    <!-- SECURE LOGIN GATE -->
     <div id="authGate" class="flex items-center justify-center min-h-screen bg-gray-950 px-4">
         <div class="glass-panel p-8 w-full max-w-md text-center">
             <h2 class="text-2xl font-black mb-6 tracking-widest text-[#0dcaf0]">COHI<span class="text-white">COMMAND</span></h2>
@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    <!-- 2. MAIN DASHBOARD (Hidden until authenticated) -->
+    <!-- MAIN DASHBOARD -->
     <div id="dashboardApp" class="hidden flex-grow flex flex-col">
         
         <!-- GLOBAL NAV -->
@@ -42,11 +42,9 @@
             </div>
         </nav>
 
-        <!-- DASHBOARD CONTENT -->
-        <div class="p-4 md:p-6 flex-grow flex flex-col space-y-6">
+        <div class="p-4 md:p-6 flex-grow flex flex-col space-y-4">
             
-            <!-- HEADER & SEARCH -->
-            <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
                 <div>
                     <h1 id="designerWelcome" class="text-2xl md:text-3xl font-black mb-1">Welcome</h1>
                     <p class="text-xs text-gray-500 uppercase tracking-widest">Pipeline Overview</p>
@@ -57,10 +55,74 @@
                 </div>
             </header>
 
-            <!-- LIVE HUD METRICS -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="glass-panel p-4 text-center metric-card" onclick="window.filterByMetric('all')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Active Leads</p>
+            <!-- 💰 FINANCIAL COMMAND CENTER -->
+            <div class="glass-panel p-5 border-t-4 border-t-[#0dcaf0] shadow-[0_0_20px_rgba(13,202,240,0.1)] relative">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">💰 Financial Command Center</h3>
+                    <button onclick="document.getElementById('finControls').classList.toggle('hidden')" class="text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:bg-[#0dcaf0] hover:text-black text-gray-300 transition font-bold tracking-widest uppercase">⚙️ Target Settings</button>
+                </div>
+                
+                <!-- SETTINGS PANEL (Hidden by default) -->
+                <div id="finControls" class="grid grid-cols-2 md:grid-cols-5 gap-4 hidden bg-slate-900/50 p-4 rounded-lg border border-gray-700 mb-4">
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Start Date</label>
+                        <input type="date" id="finStartDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">End Date</label>
+                        <input type="date" id="finEndDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Monthly Target (£)</label>
+                        <input type="number" id="finMonthlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Yearly Target (£)</label>
+                        <input type="number" id="finYearlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Commission Profile</label>
+                        <select id="finCommProfile" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
+                            <option value="1">Employed (1% Net)</option>
+                            <option value="4">Self-Employed (4% Net)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- FINANCIAL READOUTS -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700">
+                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Live Pipeline Value</p>
+                        <p id="hudPipeline" class="text-xl font-black text-amber-500">£0</p>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-lg border border-emerald-500/30">
+                        <p class="text-[9px] text-emerald-500 uppercase tracking-widest mb-1 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sold In Period</p>
+                        <p id="hudSoldPeriod" class="text-xl font-black text-emerald-400">£0</p>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700 relative overflow-hidden">
+                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Vs Monthly Target</p>
+                        <p id="hudMonthlyVs" class="text-xl font-black text-white z-10 relative">0%</p>
+                        <div id="barMonthly" class="absolute bottom-0 left-0 h-1 bg-[#0dcaf0] transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700 relative overflow-hidden">
+                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Vs Yearly Target (YTD)</p>
+                        <p id="hudYearlyVs" class="text-xl font-black text-white z-10 relative">0%</p>
+                        <div id="barYearly" class="absolute bottom-0 left-0 h-1 bg-[#0dcaf0] transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="bg-purple-900/20 p-3 rounded-lg border border-purple-500/30">
+                        <p class="text-[9px] text-purple-400 uppercase tracking-widest mb-1 flex justify-between">
+                            <span>Est. Comm</span>
+                            <span class="text-gray-500 text-[8px]">(Net)</span>
+                        </p>
+                        <p id="hudCommPeriod" class="text-xl font-black text-purple-400">£0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTERACTIVE HUD METRICS (Kanban Filters) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 mb-4">
+                <div class="glass-panel p-4 text-center metric-card border-b-2 border-gray-700" onclick="window.filterByMetric('all')">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Total Active Deals</p>
                     <p id="hudActiveLeads" class="text-2xl font-black text-white">0</p>
                 </div>
                 <div class="glass-panel p-4 text-center border-b-2 border-amber-500 metric-card" onclick="window.filterByMetric('survey')">
@@ -71,44 +133,35 @@
                     <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Action Required</p>
                     <p id="hudAction" class="text-2xl font-black text-rose-500">0</p>
                 </div>
-                <div class="glass-panel p-4 text-center border-b-2 border-emerald-500">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Revenue Won</p>
-                    <p id="hudRevenueWon" class="text-2xl font-black text-emerald-500">£0</p>
+                <div class="glass-panel p-4 text-center border-b-2 border-emerald-500 metric-card" onclick="window.filterByMetric('won')">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Total Won (All Time)</p>
+                    <p id="hudTotalWon" class="text-2xl font-black text-emerald-500">0</p>
                 </div>
             </div>
 
             <!-- KANBAN BOARD -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-8 flex-grow">
-                
-                <!-- Stage 1 -->
-                <div class="glass-panel p-4 flex flex-col h-[65vh]">
+                <div class="glass-panel p-4 flex flex-col h-[60vh]">
                     <h2 class="text-xs font-bold text-gray-400 mb-3 tracking-widest uppercase border-b border-gray-700 pb-2">1. Consultation (<span id="count-stage1">0</span>)</h2>
                     <div id="col-stage1" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="1. Consultation"></div>
                 </div>
-                
-                <!-- Stage 2 -->
-                <div class="glass-panel p-4 flex flex-col h-[65vh]">
+                <div class="glass-panel p-4 flex flex-col h-[60vh]">
                     <h2 class="text-xs font-bold text-[#0dcaf0] mb-3 tracking-widest uppercase border-b border-[#0dcaf0]/30 pb-2">2. Quote Sent (<span id="count-stage2">0</span>)</h2>
                     <div id="col-stage2" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="2. Quote Sent"></div>
                 </div>
-                
-                <!-- Stage 3 -->
-                <div class="glass-panel p-4 flex flex-col h-[65vh]">
+                <div class="glass-panel p-4 flex flex-col h-[60vh]">
                     <h2 class="text-xs font-bold text-amber-500 mb-3 tracking-widest uppercase border-b border-amber-500/30 pb-2">3. Technical Survey (<span id="count-stage3">0</span>)</h2>
                     <div id="col-stage3" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="3. Technical Survey"></div>
                 </div>
-                
-                <!-- Stage 4 -->
-                <div class="glass-panel p-4 flex flex-col h-[65vh]">
+                <div class="glass-panel p-4 flex flex-col h-[60vh]">
                     <h2 class="text-xs font-bold text-emerald-500 mb-3 tracking-widest uppercase border-b border-emerald-500/30 pb-2">4. Handover (<span id="count-stage4">0</span>)</h2>
                     <div id="col-stage4" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="4. Handover"></div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- 3. TECHNICAL SLIDE-OUT DRAWER -->
+    <!-- TECHNICAL SLIDE-OUT DRAWER -->
     <div id="drawerOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity" onclick="window.closeDrawer()"></div>
     <div id="techDrawer" class="fixed top-0 right-0 h-full w-full md:w-[600px] bg-gray-900 border-l border-gray-700 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-950">
@@ -120,7 +173,6 @@
         </div>
         
         <div class="p-6 overflow-y-auto flex-grow space-y-8">
-            <!-- Details & Financials Block -->
             <div class="space-y-4">
                 <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Pipeline Management</h3>
                 <div class="grid grid-cols-2 gap-4">
