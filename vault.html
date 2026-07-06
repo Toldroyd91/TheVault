@@ -24,6 +24,9 @@
         .slide:hover .bg-img { transform: scale(1.03); }
         .overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.98) 100%), radial-gradient(circle, transparent 10%, rgba(0,0,0,0.9) 100%); z-index: 1; pointer-events: none;}
         
+        /* LIVE MAP STYLING */
+        .map-container { position: absolute; inset: 0; z-index: 0; opacity: 0.4; filter: invert(1) hue-rotate(180deg) grayscale(0.8) contrast(1.2); pointer-events: none; }
+        
         /* PIPELINE TRACKER */
         .pipeline-bar { position: fixed; top: 0; left: 0; width: 100%; z-index: 9000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 5vw; display: flex; justify-content: space-between; align-items: center; }
         .step-container { display: flex; align-items: center; gap: 15px; width: 100%; }
@@ -40,7 +43,7 @@
 
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(13,202,240,0.4); } 70% { box-shadow: 0 0 0 10px rgba(13,202,240,0); } 100% { box-shadow: 0 0 0 0 rgba(13,202,240,0); } }
 
-        /* GLASSMORPHISM UI & INFORMATIVE CARDS */
+        /* GLASSMORPHISM UI */
         .glass-panel { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 45px; box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
         h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; }
         .text-accent { color: var(--accent); }
@@ -62,7 +65,7 @@
         
         @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
 
-        /* GALLERY */
+        /* GALLERY & SKETCHES */
         .gallery-wrapper { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; scroll-snap-type: x mandatory; }
         .gallery-wrapper::-webkit-scrollbar { height: 6px; }
         .gallery-wrapper::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
@@ -70,6 +73,10 @@
         .gallery-img-container img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
         .gallery-img-container:hover img { transform: scale(1.08); filter: brightness(1.2); }
         .img-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--accent); font-weight: bold; letter-spacing: 1px; backdrop-filter: blur(5px); }
+
+        .sniper-container { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--accent); box-shadow: 0 10px 20px rgba(13,202,240,0.2); position: relative; }
+        .sniper-container img { width: 100%; height: auto; display: block; }
+        .sniper-tag { position: absolute; top: 10px; left: 10px; background: var(--accent); color: #000; padding: 5px 10px; font-size: 10px; font-weight: bold; text-transform: uppercase; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -105,13 +112,15 @@
             </div>
         </section>
 
-        <!-- 02. ENVIRONMENTAL INTELLIGENCE (Live API Data) -->
+        <!-- 02. ENVIRONMENTAL INTELLIGENCE (Live Map API) -->
         <section class="slide">
-            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" class="bg-img" style="opacity: 0.5;">
+            <!-- LIVE OPENSTREETMAP IFRAME (Injected via JS) -->
+            <div id="liveMapContainer" class="map-container"></div>
+            
             <div class="overlay"></div>
             <div class="glass-panel" style="width: 85vw; max-width: 1200px;">
                 <h2 style="font-size: 2.5rem; margin-bottom: 15px;"><span class="text-accent">01.</span> Environmental Intelligence</h2>
-                <p style="color: #aaa; margin-bottom: 40px; font-size: 15px; max-width: 800px; line-height: 1.6;">Our pre-commencement team utilizes live topographical mapping. We tailor your structural engineering based on the specific geographical demands of your postcode.</p>
+                <p style="color: #aaa; margin-bottom: 40px; font-size: 15px; max-width: 800px; line-height: 1.6;">Our pre-commencement team utilizes live topographical mapping. We tailor your structural engineering based on the specific geographical demands of your location.</p>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                     <div class="info-card">
@@ -157,7 +166,7 @@
                         <div class="hotspot-card">
                             <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 10px;">Masonry & Cavity Protocol</h3>
                             <p style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px;" id="ar-walls">Standard Brick Match</p>
-                            <p style="font-size: 13px; color: #aaa; line-height: 1.5;">Our surveyors identified your existing exterior finish. We source matching materials to ensure the new extension looks like a natural, original part of the property, not an afterthought.</p>
+                            <p style="font-size: 13px; color: #aaa; line-height: 1.5;">Our surveyors identified your existing exterior finish. We source matching materials to ensure the new extension looks like a natural, original part of the property.</p>
                         </div>
                     </div>
 
@@ -173,7 +182,7 @@
             </div>
         </section>
 
-        <!-- 04. METICULOUS SURVEY DEEPDIVE -->
+        <!-- 04. METICULOUS SURVEY DEEPDIVE & SNIPER SKETCHES -->
         <section class="slide">
             <img src="" id="deepdiveImg" class="bg-img" style="filter: grayscale(1) brightness(0.25);">
             <div class="overlay"></div>
@@ -182,43 +191,44 @@
                 <h2 style="font-size: 2.5rem; margin-bottom: 30px;"><span class="text-accent">03.</span> Meticulous Survey Deepdive</h2>
                 
                 <div style="display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 40px;">
+                    <!-- Column 1: Compliance -->
                     <div style="flex: 1; min-width: 320px;">
                         <h3 style="color: #fff; font-size: 16px; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Design & Compliance</h3>
                         
                         <div class="info-card">
                             <span class="info-title">Building Regulations</span>
                             <span class="info-value" id="spec-regs">TBC</span>
-                            <span class="info-desc">We manage all compliance. Your build is overseen to ensure it meets strict UK Building Regulations for structural integrity and energy performance.</span>
+                            <span class="info-desc">Your build is overseen to ensure it meets strict UK Building Regulations for structural integrity and energy performance.</span>
                         </div>
                         <div class="info-card">
                             <span class="info-title">Planning Permission</span>
                             <span class="info-value" id="spec-planning">TBC</span>
-                            <span class="info-desc">If Prior Approval or Full Planning is needed, our in-house pre-commencement team handles the application, removing the stress of council liaison from your shoulders.</span>
-                        </div>
-                        <div class="info-card" style="border-left-color: var(--success);">
-                            <span class="info-title">The COHI Standard</span>
-                            <span class="info-value" style="color: var(--success);">Fully Accredited</span>
-                            <span class="info-desc">Over 30 years of expertise. Backed by FENSA, the GGF, and protected by a comprehensive 20-Year Insurance-Backed Guarantee for total peace of mind.</span>
-                        </div>
-                    </div>
-                    
-                    <div style="flex: 1; min-width: 320px;">
-                        <h3 style="color: #fff; font-size: 16px; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Site Specifics</h3>
-                        
-                        <div class="info-card">
-                            <span class="info-title">Site Clearance & Obstacles</span>
-                            <span class="info-value" id="prop-obs">None Recorded</span>
-                            <span class="info-desc">Our surveyor mapped the structural envelope. By identifying boiler flues, soil pipes, and drainage early, we eliminate unexpected costs and installation delays.</span>
-                        </div>
-                        <div class="info-card">
-                            <span class="info-title">Ventilation Protocol</span>
-                            <span class="info-value" id="prop-air">Standard Ducts</span>
-                            <span class="info-desc">Proper sub-floor airflow is essential to prevent moisture buildup beneath the new extension. Your air brick locations have been specifically calculated.</span>
+                            <span class="info-desc">If Prior Approval or Full Planning is needed, our in-house pre-commencement team handles the application entirely.</span>
                         </div>
                         
                         <div style="background: rgba(0,0,0,0.5); padding: 25px; border-radius: 12px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
                             <p style="font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold;">Lead Designer Notes</p>
                             <p style="font-size: 14px; line-height: 1.6; color: #ccc; font-style: italic; white-space: pre-wrap;" id="designer-notes">Notes loading...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Column 2: Site & Sniper Markups -->
+                    <div style="flex: 1; min-width: 320px;">
+                        <h3 style="color: #fff; font-size: 16px; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Calibrated Elevations</h3>
+                        
+                        <!-- SNIPER IMAGE SHOWCASE -->
+                        <div id="sniper-box" style="display: none; margin-bottom: 20px;">
+                            <p style="font-size: 13px; color: #aaa; margin-bottom: 10px;">Your lead designer has mapped physical dimensions directly onto your property to ensure millimetric manufacturing accuracy.</p>
+                            <div class="sniper-container">
+                                <div class="sniper-tag">Surveyor Markup</div>
+                                <img id="sniper-sketch" src="" alt="Sniper Measurements">
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <span class="info-title">Site Clearance & Obstacles</span>
+                            <span class="info-value" id="prop-obs">None Recorded</span>
+                            <span class="info-desc">By identifying boiler flues, soil pipes, and drainage early, we eliminate unexpected costs and installation delays.</span>
                         </div>
                     </div>
                 </div>
@@ -277,8 +287,13 @@
                     document.getElementById('spec-regs').innerText = data.projectSpecs?.buildingRegs || 'Determined by Local Authority';
                     document.getElementById('spec-planning').innerText = data.projectSpecs?.planningPerms || 'N/A';
                     document.getElementById('prop-obs').innerText = data.projectSpecs?.wallObstacles || 'Clear Envelope';
-                    document.getElementById('prop-air').innerText = pDesign.includes('Air Bricks:') ? pDesign.split('Air Bricks: ')[1].split('\n')[0] : 'Sufficient Existing Venting';
                     document.getElementById('designer-notes').innerText = data.designerInsights?.prep || 'All architectural tolerances verified on site.';
+
+                    // --- SNIPER SKETCH INJECTION ---
+                    if (data.media?.sketch) {
+                        document.getElementById('sniper-box').style.display = 'block';
+                        document.getElementById('sniper-sketch').src = data.media.sketch;
+                    }
 
                     // Gallery
                     const gallery = document.getElementById('labeled-gallery');
@@ -303,8 +318,7 @@
                     document.getElementById('authGate').style.opacity = '0';
                     setTimeout(() => { document.getElementById('authGate').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; }, 800);
 
-                    // --- 2. LIVE ENVIRONMENTAL API ENGINE ---
-                    // Fetch Lat/Lon from Postcode
+                    // --- 2. LIVE ENVIRONMENTAL API ENGINE & MAPS ---
                     try {
                         const cleanPC = postcode.replace(/\s+/g, '');
                         const pcRes = await fetch(`https://api.postcodes.io/postcodes/${cleanPC}`);
@@ -314,7 +328,11 @@
                             const { latitude, longitude, admin_district } = pcData.result;
                             document.getElementById('env-borough').innerText = admin_district || "Local Authority";
                             
-                            // Fetch Weather/Elevation from Open-Meteo
+                            // INJECT LIVE INTERACTIVE MAP
+                            const mapIframe = `<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=${longitude-0.015},${latitude-0.015},${longitude+0.015},${latitude+0.015}&layer=mapnik&marker=${latitude},${longitude}"></iframe>`;
+                            document.getElementById('liveMapContainer').innerHTML = mapIframe;
+
+                            // Fetch Weather/Elevation
                             const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&elevation=true`);
                             const weatherData = await weatherRes.json();
                             
@@ -323,13 +341,9 @@
                             const windSpeed = weatherData.current_weather?.windspeed || 0;
                             const windStr = windSpeed > 25 ? `${windSpeed} km/h (High Load)` : `${windSpeed} km/h (Moderate)`;
                             document.getElementById('env-wind').innerText = windStr;
-                        } else {
-                            document.getElementById('env-borough').innerText = "Barnsley Council (Default)";
-                            document.getElementById('env-elevation').innerText = "142m ASL";
-                            document.getElementById('env-wind').innerText = "Moderate / Protected";
                         }
                     } catch(apiErr) {
-                        console.warn("API Fetch failed, using standard topographical data.", apiErr);
+                        console.warn("API Fetch failed.", apiErr);
                         document.getElementById('env-borough').innerText = "Barnsley Council (Default)";
                         document.getElementById('env-elevation').innerText = "142m ASL";
                         document.getElementById('env-wind').innerText = "Moderate / Protected";
