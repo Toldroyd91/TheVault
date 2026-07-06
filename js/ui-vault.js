@@ -1,4 +1,4 @@
-import { db, doc, getDoc, updateDoc, onSnapshot, collection, query, orderBy, addDoc, serverTimestamp, BRAND_CONFIG, arrayUnion, increment } from './core-firebase.js';
+import { db, doc, getDoc, updateDoc, onSnapshot, collection, query, orderBy, addDoc, serverTimestamp, BRAND_CONFIG, arrayUnion } from './core-firebase.js';
 
 let projectId = new URLSearchParams(window.location.search).get('id');
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqkhhz0f9/image/upload"; 
@@ -9,7 +9,6 @@ function formatCamelCase(text) {
     return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
-// OSM Math
 function lon2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
 function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
 
@@ -61,6 +60,9 @@ function renderDynamicSurveyData(data) {
 const btnAccess = document.getElementById('btnAccess');
 const pinInput = document.getElementById('vaultPinInput');
 
+// We will track the latest view time from the database here
+let currentTotalViewTime = 0; 
+
 async function attemptDecrypt() {
     if(!projectId) { projectId = prompt("System requires a Project ID to access the vault. Please enter it:"); if(!projectId) return; }
 
@@ -76,30 +78,30 @@ async function attemptDecrypt() {
         const storedPin = String(data.customerProfile?.vaultPIN || "").trim();
         const enteredPin = String(pinInput.value).trim();
         
-        // MASTER OVERRIDE ALLOWED HERE
         if(enteredPin !== "0000" && enteredPin !== storedPin) { btnAccess.innerText = originalText; btnAccess.disabled = false; return alert(`AUTH ERROR: PIN incorrect.`); }
 
         await updateDoc(docRef, { "vaultTelemetry.lastActive": Date.now() });
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('vaultContent').style.display = 'flex';
 
-        // --- SILENT TELEMETRY TRACKER ---
-        // Tracks how many seconds the customer stares at the vault
-        let sessionSeconds = 0;
+        // START GHOST TRACKER (No imports required, basic JS maths)
         setInterval(async () => {
             if(document.visibilityState === 'visible') {
-                sessionSeconds += 15;
                 try {
                     await updateDoc(docRef, {
-                        "vaultTelemetry.totalViewTimeSeconds": increment(15),
+                        "vaultTelemetry.totalViewTimeSeconds": currentTotalViewTime + 15,
                         "vaultTelemetry.lastActive": Date.now()
                     });
-                } catch(e) {}
+                } catch(e) {} // Silently fail if network drops so it doesn't interrupt the user
             }
-        }, 15000); // Logs to database every 15 seconds they look at it
+        }, 15000); 
 
         onSnapshot(docRef, (docSnap) => {
             const data = docSnap.data();
+            
+            // Sync current view time for Ghost Tracker
+            currentTotalViewTime = data.vaultTelemetry?.totalViewTimeSeconds || 0;
+
             const brandId = data.brand || "YorkshireWindows";
             const brandData = BRAND_CONFIG[brandId] || BRAND_CONFIG["YorkshireWindows"];
             
@@ -130,7 +132,6 @@ async function attemptDecrypt() {
             }
             if (!hasImages && uiGallery) uiGallery.innerHTML = '<div class="text-xs text-gray-500 italic col-span-2 p-4 bg-[#161b22] border border-[#30363d] rounded-lg">Site imagery is currently processing.</div>';
             
-            // --- SALES FUNNEL LOGIC ---
             const financialContainer = document.getElementById('quoteContainer');
             if (financialContainer) {
                 const accessLevel = data.vaultAccessLevel || 'survey_only';
@@ -159,7 +160,6 @@ async function attemptDecrypt() {
                     const totalVal = data.uDesignData?.totalPrice || 0; const depositVal = data.uDesignData?.deposit || 0;
                     const total = parseFloat(totalVal).toLocaleString('en-GB', {style: 'currency', currency: 'GBP'}); const deposit = parseFloat(depositVal).toLocaleString('en-GB', {style: 'currency', currency: 'GBP'});
 
-                    // REMOVED SIGN BUTTON - REPLACED WITH NEXT STEPS SUMMARY
                     financialContainer.innerHTML = `
                         <div class="mt-8 animate-[fadeIn_0.8s_ease-out]">
                             <h3 class="text-sm font-black text-[#238636] uppercase tracking-widest mb-4 pb-2 border-b border-[#30363d] flex items-center gap-2"><span>🔓</span> Official Investment Breakdown</h3>
@@ -205,8 +205,13 @@ async function attemptDecrypt() {
     }
 }
 
-if (btnAccess) btnAccess.addEventListener('click', attemptDecrypt);
-if (pinInput) pinInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptDecrypt(); });
+// BIND THE BUTTON (This was being blocked by the import crash)
+if (btnAccess) {
+    btnAccess.addEventListener('click', attemptDecrypt);
+}
+if (pinInput) {
+    pinInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptDecrypt(); });
+}
 
 // PDF Engine
 const btnDownload = document.getElementById('btnDownloadReport');
