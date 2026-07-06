@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COHI | Command Center</title>
-    <!-- PWA Hooks for Field Use -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,6 +18,8 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .metric-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
         .metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5); }
+        .hot-lead { animation: pulseBorder 2s infinite; }
+        @keyframes pulseBorder { 0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(229, 9, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); } }
     </style>
 </head>
 <body class="bg-gray-950 text-white min-h-screen flex flex-col">
@@ -69,24 +70,11 @@
                     <button onclick="document.getElementById('finControls').classList.toggle('hidden')" class="text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:bg-[#0dcaf0] hover:text-black text-gray-300 transition font-bold tracking-widest uppercase">⚙️ Target Settings</button>
                 </div>
                 
-                <!-- SETTINGS PANEL (Hidden by default) -->
                 <div id="finControls" class="grid grid-cols-2 md:grid-cols-5 gap-4 hidden bg-slate-900/50 p-4 rounded-lg border border-gray-700 mb-4">
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Start Date</label>
-                        <input type="date" id="finStartDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">End Date</label>
-                        <input type="date" id="finEndDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Monthly Target (£)</label>
-                        <input type="number" id="finMonthlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Yearly Target (£)</label>
-                        <input type="number" id="finYearlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()">
-                    </div>
+                    <div><label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Start Date</label><input type="date" id="finStartDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()"></div>
+                    <div><label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">End Date</label><input type="date" id="finEndDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()"></div>
+                    <div><label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Monthly Target (£)</label><input type="number" id="finMonthlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()"></div>
+                    <div><label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Yearly Target (£)</label><input type="number" id="finYearlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()"></div>
                     <div>
                         <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Commission Profile</label>
                         <select id="finCommProfile" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
@@ -96,7 +84,6 @@
                     </div>
                 </div>
 
-                <!-- FINANCIAL READOUTS -->
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700">
                         <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Live Pipeline Value</p>
@@ -117,16 +104,13 @@
                         <div id="barYearly" class="absolute bottom-0 left-0 h-1 bg-[#0dcaf0] transition-all duration-500" style="width: 0%"></div>
                     </div>
                     <div class="bg-purple-900/20 p-3 rounded-lg border border-purple-500/30">
-                        <p class="text-[9px] text-purple-400 uppercase tracking-widest mb-1 flex justify-between">
-                            <span>Est. Comm</span>
-                            <span class="text-gray-500 text-[8px]">(Net)</span>
-                        </p>
+                        <p class="text-[9px] text-purple-400 uppercase tracking-widest mb-1 flex justify-between"><span>Est. Comm</span><span class="text-gray-500 text-[8px]">(Net)</span></p>
                         <p id="hudCommPeriod" class="text-xl font-black text-purple-400">£0</p>
                     </div>
                 </div>
             </div>
 
-            <!-- INTERACTIVE HUD METRICS (Kanban Filters) -->
+            <!-- INTERACTIVE HUD METRICS -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 mb-4">
                 <div class="glass-panel p-4 text-center metric-card border-b-2 border-gray-700" onclick="window.filterByMetric('all')">
                     <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Total Active Deals</p>
@@ -146,29 +130,29 @@
                 </div>
             </div>
 
-            <!-- KANBAN BOARD -->
+            <!-- UPDATED KANBAN BOARD -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-8 flex-grow">
                 <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-gray-400 mb-3 tracking-widest uppercase border-b border-gray-700 pb-2">1. Consultation (<span id="count-stage1">0</span>)</h2>
-                    <div id="col-stage1" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="1. Consultation"></div>
+                    <h2 class="text-xs font-bold text-gray-400 mb-3 tracking-widest uppercase border-b border-gray-700 pb-2">1. Survey Phase (<span id="count-stage1">0</span>)</h2>
+                    <div id="col-stage1" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="survey"></div>
                 </div>
                 <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-[#0dcaf0] mb-3 tracking-widest uppercase border-b border-[#0dcaf0]/30 pb-2">2. Quote Sent (<span id="count-stage2">0</span>)</h2>
-                    <div id="col-stage2" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="2. Quote Sent"></div>
+                    <h2 class="text-xs font-bold text-[#E50914] mb-3 tracking-widest uppercase border-b border-[#E50914]/30 pb-2">2. Design Tease (<span id="count-stage2">0</span>)</h2>
+                    <div id="col-stage2" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="tease"></div>
                 </div>
                 <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-amber-500 mb-3 tracking-widest uppercase border-b border-amber-500/30 pb-2">3. Technical Survey (<span id="count-stage3">0</span>)</h2>
-                    <div id="col-stage3" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="3. Technical Survey"></div>
+                    <h2 class="text-xs font-bold text-[#0dcaf0] mb-3 tracking-widest uppercase border-b border-[#0dcaf0]/30 pb-2">3. Price Unlocked (<span id="count-stage3">0</span>)</h2>
+                    <div id="col-stage3" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="unlocked"></div>
                 </div>
                 <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-emerald-500 mb-3 tracking-widest uppercase border-b border-emerald-500/30 pb-2">4. Handover (<span id="count-stage4">0</span>)</h2>
-                    <div id="col-stage4" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="4. Handover"></div>
+                    <h2 class="text-xs font-bold text-emerald-500 mb-3 tracking-widest uppercase border-b border-emerald-500/30 pb-2">4. Closed Won (<span id="count-stage4">0</span>)</h2>
+                    <div id="col-stage4" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="closed"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- TECHNICAL SLIDE-OUT DRAWER -->
+    <!-- TECHNICAL SLIDE-OUT DRAWER (Kept exactly as requested) -->
     <div id="drawerOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity" onclick="window.closeDrawer()"></div>
     <div id="techDrawer" class="fixed top-0 right-0 h-full w-full md:w-[600px] bg-gray-900 border-l border-gray-700 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-950">
@@ -183,16 +167,14 @@
             <div class="space-y-4">
                 <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Pipeline Management</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest">Project Owner</label>
-                        <input type="text" id="ownerInput" class="luxury-input w-full p-2 text-sm mt-1">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest">Follow Up Date</label>
-                        <input type="date" id="followUpInput" class="luxury-input w-full p-2 text-sm mt-1">
-                    </div>
+                    <div><label class="text-[10px] text-gray-500 uppercase tracking-widest">Project Owner</label><input type="text" id="ownerInput" class="luxury-input w-full p-2 text-sm mt-1"></div>
+                    <div><label class="text-[10px] text-gray-500 uppercase tracking-widest">Follow Up Date</label><input type="date" id="followUpInput" class="luxury-input w-full p-2 text-sm mt-1"></div>
                 </div>
-                <button onclick="window.saveDrawerData('management')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SAVE MANAGEMENT DETAILS</button>
+                <div class="flex gap-2">
+                    <button onclick="window.saveDrawerData('management')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SAVE MGMT DETAILS</button>
+                    <!-- VAULT / GATEKEEPER SHORTCUT BUTTON -->
+                    <button id="btnOpenGatekeeper" class="flex-1 py-2 bg-[#E50914] hover:bg-red-700 text-white text-xs font-bold rounded transition shadow-[0_0_10px_rgba(229,9,20,0.3)]">OPEN GATEKEEPER ↗</button>
+                </div>
             </div>
 
             <div class="space-y-4">
@@ -201,18 +183,12 @@
                     <div>
                         <label class="text-[10px] text-gray-500 uppercase tracking-widest">Contract Value (£)</label>
                         <input type="number" id="financeValueInput" class="luxury-input w-full p-2 text-sm mt-1" onkeyup="window.calculateVAT()">
-                        <div class="text-[10px] text-gray-400 mt-2 font-mono flex justify-between">
-                            <span>NET: <span id="netCalc">£0.00</span></span>
-                            <span>VAT: <span id="vatCalc">£0.00</span></span>
-                        </div>
+                        <div class="text-[10px] text-gray-400 mt-2 font-mono flex justify-between"><span>NET: <span id="netCalc">£0.00</span></span><span>VAT: <span id="vatCalc">£0.00</span></span></div>
                     </div>
                     <div>
                         <label class="text-[10px] text-gray-500 uppercase tracking-widest">Finance Status</label>
                         <select id="financeStatusInput" class="luxury-input w-full p-2 text-sm mt-1">
-                            <option value="TBC">TBC</option>
-                            <option value="Cash/Self-Funded">Cash / Self-Funded</option>
-                            <option value="Application Pending">Application Pending</option>
-                            <option value="Approved">Approved</option>
+                            <option value="TBC">TBC</option><option value="Cash/Self-Funded">Cash / Self-Funded</option><option value="Application Pending">Application Pending</option><option value="Approved">Approved</option>
                         </select>
                     </div>
                 </div>
@@ -242,18 +218,6 @@
         </div>
     </div>
 
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('PWA Service Worker registered successfully.', reg);
-                }).catch(err => {
-                    console.warn('PWA Service Worker registration failed:', err);
-                });
-            });
-        }
-    </script>
     <script type="module" src="js/ui-dashboard.js"></script>
 </body>
 </html>
