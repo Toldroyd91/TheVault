@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Command Center - Full Survey Pack</title>
-    <!-- Pre-load PDF.js for the PDF Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         :root {
@@ -19,20 +18,21 @@
         }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
-        h2 { margin: 0; font-weight: 600; font-size: 22px; letter-spacing: -0.5px; }
-        h3 { margin-top: 0; font-size: 15px; color: #fff; font-weight: 500; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+        h2 { margin: 0; font-weight: 900; font-size: 22px; letter-spacing: -0.5px; text-transform: uppercase; color: #fff; }
+        h3 { margin-top: 0; font-size: 13px; color: #0dcaf0; font-weight: 900; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
         
         .grid-container { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 25px; align-items: start; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 22px; border: 1px solid var(--border-color); box-shadow: 0 8px 24px rgba(0,0,0,0.3); margin-bottom: 20px; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 22px; border: 1px solid var(--border-color); box-shadow: 0 8px 24px rgba(0,0,0,0.3); margin-bottom: 20px; transition: border-color 0.2s; }
+        .card:hover { border-color: #4b5563; }
         
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .full-width { grid-column: 1 / -1; }
         
-        label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-        input, select, textarea { background: var(--input-bg); border: 1px solid var(--border-color); color: #c9d1d9; padding: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 15px; transition: border-color 0.2s, box-shadow 0.2s; }
+        label { font-size: 10px; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        input, select, textarea { background: var(--input-bg); border: 1px solid var(--border-color); color: #fff; padding: 12px; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; transition: all 0.2s; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.15); }
         
-        .checkbox-group { display: flex; align-items: center; gap: 10px; padding: 8px 0; background: var(--input-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 8px; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; background: var(--input-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 8px; }
         .checkbox-group input { width: auto; accent-color: var(--accent); transform: scale(1.2); margin: 0; }
         .checkbox-group label { margin: 0; font-size: 13px; color: #fff; text-transform: none; letter-spacing: normal; font-weight: normal;}
         
@@ -40,18 +40,20 @@
         canvas { max-width: 100%; max-height: 100%; }
         
         .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .photo-btn { background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; font-size: 13px; color: #c9d1d9; user-select: none; }
-        .photo-btn:hover { border-color: var(--text-muted); }
-        .photo-btn .badge { background: var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-        .photo-btn.has-photos { border-color: var(--accent); color: #fff; background: rgba(229, 9, 20, 0.05); }
-        .photo-btn.has-photos .badge { background: var(--accent); color: #fff; }
+        .photo-btn { background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; font-size: 12px; color: #c9d1d9; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .photo-btn:hover { border-color: #0dcaf0; color: #fff; }
+        .photo-btn .badge { background: var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: black; }
+        .photo-btn.has-photos { border-color: #238636; color: #fff; background: rgba(35, 134, 54, 0.1); }
+        .photo-btn.has-photos .badge { background: #238636; color: #fff; }
 
         .action-bar { display: flex; gap: 15px; margin-top: 20px; }
-        button { background: var(--accent); color: white; border: none; padding: 15px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 0.5px; }
-        button:hover { background: var(--accent-hover); transform: translateY(-1px); }
-        button:disabled { opacity: 0.7; cursor: not-allowed; }
-        .btn-secondary { background: #21262d; border: 1px solid var(--border-color); color: #c9d1d9; }
-        .btn-secondary:hover { background: #30363d; border-color: #8b949e; }
+        button { background: var(--accent); color: white; border: none; padding: 16px 24px; border-radius: 6px; font-size: 14px; font-weight: 900; cursor: pointer; transition: all 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 1px; }
+        button:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3); }
+        button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-secondary { background: #21262d; border: 1px solid var(--border-color); color: #fff; }
+        .btn-secondary:hover { background: #30363d; border-color: #8b949e; box-shadow: none; }
+        .btn-success { background: #238636; }
+        .btn-success:hover { background: #2ea043; box-shadow: 0 4px 15px rgba(35, 134, 54, 0.3); }
         
         @media (max-width: 992px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
@@ -60,18 +62,18 @@
 
     <div class="header">
         <h2>COHI Pro Survey Engine</h2>
-        <select id="brandSelect" style="width: auto; padding: 8px 12px; font-size: 14px; background: #161b22;"></select>
+        <select id="brandSelect" style="width: auto; padding: 8px 12px; font-size: 14px; background: #161b22; font-weight: bold;"></select>
     </div>
 
     <div class="grid-container">
-        <!-- LEFT COLUMN -->
+        <!-- LEFT COLUMN: SITE DATA -->
         <div>
             <div class="card">
                 <h3>Client Profile</h3>
                 <div class="form-grid">
                     <div><label>Lead Name *</label><input type="text" id="clientName" placeholder="e.g. John Dall"></div>
                     <div><label>Customer Number</label><input type="text" id="clientNum" placeholder="e.g. 10245"></div>
-                    <div class="full-width"><label>Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70"></div>
+                    <div class="full-width"><label>Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70 0PN"></div>
                     <div><label>Consultation Date</label><input type="date" id="apptDate"></div>
                     <div><label>Revisit Date</label><input type="date" id="revisitDate"></div>
                 </div>
@@ -98,11 +100,8 @@
                     <div>
                         <label>Plumbing to move</label>
                         <select id="drainage">
-                            <option value="">Select...</option>
-                            <option value="MH">MH</option>
-                            <option value="RWP">RWP</option>
-                            <option value="Soil">Soil</option>
-                            <option value="Gulley">Gulley</option>
+                            <option value="">Select...</option><option value="MH">MH</option><option value="RWP">RWP</option>
+                            <option value="Soil">Soil</option><option value="Gulley">Gulley</option>
                         </select>
                     </div>
                     <div class="full-width"><label>Wall Obstacles</label><input type="text" id="wallObstacles" placeholder="e.g. Boiler flue, soil pipe"></div>
@@ -115,34 +114,22 @@
                     <div>
                         <label>Roof System</label>
                         <select id="roofType">
-                            <option value="">Select...</option>
-                            <option value="Flat Roof">Flat Roof</option>
-                            <option value="Glass/Poly Roof">Glass/Poly Roof</option>
-                            <option value="Hybrid/Livin Roof">Hybrid/Livin Roof</option>
-                            <option value="Ultra380">Ultra380</option>
+                            <option value="">Select...</option><option value="Flat Roof">Flat Roof</option><option value="Glass/Poly Roof">Glass/Poly Roof</option>
+                            <option value="Hybrid/Livin Roof">Hybrid/Livin Roof</option><option value="Ultra380">Ultra380</option>
                         </select>
                     </div>
                     <div><label>Roof Pitch</label><input type="text" id="roofPitch" placeholder="e.g. 25 degrees"></div>
                     <div>
                         <label>Frame Colour (External)</label>
                         <select id="frameColour">
-                            <option value="">Select...</option>
-                            <option value="White">White</option>
-                            <option value="Grey Foil">Grey Foil</option>
-                            <option value="Rosewood">Rosewood</option>
-                            <option value="Light Oak">Light Oak</option>
-                            <option value="Black Brown Foil">Black Brown Foil</option>
-                            <option value="Cream Foil">Cream Foil</option>
-                            <option value="Chartwell Green Foil">Chartwell Green Foil</option>
-                            <option value="Agate Grey">Agate Grey</option>
+                            <option value="">Select...</option><option value="White">White</option><option value="Grey Foil">Grey Foil</option>
+                            <option value="Rosewood">Rosewood</option><option value="Light Oak">Light Oak</option><option value="Black Brown Foil">Black Brown Foil</option>
+                            <option value="Cream Foil">Cream Foil</option><option value="Chartwell Green Foil">Chartwell Green Foil</option><option value="Agate Grey">Agate Grey</option>
                         </select>
                     </div>
                     <div>
                         <label>Frame Colour (Internal)</label>
-                        <select id="internalFrameColour">
-                            <option value="White">White</option>
-                            <option value="Match External">Match External</option>
-                        </select>
+                        <select id="internalFrameColour"><option value="White">White</option><option value="Match External">Match External</option></select>
                     </div>
                 </div>
             </div>
@@ -153,30 +140,21 @@
                     <div>
                         <label>Building Regs Required?</label>
                         <select id="buildingRegs">
-                            <option value="">Select...</option>
-                            <option value="New Build Full Regs">New Build Full Regs</option>
-                            <option value="Replacment With Masonary Alterations">Replacment With Masonary Alterations</option>
-                            <option value="Replacment Without Masonary Alterations">Replacment Without Masonary Alterations</option>
-                            <option value="No">No</option>
+                            <option value="">Select...</option><option value="New Build Full Regs">New Build Full Regs</option>
+                            <option value="Replacement With Masonry Alterations">Replacement With Masonry Alterations</option>
+                            <option value="Replacement Without Masonry Alterations">Replacement Without Masonry Alterations</option><option value="No">No</option>
                         </select>
                     </div>
                     <div>
                         <label>Planning Perms Required?</label>
                         <select id="planningPerms">
-                            <option value="">Select...</option>
-                            <option value="Full Planning">Full Planning</option>
-                            <option value="NCS Prior approval Planning">NCS Prior Approval Planning</option>
-                            <option value="Full Planning">Full Planning</option>
-                            <option value="No">No</option>
+                            <option value="">Select...</option><option value="Full Planning">Full Planning</option>
+                            <option value="NCS Prior approval Planning">NCS Prior Approval Planning</option><option value="No">No</option>
                         </select>
                     </div>
                     <div>
                         <label>SAP Calcs Required?</label>
-                        <select id="sapCalcs">
-                            <option value="">Select...</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </select>
+                        <select id="sapCalcs"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select>
                     </div>
                 </div>
             </div>
@@ -191,7 +169,7 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
+        <!-- RIGHT COLUMN: IMAGERY & NOTES -->
         <div>
             <!-- EXPERT SNIPER UI -->
             <div class="card">
@@ -202,10 +180,8 @@
                 
                 <div class="canvas-container" style="cursor: grab;">
                     <canvas id="sniperCanvas" width="800" height="600"></canvas>
-                    
-                    <!-- Zoom Slider for iPad -->
                     <div style="position: absolute; bottom: 20px; right: 20px; background: rgba(9, 13, 19, 0.8); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 12px; color: #8b949e;">Zoom</span>
+                        <span style="font-size: 12px; color: #8b949e; font-weight: bold; text-transform: uppercase;">Zoom</span>
                         <input type="range" id="sniperZoom" min="0.5" max="5" step="0.1" value="1" style="width: 100px;">
                     </div>
                 </div>
@@ -219,28 +195,28 @@
             <div class="card">
                 <h3>Site Photography & Reference</h3>
                 <div class="photo-grid">
-                    <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()"><span>Front Elevation</span><span class="badge" id="badge-front">0</span></div>
+                    <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()"><span>Front Elev</span><span class="badge" id="badge-front">0</span></div>
                     <input type="file" id="upload-front" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'front')">
                     
-                    <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()"><span>Side Elevation</span><span class="badge" id="badge-side">0</span></div>
+                    <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()"><span>Side Elev</span><span class="badge" id="badge-side">0</span></div>
                     <input type="file" id="upload-side" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'side')">
                     
-                    <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()"><span>Back Elevation</span><span class="badge" id="badge-back">0</span></div>
+                    <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()"><span>Back Elev</span><span class="badge" id="badge-back">0</span></div>
                     <input type="file" id="upload-back" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'back')">
                     
-                    <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()"><span>Access / Pathways</span><span class="badge" id="badge-access">0</span></div>
+                    <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()"><span>Access</span><span class="badge" id="badge-access">0</span></div>
                     <input type="file" id="upload-access" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'access')">
                     
-                    <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()"><span>Drainage / Manholes</span><span class="badge" id="badge-drainage">0</span></div>
+                    <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()"><span>Drainage</span><span class="badge" id="badge-drainage">0</span></div>
                     <input type="file" id="upload-drainage" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'drainage')">
                     
-                    <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()"><span>Trees / Foliage</span><span class="badge" id="badge-trees">0</span></div>
+                    <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()"><span>Trees</span><span class="badge" id="badge-trees">0</span></div>
                     <input type="file" id="upload-trees" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'trees')">
                     
-                    <div class="photo-btn" id="btn-brick" onclick="document.getElementById('upload-brick').click()"><span>Brickwork / Match</span><span class="badge" id="badge-brick">0</span></div>
+                    <div class="photo-btn" id="btn-brick" onclick="document.getElementById('upload-brick').click()"><span>Brickwork</span><span class="badge" id="badge-brick">0</span></div>
                     <input type="file" id="upload-brick" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'brick')">
                     
-                    <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()"><span>Misc / Other</span><span class="badge" id="badge-misc">0</span></div>
+                    <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()"><span>Misc</span><span class="badge" id="badge-misc">0</span></div>
                     <input type="file" id="upload-misc" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'misc')">
                 </div>
             </div>
@@ -248,7 +224,7 @@
             <div class="card">
                 <h3>Designer Survey Notes</h3>
                 <div class="full-width">
-                    <textarea id="designerNotes" rows="5" placeholder="Enter site notes (e.g., transom bars required, render details, obstacles)..."></textarea>
+                    <textarea id="designerNotes" rows="6" placeholder="Enter site notes (e.g., transom bars required, render details, obstacles)..."></textarea>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
                     <input type="checkbox" id="includeNotesInPack" checked style="accent-color: var(--accent);">
@@ -258,8 +234,8 @@
                 <button id="btn-ai-polish" class="btn-secondary" style="margin-top: 15px; width: 100%;">✨ AI Polish Notes</button>
                 
                 <div class="action-bar">
-                    <button id="btn-sync" class="btn-secondary">Save & Sync</button>
-                    <button id="btn-generate-pdf">Generate PDF Pack</button>
+                    <button id="btn-sync" class="btn-success">Save & Sync</button>
+                    <button id="btn-generate-pdf">Open Vault PDF</button>
                 </div>
             </div>
         </div>
@@ -280,10 +256,10 @@
             id: new URLSearchParams(window.location.search).get('id') || null,
             brand: "YorkshireWindows",
             customerProfile: {},
-            technicalSurvey: {},
-            logistics: {},
-            designSpecification: {},
+            projectSpecs: {},
             compliance: {},
+            designerInsights: {},
+            media: {},
             pamphlets: {},
             rawAssets: {}
         };
@@ -294,10 +270,7 @@
         }
 
         onAuthStateChanged(auth, async (user) => {
-            if(!user) {
-                console.warn("Security Notice: Not logged in. Saves will fail.");
-                return;
-            }
+            if(!user) { console.warn("Security Notice: Not logged in. Saves will fail."); return; }
             
             if(SurveyState.id) {
                 const snap = await getDoc(doc(db, "surveys", SurveyState.id));
@@ -314,26 +287,26 @@
                     if(el('buildType')) el('buildType').value = SurveyState.projectSpecs?.buildType || "";
                     if(el('proposedSize')) el('proposedSize').value = SurveyState.projectSpecs?.proposedSize || "";
                     if(el('houseMaterial')) el('houseMaterial').value = SurveyState.projectSpecs?.houseMaterial || "";
-                    if(el('baseType')) el('baseType').value = SurveyState.technicalSurvey?.baseType || "";
-                    if(el('dpcDepth')) el('dpcDepth').value = SurveyState.technicalSurvey?.dpcDepth || "";
-                    if(el('fasciaHeight')) el('fasciaHeight').value = SurveyState.technicalSurvey?.fasciaHeight || "";
-                    if(el('airBricks')) el('airBricks').value = SurveyState.technicalSurvey?.airBricks || "";
                     
+                    // Decode legacy designer Insights if they exist
+                    if(SurveyState.designerInsights?.design) {
+                        const d = SurveyState.designerInsights.design;
+                        if(d.includes('Base Type:')) el('baseType').value = d.split('Base Type: ')[1].split('\n')[0] || "";
+                        if(d.includes('DPC Depth:')) el('dpcDepth').value = d.split('DPC Depth: ')[1].split('mm')[0] || "";
+                        if(d.includes('Fascia Height:')) el('fasciaHeight').value = d.split('Fascia Height: ')[1].split('mm')[0] || "";
+                        if(d.includes('Air Bricks:')) el('airBricks').value = d.split('Air Bricks: ')[1].split('\n')[0] || "";
+                    }
+
                     if(el('accessDifficult')) el('accessDifficult').value = SurveyState.projectSpecs?.accessIssues || "";
                     if(el('accessWidth')) el('accessWidth').value = SurveyState.projectSpecs?.accessWidth || "";
-                    if(el('drainage')) el('drainage').value = SurveyState.logistics?.drainage || "";
                     if(el('wallObstacles')) el('wallObstacles').value = SurveyState.projectSpecs?.wallObstacles || "";
                     
                     if(el('roofType')) el('roofType').value = SurveyState.projectSpecs?.roofStyle || "";
-                    if(el('roofPitch')) el('roofPitch').value = SurveyState.designSpecification?.roofPitch || "";
-                    
-                    // We extract the base colour if it was merged, but for simplicity we'll just populate what we can
                     if(el('buildingRegs')) el('buildingRegs').value = SurveyState.projectSpecs?.buildingRegs || "";
                     if(el('planningPerms')) el('planningPerms').value = SurveyState.projectSpecs?.planningPerms || "";
                     if(el('sapCalcs')) el('sapCalcs').value = SurveyState.compliance?.sapCalcs || "";
                     
                     if(el('designerNotes')) el('designerNotes').value = SurveyState.designerInsights?.prep || "";
-                    if(el('includeNotesInPack')) el('includeNotesInPack').checked = SurveyState.technicalSurvey?.includeNotesInPack !== false;
 
                     if(el('cb-brochure')) el('cb-brochure').checked = !!SurveyState.pamphlets?.brochure;
                     if(el('cb-warranty')) el('cb-warranty').checked = !!SurveyState.pamphlets?.warranty;
@@ -346,22 +319,11 @@
 
         async function uploadBase64ToCloudinary(base64Str) {
             try {
-                const formData = new FormData();
-                formData.append('file', base64Str);
-                formData.append('upload_preset', UPLOAD_PRESET);
+                const formData = new FormData(); formData.append('file', base64Str); formData.append('upload_preset', UPLOAD_PRESET);
                 const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
                 const data = await response.json();
-                
-                if (data.secure_url) {
-                    return data.secure_url;
-                } else {
-                    console.error("Cloudinary Error:", data);
-                    return null;
-                }
-            } catch (err) {
-                console.error("Upload Catch Error:", err);
-                return null;
-            }
+                return data.secure_url ? data.secure_url : null;
+            } catch (err) { return null; }
         }
 
         el('btn-ai-polish')?.addEventListener('click', (e) => {
@@ -371,35 +333,30 @@
             if(!notes) return alert("Please enter some rough notes first to polish.");
             
             const btn = e.target;
-            btn.innerText = "✨ Polishing...";
-            btn.disabled = true;
+            btn.innerText = "✨ Polishing..."; btn.disabled = true;
 
             setTimeout(() => {
                 const lines = notes.split('\n').filter(line => line.trim() !== '');
                 const formattedNotes = "PROFESSIONAL SURVEY OBSERVATIONS:\n\n" + lines.map(line => `• ${line.charAt(0).toUpperCase() + line.slice(1)}`).join('\n');
                 notesEl.value = formattedNotes;
-                
-                btn.innerText = "✨ AI Polish Notes";
-                btn.disabled = false;
+                btn.innerText = "✨ AI Polish Notes"; btn.disabled = false;
             }, 800);
         });
 
         el('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
+            if (!val('clientName') || !val('postCode')) return alert("Lead Name and Postcode are mandatory.");
+
             const btn = e.target;
-            btn.innerText = "Processing Assets..."; 
-            btn.disabled = true;
+            btn.innerText = "Processing Assets..."; btn.disabled = true;
 
             try {
-                // 1. Auto-Save Sniper Canvas
                 if (window.sniperPoints && window.sniperPoints.length > 0) {
                     const canvas = document.getElementById('sniperCanvas');
-                    const sniperScreenshot = canvas.toDataURL('image/jpeg', 0.9);
                     if (!window.sitePhotos.sniper) window.sitePhotos.sniper = [];
-                    window.sitePhotos.sniper.push(sniperScreenshot);
+                    window.sitePhotos.sniper.push(canvas.toDataURL('image/jpeg', 0.9));
                 }
 
-                // 2. SAFE Photo Uploads to Cloudinary
                 let uploadedPhotoData = SurveyState.rawAssets || { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
                 let hasUploads = false;
 
@@ -408,13 +365,10 @@
                         for (const base64 of window.sitePhotos[category]) {
                             btn.innerText = `Uploading ${category}...`;
                             const url = await uploadBase64ToCloudinary(base64);
-                            
                             if (url) {
                                 if(!uploadedPhotoData[category]) uploadedPhotoData[category] = [];
                                 uploadedPhotoData[category].push(url);
                                 hasUploads = true;
-                            } else {
-                                alert(`Upload Warning: A photo in ${category} failed to save to the cloud.`);
                             }
                         }
                     }
@@ -423,141 +377,83 @@
                 if (hasUploads) {
                     SurveyState.rawAssets = uploadedPhotoData;
                     for (const cat in window.sitePhotos) window.sitePhotos[cat] = []; 
-                    document.querySelectorAll('.photo-btn .badge').forEach(b => { 
-                        b.innerText = '0'; 
-                        b.parentElement.classList.remove('has-photos'); 
-                    });
+                    document.querySelectorAll('.photo-btn .badge').forEach(b => { b.innerText = '0'; b.parentElement.classList.remove('has-photos'); });
                 }
 
-                btn.innerText = "Syncing Everything...";
+                btn.innerText = "Syncing to Vault...";
 
                 // ==========================================
-                // 3. MASTER DATA MAPPING (FIXED FOR PDF ENGINE)
+                // EXACT VAULT / PDF DATA MAPPING OVERRIDE
                 // ==========================================
                 SurveyState.brand = val('brandSelect') || "YorkshireWindows";
                 SurveyState.pipelineStatus = SurveyState.pipelineStatus || "1. Consultation";
                 SurveyState.owner = SurveyState.owner || "Thomas Oldroyd";
 
                 SurveyState.customerProfile = {
-                    leadName: val('clientName'),
-                    customerNum: val('clientNum'),
-                    postcode: val('postCode'),
-                    apptDate: val('apptDate'),
-                    revisitDate: val('revisitDate'),
+                    leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode'),
+                    apptDate: val('apptDate'), revisitDate: val('revisitDate'),
                     vaultPIN: SurveyState.customerProfile?.vaultPIN || Math.floor(1000 + Math.random() * 9000).toString()
                 };
 
-                // Map specific data points to PDF targets
                 SurveyState.projectSpecs = {
-                    buildType: val('buildType'),
-                    proposedSize: val('proposedSize'),
-                    roofStyle: val('roofType'),
+                    buildType: val('buildType'), proposedSize: val('proposedSize'), roofStyle: val('roofType'),
                     frameColour: val('frameColour') + (val('internalFrameColour') ? ' / Int: ' + val('internalFrameColour') : ''),
-                    buildingRegs: val('buildingRegs'),
-                    planningPerms: val('planningPerms'),
-                    houseMaterial: val('houseMaterial'),
-                    wallObstacles: val('wallObstacles'),
-                    accessWidth: val('accessWidth'),
-                    accessIssues: val('accessDifficult')
+                    buildingRegs: val('buildingRegs'), planningPerms: val('planningPerms'), houseMaterial: val('houseMaterial'),
+                    wallObstacles: val('wallObstacles'), accessWidth: val('accessWidth'), accessIssues: val('accessDifficult')
                 };
 
-                // Map extra legacy technical fields into designer insights so they print
+                SurveyState.compliance = { sapCalcs: val('sapCalcs') };
+
                 SurveyState.designerInsights = {
                     prep: val('designerNotes'), 
                     design: `Base Type: ${val('baseType') || 'N/A'}\nDPC Depth: ${val('dpcDepth') ? val('dpcDepth') + 'mm' : 'N/A'}\nFascia Height: ${val('fasciaHeight') ? val('fasciaHeight') + 'mm' : 'N/A'}\n${val('airBricks') ? 'Air Bricks: ' + val('airBricks') : ''}`
                 };
 
-                // Funnel uploaded arrays into the new specific Media Object slots
                 SurveyState.media = {
-                    front: uploadedPhotoData.front?.[0] || null,
-                    side: uploadedPhotoData.side?.[0] || null,
-                    rear: uploadedPhotoData.back?.[0] || null,
-                    sketch: uploadedPhotoData.sniper?.[0] || null,
-                    surveyGallery: [
-                        ...(uploadedPhotoData.front?.slice(1) || []),
-                        ...(uploadedPhotoData.side?.slice(1) || []),
-                        ...(uploadedPhotoData.back?.slice(1) || []),
-                        ...(uploadedPhotoData.trees || []),
-                        ...(uploadedPhotoData.brick || [])
-                    ],
-                    accessGallery: [
-                        ...(uploadedPhotoData.access || []),
-                        ...(uploadedPhotoData.drainage || [])
-                    ],
+                    front: uploadedPhotoData.front?.[0] || null, side: uploadedPhotoData.side?.[0] || null,
+                    rear: uploadedPhotoData.back?.[0] || null, sketch: uploadedPhotoData.sniper?.[0] || null,
+                    surveyGallery: [ ...(uploadedPhotoData.front?.slice(1) || []), ...(uploadedPhotoData.side?.slice(1) || []), ...(uploadedPhotoData.back?.slice(1) || []), ...(uploadedPhotoData.trees || []), ...(uploadedPhotoData.brick || []) ],
+                    accessGallery: [ ...(uploadedPhotoData.access || []), ...(uploadedPhotoData.drainage || []) ],
                     miscGallery: uploadedPhotoData.misc || []
                 };
 
-                SurveyState.pamphlets = {
-                    brochure: checked('cb-brochure'),
-                    warranty: checked('cb-warranty'),
-                    planning: checked('cb-planning'),
-                    sap: checked('cb-sap'),
-                    roof: checked('cb-roof')
-                };
-                
+                SurveyState.pamphlets = { brochure: checked('cb-brochure'), warranty: checked('cb-warranty'), planning: checked('cb-planning'), sap: checked('cb-sap'), roof: checked('cb-roof') };
                 SurveyState.userId = auth.currentUser ? auth.currentUser.uid : "UNKNOWN_USER"; 
                 SurveyState.timestamps = { updatedAt: serverTimestamp() };
                 if(!SurveyState.id) SurveyState.timestamps.createdAt = serverTimestamp();
 
-                // 4. Database Save
                 const docRef = SurveyState.id ? doc(db, "surveys", SurveyState.id) : doc(collection(db, "surveys"));
                 await setDoc(docRef, SurveyState, { merge: true });
-                
                 SurveyState.id = docRef.id;
                 
-                btn.style.backgroundColor = "#238636";
-                btn.innerText = "Complete Pack Saved ✓";
+                btn.style.backgroundColor = "#2ea043"; btn.innerText = "Complete Pack Saved ✓";
                 setTimeout(() => { btn.style.backgroundColor = ""; btn.innerText = "Save & Sync"; btn.disabled = false; }, 3000);
 
             } catch(err) {
-                console.error("Sync Crash Details:", err);
                 alert("Database Sync Error: " + err.message);
-                btn.innerText = "Save & Sync"; 
-                btn.disabled = false;
+                btn.innerText = "Save & Sync"; btn.disabled = false;
             }
         });
 
         el('btn-generate-pdf')?.addEventListener('click', (e) => { 
             e.preventDefault(); 
-            if(!SurveyState.id) return alert("Please click 'Save & Sync' first to lock in the data before generating a PDF.");
-            
-            // Redirect to the vault to generate the report
+            if(!SurveyState.id) return alert("Please click 'Save & Sync' first to lock in the data.");
             window.location.href = `vault.html?id=${SurveyState.id}`;
         });
     </script>
 
     <!-- INTERNAL SCRIPTS (SNIPER & UPLOADS) -->
     <script>
-        // -----------------------------------------------------
-        // EXPERT SNIPER ENGINE (Vector Scaling, Auto-Math, Override & Touch)
-        // -----------------------------------------------------
         const canvas = document.getElementById('sniperCanvas');
         const ctx = canvas.getContext('2d');
         const zoomSlider = document.getElementById('sniperZoom');
         const markBtn = document.getElementById('btn-sniper-mark');
-        let sniperImg = null;
-
-        let imgScale = 1;
-        let imgX = 0, imgY = 0;
-        let isDragging = false;
-        let startDragX = 0, startDragY = 0;
-
-        window.sniperPoints = []; 
-        let lines = []; 
-        let calibrationRatio = null; 
+        let sniperImg = null; let imgScale = 1; let imgX = 0, imgY = 0; let isDragging = false; let startDragX = 0, startDragY = 0;
+        window.sniperPoints = []; let lines = []; let calibrationRatio = null; 
 
         document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if(file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: event.target.result }));
-                    reader.readAsDataURL(file);
-                }
-            };
+            const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+            input.onchange = (e) => { const file = e.target.files[0]; if(file) { const reader = new FileReader(); reader.onload = (ev) => window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: ev.target.result })); reader.readAsDataURL(file); } };
             input.click();
         });
 
@@ -565,242 +461,95 @@
             sniperImg = new Image();
             sniperImg.onload = () => {
                 imgScale = Math.min(canvas.width / sniperImg.width, canvas.height / sniperImg.height);
-                if (zoomSlider) {
-                    zoomSlider.value = imgScale; 
-                    zoomSlider.min = imgScale * 0.5; 
-                }
-                
-                imgX = (canvas.width - (sniperImg.width * imgScale)) / 2;
-                imgY = (canvas.height - (sniperImg.height * imgScale)) / 2;
-                
-                window.sniperPoints = [];
-                lines = [];
-                calibrationRatio = null;
-                resetMarkButton();
-                drawSniper();
+                if (zoomSlider) { zoomSlider.value = imgScale; zoomSlider.min = imgScale * 0.5; }
+                imgX = (canvas.width - (sniperImg.width * imgScale)) / 2; imgY = (canvas.height - (sniperImg.height * imgScale)) / 2;
+                window.sniperPoints = []; lines = []; calibrationRatio = null; resetMarkButton(); drawSniper();
             };
             sniperImg.src = e.detail;
         });
 
         zoomSlider?.addEventListener('input', (e) => {
             if(!sniperImg) return;
-            const newScale = parseFloat(e.target.value);
-            
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            
-            imgX = cx - ((cx - imgX) * (newScale / imgScale));
-            imgY = cy - ((cy - imgY) * (newScale / imgScale));
-            
-            imgScale = newScale;
-            drawSniper();
+            const newScale = parseFloat(e.target.value); const cx = canvas.width / 2; const cy = canvas.height / 2;
+            imgX = cx - ((cx - imgX) * (newScale / imgScale)); imgY = cy - ((cy - imgY) * (newScale / imgScale));
+            imgScale = newScale; drawSniper();
         });
 
-        canvas.addEventListener('mousedown', (e) => {
-            if(!sniperImg) return;
-            isDragging = true;
-            startDragX = e.offsetX - imgX;
-            startDragY = e.offsetY - imgY;
-            canvas.style.cursor = 'grabbing';
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            if(!isDragging || !sniperImg) return;
-            imgX = e.offsetX - startDragX;
-            imgY = e.offsetY - startDragY;
-            drawSniper();
-        });
-
+        canvas.addEventListener('mousedown', (e) => { if(!sniperImg) return; isDragging = true; startDragX = e.offsetX - imgX; startDragY = e.offsetY - imgY; canvas.style.cursor = 'grabbing'; });
+        canvas.addEventListener('mousemove', (e) => { if(!isDragging || !sniperImg) return; imgX = e.offsetX - startDragX; imgY = e.offsetY - startDragY; drawSniper(); });
         canvas.addEventListener('mouseup', () => { isDragging = false; canvas.style.cursor = 'grab'; });
         canvas.addEventListener('mouseleave', () => { isDragging = false; canvas.style.cursor = 'grab'; });
-
-        canvas.addEventListener('touchstart', (e) => {
-            if(!sniperImg || e.touches.length > 1) return; 
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            
-            isDragging = true;
-            startDragX = (touch.clientX - rect.left) - imgX;
-            startDragY = (touch.clientY - rect.top) - imgY;
-        }, { passive: false });
-
-        canvas.addEventListener('touchmove', (e) => {
-            if(!isDragging || !sniperImg || e.touches.length > 1) return;
-            e.preventDefault(); 
-            
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            
-            imgX = (touch.clientX - rect.left) - startDragX;
-            imgY = (touch.clientY - rect.top) - startDragY;
-            drawSniper();
-        }, { passive: false });
-
-        canvas.addEventListener('touchend', () => { isDragging = false; });
-        canvas.addEventListener('touchcancel', () => { isDragging = false; });
+        
+        canvas.addEventListener('touchstart', (e) => { if(!sniperImg || e.touches.length > 1) return; const touch = e.touches[0]; const rect = canvas.getBoundingClientRect(); isDragging = true; startDragX = (touch.clientX - rect.left) - imgX; startDragY = (touch.clientY - rect.top) - imgY; }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { if(!isDragging || !sniperImg || e.touches.length > 1) return; e.preventDefault(); const touch = e.touches[0]; const rect = canvas.getBoundingClientRect(); imgX = (touch.clientX - rect.left) - startDragX; imgY = (touch.clientY - rect.top) - startDragY; drawSniper(); }, { passive: false });
+        canvas.addEventListener('touchend', () => { isDragging = false; }); canvas.addEventListener('touchcancel', () => { isDragging = false; });
 
         function drawSniper() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if(!sniperImg) return;
-
+            ctx.clearRect(0, 0, canvas.width, canvas.height); if(!sniperImg) return;
             ctx.drawImage(sniperImg, 0, 0, sniperImg.width, sniperImg.height, imgX, imgY, sniperImg.width * imgScale, sniperImg.height * imgScale);
 
             lines.forEach(line => {
-                const p1 = window.sniperPoints[line.p1];
-                const p2 = window.sniperPoints[line.p2];
-                
-                const screenX1 = (p1.x * imgScale) + imgX;
-                const screenY1 = (p1.y * imgScale) + imgY;
-                const screenX2 = (p2.x * imgScale) + imgX;
-                const screenY2 = (p2.y * imgScale) + imgY;
-
-                ctx.beginPath();
-                ctx.moveTo(screenX1, screenY1);
-                ctx.lineTo(screenX2, screenY2);
-                ctx.strokeStyle = '#0dcaf0';
-                ctx.lineWidth = 2; 
-                ctx.stroke();
-
-                const midX = (screenX1 + screenX2) / 2;
-                const midY = (screenY1 + screenY2) / 2;
-                const text = line.realLength + 'mm';
-                
-                ctx.font = 'bold 12px -apple-system, sans-serif';
-                const textWidth = ctx.measureText(text).width;
-
-                ctx.fillStyle = 'rgba(9, 13, 19, 0.85)';
-                ctx.fillRect(midX - (textWidth / 2) - 8, midY - 12, textWidth + 16, 24);
-                
-                ctx.fillStyle = '#f0f6fc';
-                ctx.fillText(text, midX - (textWidth / 2), midY + 4);
+                const p1 = window.sniperPoints[line.p1]; const p2 = window.sniperPoints[line.p2];
+                const screenX1 = (p1.x * imgScale) + imgX; const screenY1 = (p1.y * imgScale) + imgY; const screenX2 = (p2.x * imgScale) + imgX; const screenY2 = (p2.y * imgScale) + imgY;
+                ctx.beginPath(); ctx.moveTo(screenX1, screenY1); ctx.lineTo(screenX2, screenY2); ctx.strokeStyle = '#0dcaf0'; ctx.lineWidth = 2; ctx.stroke();
+                const midX = (screenX1 + screenX2) / 2; const midY = (screenY1 + screenY2) / 2; const text = line.realLength + 'mm';
+                ctx.font = 'bold 12px -apple-system, sans-serif'; const textWidth = ctx.measureText(text).width;
+                ctx.fillStyle = 'rgba(9, 13, 19, 0.85)'; ctx.fillRect(midX - (textWidth / 2) - 8, midY - 12, textWidth + 16, 24);
+                ctx.fillStyle = '#f0f6fc'; ctx.fillText(text, midX - (textWidth / 2), midY + 4);
             });
 
             window.sniperPoints.forEach((p, index) => {
-                const screenX = (p.x * imgScale) + imgX;
-                const screenY = (p.y * imgScale) + imgY;
-                
-                ctx.beginPath();
-                ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
-                ctx.fillStyle = (index === window.sniperPoints.length - 1 && window.sniperPoints.length % 2 !== 0) ? '#E50914' : '#8b949e';
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
+                const screenX = (p.x * imgScale) + imgX; const screenY = (p.y * imgScale) + imgY;
+                ctx.beginPath(); ctx.arc(screenX, screenY, 4, 0, Math.PI * 2); ctx.fillStyle = (index === window.sniperPoints.length - 1 && window.sniperPoints.length % 2 !== 0) ? '#E50914' : '#8b949e'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
             });
 
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            
-            ctx.beginPath();
-            ctx.moveTo(cx - 20, cy);
-            ctx.lineTo(cx + 20, cy);
-            ctx.moveTo(cx, cy - 20);
-            ctx.lineTo(cx, cy + 20);
-            ctx.strokeStyle = 'rgba(229, 9, 20, 0.9)';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(cx, cy, 10, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(229, 9, 20, 0.5)';
-            ctx.stroke();
+            const cx = canvas.width / 2; const cy = canvas.height / 2;
+            ctx.beginPath(); ctx.moveTo(cx - 20, cy); ctx.lineTo(cx + 20, cy); ctx.moveTo(cx, cy - 20); ctx.lineTo(cx, cy + 20); ctx.strokeStyle = 'rgba(229, 9, 20, 0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(229, 9, 20, 0.5)'; ctx.stroke();
         }
 
         markBtn?.addEventListener('click', (e) => {
-            e.preventDefault();
-            if(!sniperImg) return alert("Load an image first.");
-            
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            
-            const imgPixelX = (cx - imgX) / imgScale;
-            const imgPixelY = (cy - imgY) / imgScale;
-            
-            window.sniperPoints.push({ x: imgPixelX, y: imgPixelY });
+            e.preventDefault(); if(!sniperImg) return alert("Load an image first.");
+            const cx = canvas.width / 2; const cy = canvas.height / 2;
+            window.sniperPoints.push({ x: (cx - imgX) / imgScale, y: (cy - imgY) / imgScale });
             
             if(window.sniperPoints.length > 0 && window.sniperPoints.length % 2 === 0) {
-                const p1Index = window.sniperPoints.length - 2;
-                const p2Index = window.sniperPoints.length - 1;
-                const p1 = window.sniperPoints[p1Index];
-                const p2 = window.sniperPoints[p2Index];
-                
+                const p1Index = window.sniperPoints.length - 2; const p2Index = window.sniperPoints.length - 1;
+                const p1 = window.sniperPoints[p1Index]; const p2 = window.sniperPoints[p2Index];
                 const pixelDist = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
                 
                 if(!calibrationRatio) {
                     const realWorld = prompt("CALIBRATION MODE: Enter the length of this line (in mm):");
                     if(realWorld && !isNaN(realWorld)) {
-                        calibrationRatio = parseFloat(realWorld) / pixelDist;
-                        lines.push({ p1: p1Index, p2: p2Index, realLength: realWorld });
-                        
-                        markBtn.innerText = "🎯 Drop Pin (Calibrated)";
-                        markBtn.style.backgroundColor = "#238636";
-                        markBtn.style.color = "#fff";
-                    } else {
-                        window.sniperPoints.pop(); 
-                    }
+                        calibrationRatio = parseFloat(realWorld) / pixelDist; lines.push({ p1: p1Index, p2: p2Index, realLength: realWorld });
+                        markBtn.innerText = "🎯 Drop Pin (Calibrated)"; markBtn.style.backgroundColor = "#238636"; markBtn.style.color = "#fff";
+                    } else window.sniperPoints.pop(); 
                 } else {
                     const calculatedLength = Math.round(pixelDist * calibrationRatio);
                     const finalLength = prompt("Calculated measurement (mm). Edit if needed:", calculatedLength);
-                    
-                    if(finalLength && !isNaN(finalLength)) {
-                        lines.push({ p1: p1Index, p2: p2Index, realLength: Math.round(finalLength) });
-                    } else {
-                        window.sniperPoints.pop(); 
-                    }
+                    if(finalLength && !isNaN(finalLength)) lines.push({ p1: p1Index, p2: p2Index, realLength: Math.round(finalLength) });
+                    else window.sniperPoints.pop(); 
                 }
-            }
-            drawSniper();
+            } drawSniper();
         });
 
-        document.getElementById('btn-sniper-clear')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.sniperPoints = []; lines = []; calibrationRatio = null;
-            resetMarkButton();
-            drawSniper();
-        });
-
-        function resetMarkButton() {
-            if (markBtn) {
-                markBtn.innerText = "🎯 Drop Target Pin";
-                markBtn.style.backgroundColor = ""; 
-                markBtn.style.color = "";
-            }
-        }
+        document.getElementById('btn-sniper-clear')?.addEventListener('click', (e) => { e.preventDefault(); window.sniperPoints = []; lines = []; calibrationRatio = null; resetMarkButton(); drawSniper(); });
+        function resetMarkButton() { if (markBtn) { markBtn.innerText = "🎯 Drop Target Pin"; markBtn.style.backgroundColor = ""; markBtn.style.color = ""; } }
 
         window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
-
         window.handlePhotoUpload = function(input, category) {
-            const files = input.files;
-            if(!files.length) return;
-
-            const badge = document.getElementById('badge-' + category);
-            const btn = document.getElementById('btn-' + category);
-
+            const files = input.files; if(!files.length) return;
+            const badge = document.getElementById('badge-' + category); const btn = document.getElementById('btn-' + category);
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    window.sitePhotos[category].push(e.target.result);
-                    const count = window.sitePhotos[category].length;
-                    badge.innerText = count;
-                    btn.classList.add('has-photos');
-                };
+                reader.onload = (e) => { window.sitePhotos[category].push(e.target.result); badge.innerText = window.sitePhotos[category].length; btn.classList.add('has-photos'); };
                 reader.readAsDataURL(file);
-            });
-            input.value = ''; 
+            }); input.value = ''; 
         };
 
-        document.getElementById('planningPerms')?.addEventListener('change', (e) => {
-            const cb = document.getElementById('cb-planning');
-            if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== '');
-        });
-        document.getElementById('sapCalcs')?.addEventListener('change', (e) => {
-            const cb = document.getElementById('cb-sap');
-            if(cb) cb.checked = (e.target.value === 'Yes');
-        });
-        document.getElementById('roofType')?.addEventListener('change', (e) => {
-            const cb = document.getElementById('cb-roof');
-            if(cb) cb.checked = (e.target.value !== '');
-        });
+        document.getElementById('planningPerms')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-planning'); if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== ''); });
+        document.getElementById('sapCalcs')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-sap'); if(cb) cb.checked = (e.target.value === 'Yes'); });
+        document.getElementById('roofType')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-roof'); if(cb) cb.checked = (e.target.value !== ''); });
     </script>
 </body>
 </html>
