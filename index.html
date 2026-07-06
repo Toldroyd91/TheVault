@@ -3,257 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COHI | Command Center</title>
-    <!-- PWA Hooks for Field Use -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
-    
+    <title>Master Pipeline | CO Home Improvements</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .luxury-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 8px; }
-        .luxury-input:focus { outline: none; border-color: #0dcaf0; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .metric-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5); }
+        body { background-color: #0d1117; color: #f0f6fc; font-family: -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+        .glass-panel { background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px); border: 1px solid #30363d; }
+        .kanban-col { min-height: 70vh; border-radius: 12px; padding: 16px; background: #090d13; border: 1px solid #30363d; display: flex; flex-direction: column; gap: 12px; }
+        .lead-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; }
+        .lead-card:hover { border-color: #0dcaf0; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(13, 202, 240, 0.15); }
+        
+        .status-indicator { position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+        .hot-lead { animation: pulseBorder 2s infinite; }
+        @keyframes pulseBorder { 0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(229, 9, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); } }
     </style>
 </head>
-<body class="bg-gray-950 text-white min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col h-screen overflow-hidden">
 
-    <!-- SECURE LOGIN GATE -->
-    <div id="authGate" class="flex items-center justify-center min-h-screen bg-gray-950 px-4">
-        <div class="glass-panel p-8 w-full max-w-md text-center">
-            <h2 class="text-2xl font-black mb-6 tracking-widest text-[#0dcaf0]">COHI<span class="text-white">COMMAND</span></h2>
-            <div class="space-y-4">
-                <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input w-full p-4 text-sm">
-                <input type="password" id="authPassword" placeholder="Password" class="luxury-input w-full p-4 text-sm text-center tracking-widest">
-                <button id="btnLogin" class="w-full py-4 bg-[#0dcaf0] text-black font-bold rounded-lg hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(13,202,240,0.3)]">SECURE LOGIN</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN DASHBOARD -->
-    <div id="dashboardApp" class="hidden flex-grow flex flex-col">
-        
-        <!-- GLOBAL NAV -->
-        <nav class="flex justify-between items-center px-4 md:px-6 py-4 border-b border-gray-800 bg-gray-900/50">
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="text-xl font-black text-[#0dcaf0]">COHI<span class="text-white">COMMAND</span></a>
-            </div>
-            <div class="flex items-center gap-4">
-                <a href="survey.html" class="bg-[#0dcaf0] text-black px-4 py-2 rounded-lg font-bold text-xs hover:scale-105 transition shadow-[0_0_10px_rgba(13,202,240,0.4)]">+ START NEW SURVEY</a>
-                <button id="btnLogout" class="text-gray-400 hover:text-white text-xs font-bold uppercase tracking-widest">Logout</button>
-            </div>
-        </nav>
-
-        <div class="p-4 md:p-6 flex-grow flex flex-col space-y-4">
-            
-            <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-2">
-                <div>
-                    <h1 id="designerWelcome" class="text-2xl md:text-3xl font-black mb-1">Welcome</h1>
-                    <p class="text-xs text-gray-500 uppercase tracking-widest">Pipeline Overview</p>
-                </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    <button onclick="window.clearFilters()" class="text-xs text-gray-400 hover:text-white uppercase tracking-widest hidden" id="btnClearFilters">Clear Filters ✕</button>
-                    <input type="text" id="searchInput" placeholder="Search by name, postcode, or owner..." class="luxury-input p-3 w-full md:w-80 text-sm" onkeyup="window.filterLeads()">
-                </div>
-            </header>
-
-            <!-- 💰 FINANCIAL COMMAND CENTER -->
-            <div class="glass-panel p-5 border-t-4 border-t-[#0dcaf0] shadow-[0_0_20px_rgba(13,202,240,0.1)] relative">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">💰 Financial Command Center</h3>
-                    <button onclick="document.getElementById('finControls').classList.toggle('hidden')" class="text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:bg-[#0dcaf0] hover:text-black text-gray-300 transition font-bold tracking-widest uppercase">⚙️ Target Settings</button>
-                </div>
-                
-                <!-- SETTINGS PANEL (Hidden by default) -->
-                <div id="finControls" class="grid grid-cols-2 md:grid-cols-5 gap-4 hidden bg-slate-900/50 p-4 rounded-lg border border-gray-700 mb-4">
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Start Date</label>
-                        <input type="date" id="finStartDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">End Date</label>
-                        <input type="date" id="finEndDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Monthly Target (£)</label>
-                        <input type="number" id="finMonthlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Yearly Target (£)</label>
-                        <input type="number" id="finYearlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Commission Profile</label>
-                        <select id="finCommProfile" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
-                            <option value="1">Employed (1% Net)</option>
-                            <option value="4">Self-Employed (4% Net)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- FINANCIAL READOUTS -->
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700">
-                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Live Pipeline Value</p>
-                        <p id="hudPipeline" class="text-xl font-black text-amber-500">£0</p>
-                    </div>
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-emerald-500/30">
-                        <p class="text-[9px] text-emerald-500 uppercase tracking-widest mb-1 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sold In Period</p>
-                        <p id="hudSoldPeriod" class="text-xl font-black text-emerald-400">£0</p>
-                    </div>
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700 relative overflow-hidden">
-                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Vs Monthly Target</p>
-                        <p id="hudMonthlyVs" class="text-xl font-black text-white z-10 relative">0%</p>
-                        <div id="barMonthly" class="absolute bottom-0 left-0 h-1 bg-[#0dcaf0] transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700 relative overflow-hidden">
-                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Vs Yearly Target (YTD)</p>
-                        <p id="hudYearlyVs" class="text-xl font-black text-white z-10 relative">0%</p>
-                        <div id="barYearly" class="absolute bottom-0 left-0 h-1 bg-[#0dcaf0] transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                    <div class="bg-purple-900/20 p-3 rounded-lg border border-purple-500/30">
-                        <p class="text-[9px] text-purple-400 uppercase tracking-widest mb-1 flex justify-between">
-                            <span>Est. Comm</span>
-                            <span class="text-gray-500 text-[8px]">(Net)</span>
-                        </p>
-                        <p id="hudCommPeriod" class="text-xl font-black text-purple-400">£0</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- INTERACTIVE HUD METRICS (Kanban Filters) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 mb-4">
-                <div class="glass-panel p-4 text-center metric-card border-b-2 border-gray-700" onclick="window.filterByMetric('all')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Total Active Deals</p>
-                    <p id="hudActiveLeads" class="text-2xl font-black text-white">0</p>
-                </div>
-                <div class="glass-panel p-4 text-center border-b-2 border-amber-500 metric-card" onclick="window.filterByMetric('survey')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Pending Surveys</p>
-                    <p id="hudSurveys" class="text-2xl font-black text-amber-500">0</p>
-                </div>
-                <div class="glass-panel p-4 text-center border-b-2 border-rose-500 metric-card" onclick="window.filterByMetric('action')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Action Required</p>
-                    <p id="hudAction" class="text-2xl font-black text-rose-500">0</p>
-                </div>
-                <div class="glass-panel p-4 text-center border-b-2 border-emerald-500 metric-card" onclick="window.filterByMetric('won')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Total Won (All Time)</p>
-                    <p id="hudTotalWon" class="text-2xl font-black text-emerald-500">0</p>
-                </div>
-            </div>
-
-            <!-- KANBAN BOARD -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-8 flex-grow">
-                <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-gray-400 mb-3 tracking-widest uppercase border-b border-gray-700 pb-2">1. Consultation (<span id="count-stage1">0</span>)</h2>
-                    <div id="col-stage1" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="1. Consultation"></div>
-                </div>
-                <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-[#0dcaf0] mb-3 tracking-widest uppercase border-b border-[#0dcaf0]/30 pb-2">2. Quote Sent (<span id="count-stage2">0</span>)</h2>
-                    <div id="col-stage2" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="2. Quote Sent"></div>
-                </div>
-                <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-amber-500 mb-3 tracking-widest uppercase border-b border-amber-500/30 pb-2">3. Technical Survey (<span id="count-stage3">0</span>)</h2>
-                    <div id="col-stage3" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="3. Technical Survey"></div>
-                </div>
-                <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-emerald-500 mb-3 tracking-widest uppercase border-b border-emerald-500/30 pb-2">4. Handover (<span id="count-stage4">0</span>)</h2>
-                    <div id="col-stage4" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="4. Handover"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TECHNICAL SLIDE-OUT DRAWER -->
-    <div id="drawerOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity" onclick="window.closeDrawer()"></div>
-    <div id="techDrawer" class="fixed top-0 right-0 h-full w-full md:w-[600px] bg-gray-900 border-l border-gray-700 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
-        <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-950">
+    <!-- TOP NAVIGATION -->
+    <header class="glass-panel p-4 flex justify-between items-center z-10 sticky top-0 shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-[#090d13] rounded-xl border border-[#30363d] flex items-center justify-center text-[#0dcaf0] font-black text-xl shadow-[0_0_10px_rgba(13,202,240,0.2)]">CO</div>
             <div>
-                <h2 id="drawerLeadName" class="text-xl font-black">Lead Name</h2>
-                <span id="drawerBrand" class="text-xs font-bold uppercase tracking-widest">Brand</span>
+                <h1 class="text-xl font-black tracking-widest uppercase text-white">Master Pipeline</h1>
+                <p class="text-[10px] text-gray-500 font-mono tracking-widest uppercase"><span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span> System Live</p>
             </div>
-            <button onclick="window.closeDrawer()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
-        
-        <div class="p-6 overflow-y-auto flex-grow space-y-8">
-            <div class="space-y-4">
-                <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Pipeline Management</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest">Project Owner</label>
-                        <input type="text" id="ownerInput" class="luxury-input w-full p-2 text-sm mt-1">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest">Follow Up Date</label>
-                        <input type="date" id="followUpInput" class="luxury-input w-full p-2 text-sm mt-1">
-                    </div>
-                </div>
-                <button onclick="window.saveDrawerData('management')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SAVE MANAGEMENT DETAILS</button>
-            </div>
+        <div class="flex gap-4">
+            <button onclick="window.location.href='survey.html'" class="px-6 py-2.5 bg-[#0dcaf0] text-black font-black uppercase tracking-widest text-xs rounded-lg hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(13,202,240,0.3)] flex items-center gap-2">
+                <span>+</span> New Survey
+            </button>
+        </div>
+    </header>
 
-            <div class="space-y-4">
-                <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Financials</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest">Contract Value (£)</label>
-                        <input type="number" id="financeValueInput" class="luxury-input w-full p-2 text-sm mt-1" onkeyup="window.calculateVAT()">
-                        <div class="text-[10px] text-gray-400 mt-2 font-mono flex justify-between">
-                            <span>NET: <span id="netCalc">£0.00</span></span>
-                            <span>VAT: <span id="vatCalc">£0.00</span></span>
+    <!-- KANBAN BOARD -->
+    <main class="flex-1 overflow-x-auto p-6 flex gap-6 items-start">
+        
+        <!-- COLUMN 1: Survey & Consultation -->
+        <div class="kanban-col min-w-[320px] w-1/4">
+            <div class="flex justify-between items-center mb-2 px-1">
+                <h2 class="text-sm font-black text-gray-400 uppercase tracking-widest">1. Survey Stage</h2>
+                <span id="count-stage1" class="text-xs bg-[#161b22] px-2 py-1 rounded text-gray-500 font-mono">0</span>
+            </div>
+            <div id="col-survey" class="flex flex-col gap-3 overflow-y-auto pr-1 pb-4 h-full">
+                <!-- JS Injects Cards Here -->
+            </div>
+        </div>
+
+        <!-- COLUMN 2: Design Tease (Locked Vault) -->
+        <div class="kanban-col min-w-[320px] w-1/4 border-t-2 border-t-[#E50914]">
+            <div class="flex justify-between items-center mb-2 px-1">
+                <h2 class="text-sm font-black text-[#E50914] uppercase tracking-widest flex items-center gap-2"><span class="text-lg">🔒</span> 2. Design Tease</h2>
+                <span id="count-stage2" class="text-xs bg-[#161b22] px-2 py-1 rounded text-[#E50914] font-mono border border-[#E50914]/30">0</span>
+            </div>
+            <div id="col-tease" class="flex flex-col gap-3 overflow-y-auto pr-1 pb-4 h-full">
+                <!-- JS Injects Cards Here -->
+            </div>
+        </div>
+
+        <!-- COLUMN 3: Proposal Unlocked (Live Meeting) -->
+        <div class="kanban-col min-w-[320px] w-1/4 border-t-2 border-t-[#0dcaf0]">
+            <div class="flex justify-between items-center mb-2 px-1">
+                <h2 class="text-sm font-black text-[#0dcaf0] uppercase tracking-widest flex items-center gap-2"><span class="text-lg">🔓</span> 3. Price Unlocked</h2>
+                <span id="count-stage3" class="text-xs bg-[#161b22] px-2 py-1 rounded text-[#0dcaf0] font-mono border border-[#0dcaf0]/30">0</span>
+            </div>
+            <div id="col-unlocked" class="flex flex-col gap-3 overflow-y-auto pr-1 pb-4 h-full">
+                <!-- JS Injects Cards Here -->
+            </div>
+        </div>
+
+        <!-- COLUMN 4: Closed Won -->
+        <div class="kanban-col min-w-[320px] w-1/4 border-t-2 border-t-[#238636]">
+            <div class="flex justify-between items-center mb-2 px-1">
+                <h2 class="text-sm font-black text-[#238636] uppercase tracking-widest flex items-center gap-2"><span class="text-lg">🤝</span> 4. Closed Won</h2>
+                <span id="count-stage4" class="text-xs bg-[#161b22] px-2 py-1 rounded text-[#238636] font-mono border border-[#238636]/30">0</span>
+            </div>
+            <div id="col-closed" class="flex flex-col gap-3 overflow-y-auto pr-1 pb-4 h-full">
+                <!-- JS Injects Cards Here -->
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { db, collection, onSnapshot, query, orderBy } from './js/core-firebase.js';
+
+        // Helper to format telemetry data into human-readable strings
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return 'Never';
+            const seconds = Math.floor((new Date() - timestamp) / 1000);
+            if (seconds < 60) return 'Just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            return `${Math.floor(hours / 24)}d ago`;
+        }
+
+        function formatViewTime(seconds) {
+            if (!seconds) return '0m';
+            if (seconds < 60) return '< 1m';
+            const m = Math.floor(seconds / 60);
+            if (m > 60) return `${Math.floor(m/60)}h ${m%60}m`;
+            return `${m}m`;
+        }
+
+        // Generate Lead Card HTML
+        function createLeadCard(id, data, columnColor) {
+            const name = data.customerProfile?.leadName || 'Unnamed Lead';
+            const postcode = data.customerProfile?.postcode || 'Location TBC';
+            const viewTime = data.vaultTelemetry?.totalViewTimeSeconds || 0;
+            const lastActive = data.vaultTelemetry?.lastActive;
+            const price = data.uDesignData?.totalPrice ? `£${parseFloat(data.uDesignData.totalPrice).toLocaleString()}` : 'TBC';
+            
+            // Highlight hot leads (looked at vault for more than 5 minutes recently)
+            const isHot = viewTime > 300 && lastActive && (Date.now() - lastActive < 86400000 * 2); // Active in last 48 hrs
+
+            return `
+                <div class="lead-card ${isHot ? 'hot-lead border-[#E50914]' : ''}" onclick="window.open('admin-gatekeeper.html?id=${id}', '_blank')">
+                    <div class="status-indicator bg-[${columnColor}]"></div>
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-white text-sm">${name}</h3>
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest">${postcode}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-bold ${data.uDesignData?.totalPrice ? 'text-[#0dcaf0]' : 'text-gray-600'}">${price}</span>
                         </div>
                     </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest">Finance Status</label>
-                        <select id="financeStatusInput" class="luxury-input w-full p-2 text-sm mt-1">
-                            <option value="TBC">TBC</option>
-                            <option value="Cash/Self-Funded">Cash / Self-Funded</option>
-                            <option value="Application Pending">Application Pending</option>
-                            <option value="Approved">Approved</option>
-                        </select>
+                    
+                    <div class="border-t border-[#30363d] pt-3 mt-1 flex justify-between items-center bg-[#090d13] -mx-4 -mb-4 px-4 py-2 rounded-b-lg">
+                        <div class="flex gap-4">
+                            <div title="Total Viewing Time">
+                                <span class="text-[10px] text-gray-500 uppercase tracking-widest block leading-tight">Interest</span>
+                                <span class="text-xs font-mono font-bold ${viewTime > 300 ? 'text-[#E50914]' : 'text-gray-400'}">👁️ ${formatViewTime(viewTime)}</span>
+                            </div>
+                            <div title="Last Active">
+                                <span class="text-[10px] text-gray-500 uppercase tracking-widest block leading-tight">Last Seen</span>
+                                <span class="text-xs font-mono text-gray-400">🕒 ${formatTimeAgo(lastActive)}</span>
+                            </div>
+                        </div>
+                        <div class="text-[10px] bg-[#161b22] px-2 py-1 rounded border border-[#30363d] uppercase tracking-widest">
+                            Gatekeeper ↗
+                        </div>
                     </div>
                 </div>
-                <button onclick="window.saveDrawerData('finance')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SAVE FINANCIALS</button>
-            </div>
-
-            <div class="space-y-4">
-                <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Survey Markups & Tech</h3>
-                <div id="sniperGallery" class="grid grid-cols-2 gap-3 mb-2"></div>
-                <textarea id="techNotesInput" class="luxury-input w-full p-3 h-24 text-sm" placeholder="Enter structural/technical limitations here..."></textarea>
-                <button onclick="window.saveDrawerData('notes')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SAVE TECH NOTES</button>
-            </div>
-
-            <div class="space-y-4">
-                <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Rilla Voice Sync</h3>
-                <input type="text" id="rillaInput" class="luxury-input w-full p-2 text-sm" placeholder="Paste Rilla.com URL here">
-                <div class="flex gap-2">
-                    <button onclick="window.saveDrawerData('rilla')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SYNC RILLA</button>
-                    <a id="rillaOpenBtn" href="#" target="_blank" class="flex-1 py-2 bg-purple-600/20 text-purple-400 border border-purple-600/50 text-center text-xs font-bold rounded hidden hover:bg-purple-600 hover:text-white transition">LISTEN</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="p-6 border-t border-gray-800 bg-gray-950 flex gap-4">
-            <button onclick="window.closeDeal('Closed Lost')" class="flex-1 py-3 border border-red-900 text-red-500 hover:bg-red-900/30 rounded font-bold text-sm transition">Mark Dead</button>
-            <button onclick="window.closeDeal('Closed Won')" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-sm transition shadow-[0_0_15px_rgba(16,185,129,0.3)]">Deal Won</button>
-        </div>
-    </div>
-
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('PWA Service Worker registered successfully.', reg);
-                }).catch(err => {
-                    console.warn('PWA Service Worker registration failed:', err);
-                });
-            });
+            `;
         }
+
+        // Listen to all surveys
+        const q = query(collection(db, "surveys"), orderBy("timestamps.createdAt", "desc"));
+        
+        onSnapshot(q, (snapshot) => {
+            const cols = { survey: '', tease: '', unlocked: '', closed: '' };
+            const counts = { survey: 0, tease: 0, unlocked: 0, closed: 0 };
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const id = docSnap.id;
+                
+                const access = data.vaultAccessLevel || 'survey_only';
+                const status = data.pipelineStatus || '';
+
+                // Routing Logic
+                if (status === 'Closed Won' || status === '4. Handover') {
+                    cols.closed += createLeadCard(id, data, '#238636');
+                    counts.closed++;
+                } else if (access === 'full_access') {
+                    cols.unlocked += createLeadCard(id, data, '#0dcaf0');
+                    counts.unlocked++;
+                } else if (access === 'design_tease') {
+                    cols.tease += createLeadCard(id, data, '#E50914');
+                    counts.tease++;
+                } else {
+                    cols.survey += createLeadCard(id, data, '#4b5563');
+                    counts.survey++;
+                }
+            });
+
+            // Inject DOM
+            document.getElementById('col-survey').innerHTML = cols.survey || '<div class="text-xs text-gray-600 text-center mt-4 italic">No leads in this stage.</div>';
+            document.getElementById('col-tease').innerHTML = cols.tease || '<div class="text-xs text-gray-600 text-center mt-4 italic">No leads in this stage.</div>';
+            document.getElementById('col-unlocked').innerHTML = cols.unlocked || '<div class="text-xs text-gray-600 text-center mt-4 italic">No leads in this stage.</div>';
+            document.getElementById('col-closed').innerHTML = cols.closed || '<div class="text-xs text-gray-600 text-center mt-4 italic">No leads in this stage.</div>';
+
+            document.getElementById('count-stage1').innerText = counts.survey;
+            document.getElementById('count-stage2').innerText = counts.tease;
+            document.getElementById('count-stage3').innerText = counts.unlocked;
+            document.getElementById('count-stage4').innerText = counts.closed;
+        });
     </script>
-    <script type="module" src="js/ui-dashboard.js"></script>
 </body>
 </html>
