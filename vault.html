@@ -6,54 +6,58 @@
     <title>Master Site Dossier</title>
     <style>
         /* --- CORE CINEMATIC STYLES --- */
-        :root { --accent: #0dcaf0; --bg-dark: #05080c; --glass: rgba(10, 15, 25, 0.6); }
+        :root { --accent: #0dcaf0; --bg-dark: #05080c; --glass: rgba(10, 15, 25, 0.65); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg-dark); color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
+        body { background: var(--bg-dark); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
         
         /* AUTH GATE */
-        #authGate { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .cyber-input { background: transparent; border: none; border-bottom: 2px solid #333; color: #fff; font-size: 2rem; text-align: center; outline: none; letter-spacing: 10px; transition: 0.3s; width: 300px; }
-        .cyber-input:focus { border-color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        #authGate { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
+        .cyber-input { background: transparent; border: none; border-bottom: 2px solid #333; color: #fff; font-size: 2.5rem; text-align: center; outline: none; letter-spacing: 15px; transition: 0.3s; width: 300px; }
+        .cyber-input:focus { border-color: var(--accent); text-shadow: 0 0 15px rgba(13, 202, 240, 0.5); }
         
         /* SCROLL SNAP ARCHITECTURE */
         #vaultContent { display: none; height: 100vh; width: 100vw; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
         .slide { height: 100vh; width: 100vw; scroll-snap-align: start; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
         /* DYNAMIC BACKGROUNDS */
-        .bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: filter 0.5s ease, transform 10s linear; }
+        .bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: transform 15s ease-out; }
         .slide:hover .bg-img { transform: scale(1.05); }
-        .overlay { position: absolute; inset: 0; background: linear-gradient(to top, #000 0%, transparent 50%, #000 100%), radial-gradient(circle, rgba(0,0,0,0.3) 0%, #000 100%); z-index: 1; }
+        .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 50%, rgba(0,0,0,0.8) 100%), radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 100%); z-index: 1; }
         
         /* GLASSMORPHISM UI */
-        .glass-panel { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+        .glass-panel { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
         h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; }
         .text-accent { color: var(--accent); }
         
-        /* AR HOTSPOTS */
-        .hotspot { position: absolute; z-index: 20; width: 30px; height: 30px; cursor: pointer; transform: translate(-50%, -50%); }
+        /* AR HOTSPOTS & STANDARDIZED BLUEPRINT */
+        #blueprint-container { position: relative; width: 90vw; max-width: 1000px; height: 70vh; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        #blueprint-img { max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0.85; filter: drop-shadow(0 0 20px rgba(13,202,240,0.2)); transition: 0.5s; }
+        
+        .hotspot { position: absolute; z-index: 20; width: 40px; height: 40px; cursor: pointer; transform: translate(-50%, -50%); }
         .hotspot-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--accent); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
-        .hotspot-dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 15px var(--accent); }
+        .hotspot-dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 20px var(--accent); }
         @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
         
-        .hotspot-card { position: absolute; top: 40px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; width: 250px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .hotspot-card { position: absolute; top: 50px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; background: rgba(5,8,12,0.95); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; width: 280px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .hotspot:hover .hotspot-card { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
         
-        /* X-RAY MODE */
-        body.xray-mode .bg-img { filter: invert(1) sepia(1) hue-rotate(180deg) grayscale(0.8) contrast(1.5) !important; }
-        body.xray-mode .overlay { background: radial-gradient(circle, rgba(13, 202, 240, 0.1) 0%, rgba(0,0,20,0.9) 100%) !important; }
-        body.xray-mode .glass-panel { border-color: var(--accent); box-shadow: 0 0 30px rgba(13, 202, 240, 0.2); }
-        .xray-btn { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 999; background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 15px 30px; border-radius: 30px; font-weight: 900; letter-spacing: 3px; cursor: crosshair; text-transform: uppercase; overflow: hidden; transition: 0.3s; }
-        .xray-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
-
         /* DATA GRID */
-        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
-        .bento-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; transition: 0.3s; border-left: 3px solid transparent; }
-        .bento-item:hover { background: rgba(255,255,255,0.08); border-left-color: var(--accent); transform: translateX(5px); }
+        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
+        .bento-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; transition: 0.3s; border-left: 3px solid transparent; }
+        .bento-item:hover { background: rgba(255,255,255,0.05); border-left-color: var(--accent); transform: translateX(5px); }
+        
+        /* HORIZONTAL CINEMATIC GALLERY */
+        .gallery-wrapper { position: relative; z-index: 10; width: 100vw; padding: 0 5vw; display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 20px; }
+        .gallery-wrapper::-webkit-scrollbar { height: 8px; }
+        .gallery-wrapper::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
+        .gallery-wrapper::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+        .gallery-img { height: 45vh; min-width: 300px; object-fit: cover; border-radius: 16px; scroll-snap-align: center; border: 1px solid rgba(255,255,255,0.1); transition: 0.4s; cursor: pointer; }
+        .gallery-img:hover { transform: scale(1.02); border-color: var(--accent); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
         
         /* SCROLL INDICATOR */
-        .scroll-down { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; align-items: center; opacity: 0.5; animation: bob 2s infinite; }
-        .scroll-down span { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
-        .scroll-down .line { width: 1px; height: 30px; background: #fff; }
+        .scroll-down { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; align-items: center; opacity: 0.6; animation: bob 2s infinite; pointer-events: none; }
+        .scroll-down span { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; color: var(--accent); font-weight: bold; }
+        .scroll-down .line { width: 2px; height: 40px; background: linear-gradient(to bottom, var(--accent), transparent); }
         @keyframes bob { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 10px); } }
     </style>
 </head>
@@ -61,107 +65,108 @@
 
     <!-- AUTHENTICATION GATE -->
     <div id="authGate">
-        <h3 style="color: #666; margin-bottom: 20px; letter-spacing: 5px;">SECURE VAULT ENCRYPTION</h3>
+        <h3 style="color: var(--accent); margin-bottom: 20px; letter-spacing: 6px; font-size: 14px;">ENCRYPTED DOSSIER</h3>
         <input type="password" id="pinInput" class="cyber-input" maxlength="4" placeholder="••••" autocomplete="off">
-        <p style="color: #444; margin-top: 20px; font-size: 12px; letter-spacing: 2px;">ENTER YOUR 4-DIGIT PIN</p>
+        <p style="color: #666; margin-top: 25px; font-size: 11px; letter-spacing: 3px;">ENTER 4-DIGIT SECURE PIN</p>
     </div>
 
     <!-- MAIN CINEMATIC EXPERIENCE -->
     <div id="vaultContent">
         
-        <!-- X-RAY SCANNER BUTTON -->
-        <button class="xray-btn" id="xrayBtn" style="display: none;">Hold for Structural Scan</button>
-
-        <!-- SLIDE 1: THE HERO REVEAL -->
+        <!-- SLIDE 1: THE HERO REVEAL (Personalized Data) -->
         <section class="slide" id="slide-hero">
             <img src="" id="heroImg" class="bg-img" alt="Front Elevation">
             <div class="overlay"></div>
-            <div class="glass-panel" style="text-align: center; max-width: 800px;">
-                <p style="color: var(--accent); font-weight: 900; letter-spacing: 4px; font-size: 12px; margin-bottom: 10px;">CO HOME IMPROVEMENTS</p>
-                <h1 style="font-size: 3.5rem; font-weight: 900; line-height: 1; margin-bottom: 20px;">The <span id="clientLastName">Client</span> Dossier</h1>
-                <p style="color: #aaa; font-size: 1.1rem; line-height: 1.6; font-weight: 300;">Welcome to your personalized architectural showcase. Everything from structural specifications to bespoke design aesthetics is locked securely within this spatial experience.</p>
+            <div class="glass-panel" style="text-align: center; max-width: 800px; width: 90%;">
+                <p style="color: var(--accent); font-weight: 900; letter-spacing: 4px; font-size: 12px; margin-bottom: 15px;">CO HOME IMPROVEMENTS</p>
+                <h1 style="font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">The <span id="clientLastName">Client</span> Project</h1>
+                <p style="font-size: 1.2rem; color: #fff; letter-spacing: 2px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 25px;" id="clientPostcode">S70 0PN</p>
+                <p style="color: #aaa; font-size: 1rem; line-height: 1.6; font-weight: 300;">Welcome to your personalized architectural dossier. Everything from your exact measurements to our bespoke structural blueprints is locked securely within this spatial experience.</p>
             </div>
             <div class="scroll-down"><span>Scroll to Explore</span><div class="line"></div></div>
         </section>
 
-        <!-- SLIDE 2: AR HOTSPOT EXPLORATION -->
-        <section class="slide" id="slide-ar">
-            <img src="" id="rearImg" class="bg-img" alt="Rear Elevation">
-            <div class="overlay" style="opacity: 0.7;"></div>
-            
-            <h2 style="position: absolute; top: 40px; left: 40px; z-index: 10; font-size: 1.5rem;"><span class="text-accent">01.</span> Structural Blueprint</h2>
-            
-            <!-- AR Node 1: Roof -->
-            <div class="hotspot" style="top: 30%; left: 50%;">
-                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
-                <div class="hotspot-card">
-                    <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">Roof Architecture</h3>
-                    <p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;" id="ar-roofType">Fetching...</p>
-                    <p style="font-size: 11px; color: #aaa;">Engineered for maximum thermal efficiency and aesthetic impact.</p>
-                </div>
+        <!-- SLIDE 2: DYNAMIC INSPIRATION (Based on Roof Type) -->
+        <section class="slide" id="slide-inspiration">
+            <img src="" id="dynamicRoofImg" class="bg-img" alt="Roof Inspiration">
+            <div class="overlay" style="opacity: 0.85;"></div>
+            <div style="position: absolute; left: 5vw; bottom: 10vh; z-index: 10; max-width: 600px;">
+                <h2 style="font-size: 3rem; margin-bottom: 10px;"><span class="text-accent">01.</span> Vision</h2>
+                <p style="font-size: 1.2rem; color: #ddd; line-height: 1.5;">Showcasing the <strong style="color: #fff;" id="inspire-roof">Ultra380</strong> profile. Unmatched thermal efficiency engineered beautifully into your property's footprint.</p>
             </div>
+        </section>
 
-            <!-- AR Node 2: Base -->
-            <div class="hotspot" style="top: 80%; left: 30%;">
-                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
-                <div class="hotspot-card">
-                    <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">Foundations</h3>
-                    <p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;" id="ar-baseType">Fetching...</p>
-                    <p style="font-size: 11px; color: #aaa;">Structural footings and damp-proof coursing verified by surveyor.</p>
-                </div>
-            </div>
+        <!-- SLIDE 3: AR BLUEPRINT (Standardized Sketch + Perfect Dots) -->
+        <section class="slide" id="slide-ar">
+            <div class="overlay" style="background: radial-gradient(circle, rgba(13,202,240,0.05) 0%, #05080c 100%);"></div>
             
-            <!-- AR Node 3: Build Scope -->
-            <div class="hotspot" style="top: 60%; left: 70%;">
-                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
-                <div class="hotspot-card">
-                    <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">Build Scope</h3>
-                    <p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;" id="ar-buildType">Fetching...</p>
-                    <p style="font-size: 14px; font-weight: bold;" id="ar-size">Fetching...</p>
+            <h2 style="position: absolute; top: 5vh; left: 5vw; z-index: 10; font-size: 2rem;"><span class="text-accent">02.</span> Technical Blueprint</h2>
+            <p style="position: absolute; top: 10vh; left: 5vw; z-index: 10; color: #888; letter-spacing: 1px; text-transform: uppercase; font-size: 12px;">Hover over pulsing nodes for live survey data.</p>
+            
+            <div id="blueprint-container">
+                <img src="" id="blueprint-img" alt="Standardized Architecture Sketch">
+                <div id="ar-hotspots-wrapper">
+                    <!-- Hotspots injected via JS based on Build Type -->
                 </div>
             </div>
         </section>
 
-        <!-- SLIDE 3: X-RAY LOGISTICS & COMPLIANCE -->
+        <!-- SLIDE 4: X-RAY LOGISTICS & FIELD NOTES -->
         <section class="slide" id="slide-logistics">
-            <img src="" id="sideImg" class="bg-img" alt="Side Elevation">
-            <div class="overlay"></div>
+            <img src="" id="rearImg" class="bg-img" alt="Rear Elevation" style="filter: grayscale(0.8) contrast(1.2) brightness(0.4);">
+            <div class="overlay" style="background: rgba(0,0,0,0.7);"></div>
             
-            <div class="glass-panel" style="width: 90%; max-width: 1000px; padding: 50px;">
-                <h2 style="font-size: 1.5rem; margin-bottom: 10px;"><span class="text-accent">02.</span> Logistics & Compliance Scan</h2>
-                <p style="color: #aaa; font-size: 14px;">Hold the structural scan button below to analyze site restrictions and regulatory requirements.</p>
-                
-                <div class="bento-grid">
-                    <div class="bento-item">
-                        <p style="font-size: 10px; color: #888; text-transform: uppercase;">Building Regulations</p>
-                        <p style="font-size: 16px; font-weight: bold; margin-top: 5px;" id="spec-regs">TBC</p>
-                    </div>
-                    <div class="bento-item">
-                        <p style="font-size: 10px; color: #888; text-transform: uppercase;">Planning Permission</p>
-                        <p style="font-size: 16px; font-weight: bold; margin-top: 5px;" id="spec-planning">TBC</p>
-                    </div>
-                    <div class="bento-item">
-                        <p style="font-size: 10px; color: #888; text-transform: uppercase;">Wall Obstacles</p>
-                        <p style="font-size: 16px; font-weight: bold; margin-top: 5px;" id="spec-obs">None Recorded</p>
-                    </div>
-                    <div class="bento-item" style="border-left-color: #238636;">
-                        <p style="font-size: 10px; color: #888; text-transform: uppercase;">SAP Calcs</p>
-                        <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #238636;" id="spec-sap">TBC</p>
+            <div class="glass-panel" style="width: 90vw; max-width: 1200px; display: flex; gap: 40px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h2 style="font-size: 2rem; margin-bottom: 20px;"><span class="text-accent">03.</span> Site Intelligence</h2>
+                    
+                    <div class="bento-grid" style="margin-top: 0;">
+                        <div class="bento-item">
+                            <p style="font-size: 10px; color: #888; text-transform: uppercase;">Building Regs</p>
+                            <p style="font-size: 14px; font-weight: bold; margin-top: 5px; color: #fff;" id="spec-regs">TBC</p>
+                        </div>
+                        <div class="bento-item">
+                            <p style="font-size: 10px; color: #888; text-transform: uppercase;">Planning Perms</p>
+                            <p style="font-size: 14px; font-weight: bold; margin-top: 5px; color: #fff;" id="spec-planning">TBC</p>
+                        </div>
+                        <div class="bento-item">
+                            <p style="font-size: 10px; color: #888; text-transform: uppercase;">Drainage / Plumbing</p>
+                            <p style="font-size: 14px; font-weight: bold; margin-top: 5px; color: #fff;" id="spec-drainage">N/A</p>
+                        </div>
+                        <div class="bento-item" style="border-left-color: #238636;">
+                            <p style="font-size: 10px; color: #888; text-transform: uppercase;">SAP Calcs</p>
+                            <p style="font-size: 14px; font-weight: bold; margin-top: 5px; color: #238636;" id="spec-sap">TBC</p>
+                        </div>
                     </div>
                 </div>
+
+                <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.5); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+                    <p style="font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight: bold;">Designer's Field Notes</p>
+                    <p style="font-size: 14px; line-height: 1.8; color: #ccc; font-style: italic; white-space: pre-wrap;" id="designer-notes">No field notes recorded for this site.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: CINEMATIC SITE GALLERY -->
+        <section class="slide" id="slide-gallery" style="flex-direction: column; align-items: flex-start; justify-content: center;">
+            <div class="overlay" style="background: linear-gradient(to bottom, var(--bg-dark), rgba(5,8,12,0.8));"></div>
+            <h2 style="position: relative; z-index: 10; font-size: 2rem; padding: 0 5vw; margin-bottom: 30px;"><span class="text-accent">04.</span> Site Photography</h2>
+            
+            <div class="gallery-wrapper" id="site-gallery">
+                <!-- Images injected via JS -->
             </div>
         </section>
         
-        <!-- SLIDE 4: THE UDESIGN REVEAL (FINANCIALS) -->
+        <!-- SLIDE 6: THE UDESIGN REVEAL (FINANCIALS) -->
         <section class="slide" id="slide-reveal">
-            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" class="bg-img" style="opacity: 0.3;">
+            <img src="https://images.unsplash.com/photo-1628624747186-a941c476b7ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" class="bg-img" style="opacity: 0.25;">
             <div class="overlay"></div>
             
             <div class="glass-panel" style="text-align: center; border-color: var(--accent); box-shadow: 0 0 50px rgba(13,202,240,0.15);">
-                <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: #000; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 20px;">🔒</div>
-                <h2 style="font-size: 2rem; margin-bottom: 15px;" id="reveal-title">Design Engine Processing</h2>
-                <p style="color: #aaa; font-size: 1rem; max-width: 500px; margin: 0 auto 30px; line-height: 1.6;" id="reveal-text">Your lead designer is currently utilizing the UDesign architectural engine to render your bespoke visuals and compile your final investment proposal.</p>
-                <button id="btnContact" style="background: var(--accent); color: #000; border: none; padding: 15px 40px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: 0.3s; display: none;">Book Design Presentation</button>
+                <div style="width: 70px; height: 70px; border-radius: 50%; background: var(--accent); color: #000; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 25px; box-shadow: 0 0 20px rgba(13,202,240,0.5);">🔒</div>
+                <h2 style="font-size: 2.5rem; margin-bottom: 15px;" id="reveal-title">Design Engine Processing</h2>
+                <p style="color: #bbb; font-size: 1.1rem; max-width: 550px; margin: 0 auto 35px; line-height: 1.6;" id="reveal-text">Your lead designer is currently utilizing the UDesign architectural engine to render your bespoke visuals and compile your final investment proposal.</p>
+                <button id="btnContact" style="background: var(--accent); color: #000; border: none; padding: 18px 45px; font-size: 14px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: 0.3s; display: none;">Book Design Presentation</button>
             </div>
         </section>
     </div>
@@ -170,91 +175,157 @@
     <script type="module">
         import { db, doc, getDoc, updateDoc } from './js/core-firebase.js';
 
+        // --- 1. DYNAMIC IMAGE POOLS (Replace these URLs with your actual 1500+ photos later) ---
+        const ROOF_POOLS = {
+            'Ultra380': [
+                'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+                'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'
+            ],
+            'Hybrid/Livin Roof': [
+                'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80',
+                'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'
+            ],
+            'Glass/Poly Roof': [
+                'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'
+            ],
+            'Flat Roof': [
+                'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'
+            ],
+            'default': [
+                'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'
+            ]
+        };
+
+        // --- 2. STANDARDIZED AR BLUEPRINTS ---
+        // Maps the "Build Type" to a specific sketch and fixed hotspot coordinates
+        const BLUEPRINTS = {
+            'Side extension': {
+                image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Placeholder Blueprint
+                hotspots: [
+                    { top: '25%', left: '50%', id: 'ar-roof', title: 'Roof Architecture', descKey: 'roof' },
+                    { top: '60%', left: '75%', id: 'ar-walls', title: 'Wall & Cavity Spec', descKey: 'walls' },
+                    { top: '85%', left: '50%', id: 'ar-base', title: 'Foundations', descKey: 'base' }
+                ]
+            },
+            'Lean-to': {
+                image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                hotspots: [
+                    { top: '30%', left: '40%', id: 'ar-roof', title: 'Roof Architecture', descKey: 'roof' },
+                    { top: '70%', left: '60%', id: 'ar-base', title: 'Foundations', descKey: 'base' }
+                ]
+            },
+            // Fallback sketch if type is unknown
+            'default': {
+                image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                hotspots: [
+                    { top: '20%', left: '50%', id: 'ar-roof', title: 'Roof Architecture', descKey: 'roof' },
+                    { top: '80%', left: '50%', id: 'ar-base', title: 'Foundations', descKey: 'base' }
+                ]
+            }
+        };
+
         const projectId = new URLSearchParams(window.location.search).get('id');
         const pinInput = document.getElementById('pinInput');
-        const xrayBtn = document.getElementById('xrayBtn');
-
-        // X-Ray Scanner Interaction
-        xrayBtn.addEventListener('mousedown', () => document.body.classList.add('xray-mode'));
-        xrayBtn.addEventListener('mouseup', () => document.body.classList.remove('xray-mode'));
-        xrayBtn.addEventListener('mouseleave', () => document.body.classList.remove('xray-mode'));
-        xrayBtn.addEventListener('touchstart', (e) => { e.preventDefault(); document.body.classList.add('xray-mode'); });
-        xrayBtn.addEventListener('touchend', (e) => { e.preventDefault(); document.body.classList.remove('xray-mode'); });
-
-        // Show X-ray button only on slide 3
-        document.getElementById('vaultContent').addEventListener('scroll', (e) => {
-            const scrollPos = e.target.scrollTop;
-            const windowHeight = window.innerHeight;
-            if (scrollPos > windowHeight * 1.5 && scrollPos < windowHeight * 2.5) {
-                xrayBtn.style.display = 'block';
-            } else {
-                xrayBtn.style.display = 'none';
-            }
-        });
 
         pinInput.addEventListener('input', async (e) => {
             if (e.target.value.length === 4) {
                 if(!projectId) return alert("System requires a Project ID.");
-                
-                pinInput.disabled = true;
-                pinInput.style.opacity = '0.5';
+                pinInput.disabled = true; pinInput.style.opacity = '0.5';
 
                 try {
                     const docRef = doc(db, "surveys", projectId.trim());
                     const snap = await getDoc(docRef);
-                    
                     if(!snap.exists()) throw new Error("Project not found.");
-                    const data = snap.data();
                     
+                    const data = snap.data();
                     const storedPin = String(data.customerProfile?.vaultPIN || "").trim();
                     if(e.target.value !== "0000" && e.target.value !== storedPin) {
-                        e.target.value = '';
-                        pinInput.disabled = false;
-                        pinInput.style.opacity = '1';
+                        e.target.value = ''; pinInput.disabled = false; pinInput.style.opacity = '1';
                         return alert("ACCESS DENIED. Invalid PIN.");
                     }
 
-                    // --- POPULATE THE CINEMATIC UI ---
+                    // --- DATA PARSING ---
+                    const buildType = data.projectSpecs?.buildType || 'default';
+                    const roofType = data.projectSpecs?.roofStyle || 'default';
+                    const dimensions = data.projectSpecs?.proposedSize || 'TBC';
                     
-                    // Naming
+                    // Parse Designer Notes (e.g., Base Type, DPC, Air bricks)
+                    const parsedDesign = data.designerInsights?.design || '';
+                    const baseType = parsedDesign.includes('Base Type:') ? parsedDesign.split('Base Type: ')[1].split('\n')[0] : 'Standard';
+                    const foundations = parsedDesign.includes('DPC Depth:') ? parsedDesign.split('DPC Depth: ')[1].split('\n')[0] : 'Standard Depth';
+                    const rawNotes = data.designerInsights?.prep || 'No field notes recorded for this site.';
+
+                    // --- POPULATE SLIDE 1 (Personal Data) ---
                     const nameParts = (data.customerProfile?.leadName || 'Valued Customer').split(' ');
-                    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
-                    document.getElementById('clientLastName').innerText = lastName;
+                    document.getElementById('clientLastName').innerText = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
+                    document.getElementById('clientPostcode').innerText = data.customerProfile?.postcode || 'Location TBC';
+                    document.getElementById('heroImg').src = data.media?.front || ROOF_POOLS['default'][0];
 
-                    // Imagery Canvas
-                    const defaultImg = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80";
-                    document.getElementById('heroImg').src = data.media?.front || defaultImg;
-                    document.getElementById('rearImg').src = data.media?.rear || data.media?.front || defaultImg;
-                    document.getElementById('sideImg').src = data.media?.side || data.media?.front || defaultImg;
+                    // --- POPULATE SLIDE 2 (Dynamic Inspiration) ---
+                    const imagePool = ROOF_POOLS[roofType] || ROOF_POOLS['default'];
+                    const randomImg = imagePool[Math.floor(Math.random() * imagePool.length)];
+                    document.getElementById('dynamicRoofImg').src = randomImg;
+                    document.getElementById('inspire-roof').innerText = roofType;
 
-                    // AR Hotspots
-                    document.getElementById('ar-roofType').innerText = data.projectSpecs?.roofStyle || 'Awaiting Specs';
-                    document.getElementById('ar-baseType').innerText = data.designerInsights?.design?.split('\n')[0]?.replace('Base Type: ', '') || 'Standard Footings';
-                    document.getElementById('ar-buildType').innerText = data.projectSpecs?.buildType || 'Bespoke Design';
-                    document.getElementById('ar-size').innerText = data.projectSpecs?.proposedSize || '';
+                    // --- POPULATE SLIDE 3 (Standardized AR Blueprint) ---
+                    const blueprintData = BLUEPRINTS[buildType] || BLUEPRINTS['default'];
+                    document.getElementById('blueprint-img').src = blueprintData.image;
+                    
+                    const arContainer = document.getElementById('ar-hotspots-wrapper');
+                    arContainer.innerHTML = ''; // Clear old dots
+                    
+                    // Generate exact descriptions for the dots
+                    const dotDescriptions = {
+                        'roof': `<p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">${roofType}</p><p style="font-size: 11px; color: #aaa;">Engineered for maximum thermal efficiency over a ${dimensions} footprint.</p>`,
+                        'walls': `<p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">${data.projectSpecs?.houseMaterial || 'Standard Cavity'}</p><p style="font-size: 11px; color: #aaa;">Structural wall matching existing property aesthetics.</p>`,
+                        'base': `<p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">${baseType}</p><p style="font-size: 11px; color: #aaa;">DPC Depth: ${foundations}</p>`
+                    };
 
-                    // X-Ray Logistics
+                    blueprintData.hotspots.forEach(spot => {
+                        arContainer.innerHTML += `
+                            <div class="hotspot" style="top: ${spot.top}; left: ${spot.left};">
+                                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
+                                <div class="hotspot-card">
+                                    <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">${spot.title}</h3>
+                                    ${dotDescriptions[spot.descKey]}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    // --- POPULATE SLIDE 4 (Logistics & Notes) ---
+                    document.getElementById('rearImg').src = data.media?.rear || randomImg;
                     document.getElementById('spec-regs').innerText = data.projectSpecs?.buildingRegs || 'N/A';
                     document.getElementById('spec-planning').innerText = data.projectSpecs?.planningPerms || 'N/A';
-                    document.getElementById('spec-obs').innerText = data.projectSpecs?.wallObstacles || 'Clear';
+                    document.getElementById('spec-drainage').innerText = data.logistics?.drainage || 'Clear';
                     document.getElementById('spec-sap').innerText = data.compliance?.sapCalcs === 'Yes' ? 'Required & Lodged' : 'Not Required';
+                    document.getElementById('designer-notes').innerText = rawNotes;
 
-                    // UDesign Reveal Logic
+                    // --- POPULATE SLIDE 5 (Cinematic Gallery) ---
+                    const gallery = document.getElementById('site-gallery');
+                    gallery.innerHTML = '';
+                    const allPhotos = [data.media?.front, data.media?.side, data.media?.rear, ...(data.media?.surveyGallery || []), ...(data.media?.accessGallery || [])].filter(Boolean);
+                    
+                    if (allPhotos.length > 0) {
+                        allPhotos.forEach(url => { gallery.innerHTML += `<img src="${url}" class="gallery-img">`; });
+                    } else {
+                        gallery.innerHTML = `<div style="padding: 40px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 16px; color: #666;">Site photography is currently processing.</div>`;
+                    }
+
+                    // --- POPULATE SLIDE 6 (Financial Reveal) ---
                     const accessLevel = data.vaultAccessLevel || 'survey_only';
                     const btnContact = document.getElementById('btnContact');
-                    const title = document.getElementById('reveal-title');
-                    const text = document.getElementById('reveal-text');
-
+                    
                     if (accessLevel === 'design_tease') {
-                        title.innerText = "Investment Proposal Ready";
-                        text.innerText = "Your blueprints, 3D renders, and financial calculations are complete. Book your final presentation to unlock the visuals.";
+                        document.getElementById('reveal-title').innerText = "Investment Proposal Ready";
+                        document.getElementById('reveal-text').innerText = "Your blueprints, 3D renders, and financial calculations are complete. Book your final presentation to unlock the visuals.";
                         btnContact.style.display = "inline-block";
-                        btnContact.onclick = () => window.location.href = `mailto:sales@cohomeimprovements.com?subject=Book Presentation: ${lastName}`;
+                        btnContact.onclick = () => window.location.href = `mailto:sales@cohomeimprovements.com?subject=Book Presentation: ${nameParts.join(' ')}`;
                     } else if (accessLevel === 'full_access') {
                         const total = parseFloat(data.uDesignData?.totalPrice || 0).toLocaleString('en-GB', {style: 'currency', currency: 'GBP'});
-                        title.innerText = "Proposal Unlocked";
-                        title.style.color = "#238636";
-                        text.innerHTML = `Your project contract has been established at <strong style="color:#fff; font-size:1.2rem;">${total}</strong>. Contact your lead designer to finalize installation scheduling.`;
+                        document.getElementById('reveal-title').innerText = "Proposal Unlocked";
+                        document.getElementById('reveal-title').style.color = "#238636";
+                        document.getElementById('reveal-text').innerHTML = `Your project contract has been established at <strong style="color:#fff; font-size:1.4rem;">${total}</strong>. Contact your lead designer to finalize installation scheduling.`;
                     }
 
                     // Unlock Animation
@@ -262,15 +333,12 @@
                     setTimeout(() => {
                         document.getElementById('authGate').style.display = 'none';
                         document.getElementById('vaultContent').style.display = 'block';
-                        // Ghost Tracker trigger
                         updateDoc(docRef, { "vaultTelemetry.lastActive": Date.now() });
-                    }, 500);
+                    }, 800);
 
                 } catch (err) {
                     alert("System Error: " + err.message);
-                    e.target.value = '';
-                    pinInput.disabled = false;
-                    pinInput.style.opacity = '1';
+                    e.target.value = ''; pinInput.disabled = false; pinInput.style.opacity = '1';
                 }
             }
         });
