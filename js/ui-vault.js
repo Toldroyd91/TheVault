@@ -12,55 +12,93 @@ function formatCamelCase(text) {
 function lon2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
 function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
 
+// --- FIXED TIMELINE ENGINE (No more infinite loops) ---
 function updateTimeline(status) {
-    const s1 = document.getElementById('step1'); const s2 = document.getElementById('step2');
-    const s3 = document.getElementById('step3'); const s4 = document.getElementById('step4');
-    
-    [s1, s2, s3, s4].forEach(el => { 
-        if(!el) return;
-        el.className = 'timeline-step'; 
-        el.innerHTML = el.innerHTML.replace('text-[#238636]', 'text-gray-500').replace('text-white', 'text-gray-500').replace('<div class="text-[10px] text-[#238636]">Completed</div>', '').replace('<div class="text-[10px]" style="color: var(--accent-primary, #0dcaf0);">In Progress</div>', ''); 
+    const steps = [
+        { id: 'step1', label: '1. Consultation' },
+        { id: 'step2', label: '2. Quote Sent' },
+        { id: 'step3', label: '3. Technical Survey' },
+        { id: 'step4', label: '4. Handover' }
+    ];
+
+    let currentStepIndex = steps.findIndex(s => s.label === status);
+    if (currentStepIndex === -1) currentStepIndex = 0; 
+    if (status === "Closed Won") currentStepIndex = 4; 
+
+    steps.forEach((step, index) => {
+        const el = document.getElementById(step.id);
+        if (!el) return;
+
+        const stepNum = index + 1;
+        const stepName = step.label.replace(/^\d+\.\s/, ''); 
+
+        let statusHtml = '';
+        let iconClass = 'bg-[#090d13] border-[#30363d] text-gray-500';
+        let textClass = 'text-gray-500';
+
+        if (index < currentStepIndex || currentStepIndex === 4) {
+            iconClass = 'bg-[#238636] border-[#238636] text-white';
+            textClass = 'text-white';
+            statusHtml = `<div class="text-[10px] text-[#238636] font-bold mt-2 uppercase tracking-widest">Completed</div>`;
+        } else if (index === currentStepIndex) {
+            iconClass = 'bg-[#0dcaf0] border-[#0dcaf0] text-black shadow-[0_0_10px_rgba(13,202,240,0.4)]';
+            textClass = 'text-white font-bold';
+            statusHtml = `<div class="text-[10px] text-[#0dcaf0] font-bold mt-2 uppercase tracking-widest animate-pulse">In Progress</div>`;
+        }
+
+        // Safely overwrite HTML to prevent stacking
+        el.innerHTML = `
+            <div class="w-8 h-8 mx-auto rounded-full border-2 flex items-center justify-center text-xs transition-all duration-300 ${iconClass} relative z-10">${stepNum}</div>
+            <div class="mt-4 text-[11px] uppercase tracking-widest ${textClass}">${stepName}</div>
+            ${statusHtml}
+        `;
     });
-
-    const markActive = (el) => { if(!el) return; el.classList.add('active'); el.querySelector('div').classList.replace('text-gray-500', 'text-white'); el.innerHTML += `<div class="text-[10px]" style="color: var(--accent-primary, #0dcaf0);">In Progress</div>`; };
-    const markComplete = (el) => { if(!el) return; el.classList.add('completed'); el.querySelector('div').classList.replace('text-gray-500', 'text-white'); el.innerHTML += `<div class="text-[10px] text-[#238636]">Completed</div>`; };
-
-    if (status === "1. Consultation") { markActive(s1); }
-    else if (status === "2. Quote Sent") { markComplete(s1); markActive(s2); }
-    else if (status === "3. Technical Survey") { markComplete(s1); markComplete(s2); markActive(s3); }
-    else if (status === "4. Handover") { markComplete(s1); markComplete(s2); markComplete(s3); markActive(s4); }
-    else if (status === "Closed Won") { markComplete(s1); markComplete(s2); markComplete(s3); markComplete(s4); }
 }
 
+// --- UPLIFTED DYNAMIC UI RENDERER ---
 function renderDynamicSurveyData(data) {
     const container = document.getElementById('dynamicSurveyData');
     if (!container) return;
     container.innerHTML = '';
 
-    const categoriesToRender = { 'Design & Architecture': data.projectSpecs, 'Designer Insights': data.designerInsights, 'Compliance': data.compliance };
+    const categoriesToRender = { 
+        'Design & Architecture': data.projectSpecs, 
+        'Designer Insights': data.designerInsights, 
+        'Compliance': data.compliance 
+    };
+    
     let hasData = false;
 
     Object.entries(categoriesToRender).forEach(([title, categoryData]) => {
         if (!categoryData || Object.keys(categoryData).length === 0) return;
-        let html = `<div class="mb-6 bg-[#161b22] p-5 rounded-xl border border-[#30363d] shadow-lg"><h4 class="text-sm font-black text-[#0dcaf0] uppercase tracking-widest mb-4 pb-2 border-b border-[#30363d]">${title}</h4><div class="grid grid-cols-2 gap-4">`;
+        
+        let html = `
+            <div class="mb-6 bg-[#090d13] p-6 rounded-xl border border-[#30363d]">
+                <h4 class="text-xs font-black text-[#0dcaf0] uppercase tracking-widest mb-4 pb-3 border-b border-[#30363d] flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-[#0dcaf0] rounded-full"></span> ${title}
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+        
         let categoryHasData = false;
         Object.entries(categoryData).forEach(([key, value]) => {
             if (value && value !== '' && value !== 'Select' && typeof value !== 'object') {
                 categoryHasData = true; hasData = true;
-                html += `<div class="bg-[#090d13] p-3 rounded-lg border border-[#30363d] shadow-inner"><label class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">${formatCamelCase(key)}</label><div class="font-bold text-sm text-white break-words whitespace-pre-wrap">${value}</div></div>`;
+                html += `
+                    <div class="bg-[#161b22] p-4 rounded-lg border border-[#30363d] transition hover:border-gray-500">
+                        <label class="text-[9px] text-gray-500 uppercase tracking-widest block mb-1.5">${formatCamelCase(key)}</label>
+                        <div class="font-bold text-sm text-white break-words whitespace-pre-wrap leading-relaxed">${value}</div>
+                    </div>`;
             }
         });
         html += `</div></div>`;
         if (categoryHasData) container.innerHTML += html;
     });
 
-    if (!hasData) container.innerHTML = '<div class="text-xs text-gray-500 italic p-4 bg-[#161b22] rounded-lg border border-[#30363d]">Site scope is currently being finalized.</div>';
+    if (!hasData) container.innerHTML = '<div class="text-xs text-gray-500 italic p-6 text-center bg-[#090d13] rounded-xl border border-[#30363d]">Site scope is currently being finalized. Check back soon.</div>';
 }
 
 const btnAccess = document.getElementById('btnAccess');
 const pinInput = document.getElementById('vaultPinInput');
-
-// We will track the latest view time from the database here
 let currentTotalViewTime = 0; 
 
 async function attemptDecrypt() {
@@ -72,7 +110,7 @@ async function attemptDecrypt() {
         const docRef = doc(db, "surveys", projectId.trim());
         const snap = await getDoc(docRef);
         
-        if(!snap.exists()) { btnAccess.innerText = originalText; btnAccess.disabled = false; return alert(`DATABASE ERROR: Cannot locate a project with ID: ${projectId.trim()}`); }
+        if(!snap.exists()) { btnAccess.innerText = originalText; btnAccess.disabled = false; return alert(`DATABASE ERROR: Cannot locate project.`); }
 
         const data = snap.data();
         const storedPin = String(data.customerProfile?.vaultPIN || "").trim();
@@ -84,7 +122,6 @@ async function attemptDecrypt() {
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('vaultContent').style.display = 'flex';
 
-        // START GHOST TRACKER (No imports required, basic JS maths)
         setInterval(async () => {
             if(document.visibilityState === 'visible') {
                 try {
@@ -92,14 +129,12 @@ async function attemptDecrypt() {
                         "vaultTelemetry.totalViewTimeSeconds": currentTotalViewTime + 15,
                         "vaultTelemetry.lastActive": Date.now()
                     });
-                } catch(e) {} // Silently fail if network drops so it doesn't interrupt the user
+                } catch(e) {} 
             }
         }, 15000); 
 
         onSnapshot(docRef, (docSnap) => {
             const data = docSnap.data();
-            
-            // Sync current view time for Ghost Tracker
             currentTotalViewTime = data.vaultTelemetry?.totalViewTimeSeconds || 0;
 
             const brandId = data.brand || "YorkshireWindows";
@@ -123,39 +158,39 @@ async function attemptDecrypt() {
 
             const appendToGallery = (url) => {
                 if(!url) return; hasImages = true;
-                uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border border-[#30363d] hover:border-[#0dcaf0] transition h-24 shadow-md"><img src="${url}" class="w-full h-full object-cover"></a>`;
+                uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border border-[#30363d] hover:border-[#0dcaf0] transition h-32 shadow-md"><img src="${url}" class="w-full h-full object-cover hover:scale-105 transition duration-500"></a>`;
             };
 
             if(data.media) {
                 appendToGallery(data.media.front); appendToGallery(data.media.side); appendToGallery(data.media.rear); appendToGallery(data.media.sketch);
                 (data.media.surveyGallery || []).slice(0, 4).forEach(appendToGallery);
             }
-            if (!hasImages && uiGallery) uiGallery.innerHTML = '<div class="text-xs text-gray-500 italic col-span-2 p-4 bg-[#161b22] border border-[#30363d] rounded-lg">Site imagery is currently processing.</div>';
+            if (!hasImages && uiGallery) uiGallery.innerHTML = '<div class="text-xs text-gray-500 italic col-span-2 p-6 text-center bg-[#090d13] border border-[#30363d] rounded-xl">Site imagery is currently processing.</div>';
             
             const financialContainer = document.getElementById('quoteContainer');
             if (financialContainer) {
                 const accessLevel = data.vaultAccessLevel || 'survey_only';
 
                 if (accessLevel === 'survey_only') {
-                    financialContainer.innerHTML = `<div class="mt-6 p-6 rounded-xl border border-[#30363d] bg-[#161b22] text-center"><p class="text-sm text-gray-400">Your Lead Designer is currently compiling your bespoke UDesign architectural renders.</p><div class="mt-4 inline-block px-4 py-2 bg-[#090d13] border border-[#30363d] rounded-lg text-xs font-bold uppercase tracking-widest text-[#0dcaf0] animate-pulse">Design Phase in Progress...</div></div>`;
+                    financialContainer.innerHTML = `<div class="mt-6 p-8 rounded-xl border border-[#30363d] bg-[#090d13] text-center shadow-lg"><p class="text-sm text-gray-400 mb-6 leading-relaxed">Your Lead Designer is currently compiling your bespoke UDesign architectural renders.</p><div class="inline-block px-6 py-3 bg-[#161b22] border border-[#30363d] rounded-lg text-xs font-bold uppercase tracking-widest text-[#0dcaf0] animate-pulse shadow-inner">Design Phase in Progress...</div></div>`;
                 } 
                 else if (accessLevel === 'design_tease') {
                     if (data.uDesignData?.renders && data.uDesignData.renders.length > 0) {
-                        data.uDesignData.renders.forEach(url => { uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border-2 border-[#E50914] shadow-[0_0_15px_rgba(229,9,20,0.3)] hover:scale-105 transition h-24"><img src="${url}" class="w-full h-full object-cover"></a>`; });
+                        data.uDesignData.renders.forEach(url => { uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border-2 border-[#E50914] shadow-[0_0_15px_rgba(229,9,20,0.3)] hover:scale-105 transition h-32"><img src="${url}" class="w-full h-full object-cover"></a>`; });
                     }
                     financialContainer.innerHTML = `
-                        <div class="mt-8 relative rounded-xl overflow-hidden border border-[#30363d] bg-[url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')] bg-cover bg-center h-64">
-                            <div class="absolute inset-0 backdrop-blur-xl bg-[#090d13]/80 flex flex-col items-center justify-center p-6 text-center z-10">
-                                <div class="w-16 h-16 bg-[#161b22] rounded-full flex items-center justify-center border border-[#30363d] mb-4 shadow-xl"><span class="text-2xl">🔒</span></div>
-                                <h3 class="text-xl font-black text-white uppercase tracking-widest mb-2">Bespoke Investment Proposal Ready</h3>
-                                <p class="text-sm text-gray-400 max-w-md">Your architectural blueprints and structural calculations are complete. Please book your follow-up design appointment to unlock your financial breakdown.</p>
-                                <button onclick="window.location.href='mailto:sales@cohomeimprovements.com?subject=Book Follow Up'" class="mt-6 px-6 py-3 bg-[#0dcaf0] text-black font-black uppercase tracking-widest text-xs rounded-lg hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(13,202,240,0.4)]">Request Appointment</button>
+                        <div class="mt-8 relative rounded-xl overflow-hidden border border-[#30363d] bg-[url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')] bg-cover bg-center h-72 shadow-2xl">
+                            <div class="absolute inset-0 backdrop-blur-xl bg-[#090d13]/85 flex flex-col items-center justify-center p-8 text-center z-10">
+                                <div class="w-16 h-16 bg-[#161b22] rounded-full flex items-center justify-center border border-[#30363d] mb-6 shadow-xl"><span class="text-2xl">🔒</span></div>
+                                <h3 class="text-xl font-black text-white uppercase tracking-widest mb-3">Investment Proposal Ready</h3>
+                                <p class="text-sm text-gray-400 max-w-md leading-relaxed">Your architectural blueprints and structural calculations are complete. Book your follow-up design appointment to unlock your financial breakdown.</p>
+                                <button onclick="window.location.href='mailto:sales@cohomeimprovements.com?subject=Book Follow Up'" class="mt-6 px-8 py-3 bg-[#0dcaf0] text-black font-black uppercase tracking-widest text-xs rounded-lg hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(13,202,240,0.4)]">Request Appointment</button>
                             </div>
                         </div>`;
                 }
                 else if (accessLevel === 'full_access') {
                     if (data.uDesignData?.renders && data.uDesignData.renders.length > 0) {
-                        data.uDesignData.renders.forEach(url => { uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border-2 border-[#238636] shadow-[0_0_15px_rgba(35,134,54,0.3)] hover:scale-105 transition h-24"><img src="${url}" class="w-full h-full object-cover"></a>`; });
+                        data.uDesignData.renders.forEach(url => { uiGallery.innerHTML += `<a href="${url}" target="_blank" class="block rounded-lg overflow-hidden border-2 border-[#238636] shadow-[0_0_15px_rgba(35,134,54,0.3)] hover:scale-105 transition h-32"><img src="${url}" class="w-full h-full object-cover"></a>`; });
                     }
                     const totalVal = data.uDesignData?.totalPrice || 0; const depositVal = data.uDesignData?.deposit || 0;
                     const total = parseFloat(totalVal).toLocaleString('en-GB', {style: 'currency', currency: 'GBP'}); const deposit = parseFloat(depositVal).toLocaleString('en-GB', {style: 'currency', currency: 'GBP'});
@@ -164,13 +199,13 @@ async function attemptDecrypt() {
                         <div class="mt-8 animate-[fadeIn_0.8s_ease-out]">
                             <h3 class="text-sm font-black text-[#238636] uppercase tracking-widest mb-4 pb-2 border-b border-[#30363d] flex items-center gap-2"><span>🔓</span> Official Investment Breakdown</h3>
                             <div class="bg-[#161b22] rounded-xl border border-[#30363d] overflow-hidden shadow-2xl">
-                                <div class="p-6 border-b border-[#30363d] flex justify-between items-center bg-[#090d13]">
-                                    <div><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Contract Total</p><p class="text-4xl font-black text-white tracking-tighter">${total}</p></div>
-                                    <div class="text-right"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Agreed Deposit</p><p class="text-xl font-bold text-[#0dcaf0]">${deposit}</p></div>
+                                <div class="p-8 border-b border-[#30363d] flex justify-between items-center bg-[#090d13]">
+                                    <div><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Contract Total</p><p class="text-4xl font-black text-white tracking-tighter">${total}</p></div>
+                                    <div class="text-right"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Agreed Deposit</p><p class="text-xl font-bold text-[#0dcaf0]">${deposit}</p></div>
                                 </div>
-                                <div class="p-6 bg-[#161b22] text-center border-t-4 border-[#0dcaf0]">
-                                    <h4 class="text-white font-bold mb-2 uppercase tracking-widest text-sm">Proposal Unlocked</h4>
-                                    <p class="text-xs text-gray-400 leading-relaxed max-w-md mx-auto">Your designer has presented the full project scope, UDesign visuals, and financials. To proceed with this investment and lock in your installation schedule, please confirm the details directly with your designer.</p>
+                                <div class="p-8 bg-[#161b22] text-center border-t-4 border-[#0dcaf0]">
+                                    <h4 class="text-white font-bold mb-3 uppercase tracking-widest text-sm">Proposal Unlocked</h4>
+                                    <p class="text-xs text-gray-400 leading-relaxed max-w-lg mx-auto">Your designer has presented the full project scope, UDesign visuals, and financials. To proceed with this investment and lock in your installation schedule, please confirm the details directly with your designer.</p>
                                 </div>
                             </div>
                         </div>`;
@@ -181,10 +216,10 @@ async function attemptDecrypt() {
         const chatRef = collection(db, `surveys/${projectId}/messages`);
         onSnapshot(query(chatRef, orderBy("timestamp", "asc")), (msgSnap) => {
             const win = document.getElementById('chat-window'); if(!win) return;
-            win.innerHTML = '<div class="text-center text-xs text-gray-500 my-4">Secure Connection Established</div>';
+            win.innerHTML = '<div class="text-center text-xs text-gray-500 my-4 uppercase tracking-widest">Secure Connection Established</div>';
             msgSnap.forEach(m => {
                 const d = m.data(); const isMe = d.sender === 'Customer';
-                win.innerHTML += `<div class="mb-3 ${isMe ? 'text-right' : 'text-left'} animate-[fadeIn_0.3s_ease-out]"><span class="text-[10px] text-gray-400 uppercase tracking-widest">${isMe ? 'You' : d.sender}</span><div class="inline-block p-3 mt-1 rounded-xl text-sm ${isMe ? 'text-black rounded-tr-sm bg-[#0dcaf0]' : 'bg-[#161b22] border border-[#30363d] text-white rounded-tl-sm'} shadow-md">${d.text}</div></div>`;
+                win.innerHTML += `<div class="mb-4 ${isMe ? 'text-right' : 'text-left'} animate-[fadeIn_0.3s_ease-out]"><span class="text-[9px] text-gray-500 uppercase tracking-widest mb-1 block">${isMe ? 'You' : d.sender}</span><div class="inline-block p-3 rounded-xl text-sm ${isMe ? 'text-black rounded-tr-sm bg-[#0dcaf0]' : 'bg-[#161b22] border border-[#30363d] text-white rounded-tl-sm'} shadow-md">${d.text}</div></div>`;
             });
             win.scrollTop = win.scrollHeight;
         });
@@ -205,15 +240,10 @@ async function attemptDecrypt() {
     }
 }
 
-// BIND THE BUTTON (This was being blocked by the import crash)
-if (btnAccess) {
-    btnAccess.addEventListener('click', attemptDecrypt);
-}
-if (pinInput) {
-    pinInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptDecrypt(); });
-}
+if (btnAccess) btnAccess.addEventListener('click', attemptDecrypt);
+if (pinInput) pinInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptDecrypt(); });
 
-// PDF Engine
+// --- RIGID PDF ENGINE (Print-Safe Architecture) ---
 const btnDownload = document.getElementById('btnDownloadReport');
 if (btnDownload) {
     btnDownload.addEventListener('click', async () => {
@@ -256,79 +286,104 @@ if (btnDownload) {
             let pdfContainer = document.getElementById('hiddenPdfContainer');
             if(!pdfContainer) { pdfContainer = document.createElement('div'); pdfContainer.id = 'hiddenPdfContainer'; document.body.appendChild(pdfContainer); }
             
+            // Using inline blocks instead of Grid for precise PDF rendering
             pdfContainer.innerHTML = `
                 <!-- PAGE 1: COVER PAGE -->
-                <div class="relative h-[1123px] w-[794px] overflow-hidden flex flex-col bg-white">
-                    <div class="absolute inset-0 z-0 flex items-center justify-center opacity-5 pointer-events-none"><img src="${brandLogoWatermark}" style="width: 80%;" crossorigin="anonymous"></div>
-                    <div class="h-[65%] relative z-10"><img src="${heroImg}" class="w-full h-full object-cover" crossorigin="anonymous"><div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div></div>
-                    <div class="h-[35%] bg-white p-12 flex flex-col justify-between z-10">
-                        <div>
-                            <h1 class="text-6xl font-black text-gray-900 tracking-tighter mb-8 uppercase">Master Site <br>Dossier.</h1>
-                            <div class="grid grid-cols-2 gap-y-6 gap-x-12 text-sm">
-                                <div><p class="text-gray-500 font-bold tracking-widest uppercase text-[10px] mb-1">Customer Name</p><p class="text-xl font-bold">${data.customerProfile?.leadName || 'Valued Customer'}</p></div>
-                                <div><p class="text-gray-500 font-bold tracking-widest uppercase text-[10px] mb-1">Local Authority</p><p class="text-lg font-bold text-[#0dcaf0]">${council}</p></div>
-                                <div><p class="text-gray-500 font-bold tracking-widest uppercase text-[10px] mb-1">Site Location</p><p class="text-xl font-bold">${postcode || 'TBC'}</p></div>
-                                <div><p class="text-gray-500 font-bold tracking-widest uppercase text-[10px] mb-1">Lead Designer</p><p class="text-lg font-bold">${data.owner || 'Thomas Oldroyd'}</p></div>
+                <div style="position: relative; height: 1123px; width: 794px; overflow: hidden; background: white; font-family: sans-serif;">
+                    <div style="height: 65%; position: relative;">
+                        <img src="${heroImg}" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
+                    </div>
+                    <div style="height: 35%; padding: 50px; box-sizing: border-box;">
+                        <h1 style="font-size: 50px; font-weight: 900; color: #111; margin: 0 0 40px 0; text-transform: uppercase; line-height: 1.1;">Master Site<br>Dossier.</h1>
+                        <div style="width: 100%;">
+                            <div style="width: 48%; display: inline-block; vertical-align: top; margin-bottom: 20px;">
+                                <p style="font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">Customer Name</p>
+                                <p style="font-size: 18px; font-weight: bold; color: #111; margin: 0;">${data.customerProfile?.leadName || 'Valued Customer'}</p>
+                            </div>
+                            <div style="width: 48%; display: inline-block; vertical-align: top; margin-bottom: 20px;">
+                                <p style="font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">Local Authority</p>
+                                <p style="font-size: 18px; font-weight: bold; color: ${brandData.theme}; margin: 0;">${council}</p>
+                            </div>
+                            <div style="width: 48%; display: inline-block; vertical-align: top;">
+                                <p style="font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">Site Location</p>
+                                <p style="font-size: 18px; font-weight: bold; color: #111; margin: 0;">${postcode || 'TBC'}</p>
+                            </div>
+                            <div style="width: 48%; display: inline-block; vertical-align: top;">
+                                <p style="font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">Lead Designer</p>
+                                <p style="font-size: 18px; font-weight: bold; color: #111; margin: 0;">${data.owner || 'Thomas Oldroyd'}</p>
                             </div>
                         </div>
-                        <div class="flex justify-end items-end border-t border-gray-200 pt-4"><p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase">CO HOME IMPROVEMENTS | CONFIDENTIAL MASTER REPORT</p></div>
                     </div>
                 </div>
 
-                <!-- PAGE 2: ENVIRONMENTAL ANALYSIS -->
-                <div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
-                    <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: ${brandData.theme};">Environmental Analysis</h2>
-                    <p class="text-sm text-gray-600 mb-8 leading-relaxed">Prior to finalizing your structural design, we conduct a topographical and environmental review of your location.</p>
-                    <div class="w-full h-64 bg-gray-200 rounded-xl mb-8 overflow-hidden relative border border-gray-300">
-                        ${mapTileUrl ? `<img src="${mapTileUrl}" class="w-full h-full object-cover opacity-80 mix-blend-multiply" crossorigin="anonymous">` : ''}
-                        <div class="absolute inset-0 border-4 rounded-xl pointer-events-none" style="border-color: ${brandData.theme}33;"></div>
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-red-600 bg-red-600/30"></div>
+                <!-- PAGE 2: ENVIRONMENTAL & SPECS -->
+                <div style="page-break-before: always; height: 1123px; width: 794px; background: white; padding: 50px; box-sizing: border-box; font-family: sans-serif;">
+                    <h2 style="font-size: 30px; font-weight: 900; color: #111; text-transform: uppercase; border-bottom: 4px solid ${brandData.theme}; padding-bottom: 10px; margin-bottom: 30px; display: inline-block;">Site Intelligence & Specs</h2>
+                    
+                    <div style="width: 100%; height: 250px; background: #eee; border: 1px solid #ccc; border-radius: 10px; overflow: hidden; margin-bottom: 30px; position: relative;">
+                        ${mapTileUrl ? `<img src="${mapTileUrl}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;" crossorigin="anonymous">` : ''}
                     </div>
-                    <div class="grid grid-cols-2 gap-6 mb-8">
-                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Exact Coordinates</p><p class="text-xl font-bold text-gray-900 font-mono">${lat ? `${lat.toFixed(4)}N, ${lon.toFixed(4)}W` : 'Fetching...'}</p></div>
-                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Planning Ward</p><p class="text-xl font-bold text-gray-900">${ward}</p></div>
+
+                    <div style="width: 100%; margin-bottom: 30px;">
+                        <div style="width: 32%; display: inline-block; background: #f9f9f9; padding: 15px; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; text-align: center;">
+                            <p style="font-size: 9px; color: #666; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">Topographical Elev.</p>
+                            <p style="font-size: 18px; font-weight: bold; color: #111; margin: 0;">${elevation}</p>
+                        </div>
+                        <div style="width: 32%; display: inline-block; background: #f9f9f9; padding: 15px; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; text-align: center; margin-left: 1%;">
+                            <p style="font-size: 9px; color: #666; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">Wind Zone</p>
+                            <p style="font-size: 18px; font-weight: bold; color: #111; margin: 0;">${windZone}</p>
+                        </div>
+                        <div style="width: 32%; display: inline-block; background: #f9f9f9; padding: 15px; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; text-align: center; margin-left: 1%;">
+                            <p style="font-size: 9px; color: #666; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">Coordinates</p>
+                            <p style="font-size: 14px; font-weight: bold; color: #111; margin: 0;">${lat ? `${lat.toFixed(3)}N, ${lon.toFixed(3)}W` : 'TBC'}</p>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Topographical Elev.</p><p class="text-2xl font-black text-gray-800">${elevation}</p></div>
-                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Structural Wind Zone</p><p class="text-2xl font-black text-gray-800">${windZone}</p></div>
-                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Ground Condition</p><p class="text-lg font-black text-[#238636] mt-2">Satisfactory</p></div>
+
+                    <h3 style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 20px;">Architecture & Build</h3>
+                    <div style="width: 100%; margin-bottom: 30px;">
+                        <div style="width: 32%; display: inline-block; vertical-align: top; margin-bottom: 15px;"><p style="font-size: 9px; color: ${brandData.theme}; font-weight: bold; text-transform: uppercase; margin: 0 0 3px 0;">Build Type</p><p style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${data.projectSpecs?.buildType || 'TBC'}</p></div>
+                        <div style="width: 32%; display: inline-block; vertical-align: top; margin-bottom: 15px;"><p style="font-size: 9px; color: ${brandData.theme}; font-weight: bold; text-transform: uppercase; margin: 0 0 3px 0;">Size</p><p style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${data.projectSpecs?.proposedSize || 'TBC'}</p></div>
+                        <div style="width: 32%; display: inline-block; vertical-align: top; margin-bottom: 15px;"><p style="font-size: 9px; color: ${brandData.theme}; font-weight: bold; text-transform: uppercase; margin: 0 0 3px 0;">Roof</p><p style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${data.projectSpecs?.roofStyle || 'TBC'}</p></div>
+                        <div style="width: 32%; display: inline-block; vertical-align: top;"><p style="font-size: 9px; color: ${brandData.theme}; font-weight: bold; text-transform: uppercase; margin: 0 0 3px 0;">Frame</p><p style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${data.projectSpecs?.frameColour || 'TBC'}</p></div>
+                        <div style="width: 32%; display: inline-block; vertical-align: top;"><p style="font-size: 9px; color: ${brandData.theme}; font-weight: bold; text-transform: uppercase; margin: 0 0 3px 0;">Planning</p><p style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${data.projectSpecs?.planningPerms || 'TBC'}</p></div>
+                        <div style="width: 32%; display: inline-block; vertical-align: top;"><p style="font-size: 9px; color: ${brandData.theme}; font-weight: bold; text-transform: uppercase; margin: 0 0 3px 0;">Building Regs</p><p style="font-size: 12px; font-weight: bold; color: #333; margin: 0;">${data.projectSpecs?.buildingRegs || 'TBC'}</p></div>
+                    </div>
+
+                    <h3 style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 20px;">Designer Insights</h3>
+                    <div style="width: 100%;">
+                        <div style="margin-bottom: 15px;"><p style="font-size: 10px; color: #111; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0;">Structural Prep</p><p style="font-size: 12px; color: #444; line-height: 1.5; margin: 0;">${data.designerInsights?.prep || 'None recorded.'}</p></div>
+                        <div><p style="font-size: 10px; color: #111; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0;">Design & Layout</p><p style="font-size: 12px; color: #444; line-height: 1.5; margin: 0;">${data.designerInsights?.design || 'None recorded.'}</p></div>
                     </div>
                 </div>
 
-                <!-- PAGE 3: PROJECT SPECS -->
-                <div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
-                    <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: ${brandData.theme};">Project Specifications</h2>
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-200 pb-2">Design & Architecture</h3>
-                    <div class="grid grid-cols-3 gap-y-6 gap-x-4 mb-8">
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Build Type</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.buildType || 'TBC'}</p></div>
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Proposed Size</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.proposedSize || 'TBC'}</p></div>
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Roof Style</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.roofStyle || 'TBC'}</p></div>
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Frame Colour</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.frameColour || 'TBC'}</p></div>
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Building Regs</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.buildingRegs || 'TBC'}</p></div>
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Planning Perms</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.planningPerms || 'TBC'}</p></div>
-                    </div>
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-200 pb-2">Structural & Access Logistics</h3>
-                    <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">House Material</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.houseMaterial || 'TBC'}</p></div>
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Wall Obstacles</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.wallObstacles || 'TBC'}</p></div>
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Access Width</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.accessWidth || 'TBC'}</p></div>
-                        <div><p class="text-[9px] text-[#0dcaf0] font-bold uppercase tracking-widest mb-1">Access Issues</p><p class="text-sm font-bold text-gray-800 break-words">${data.projectSpecs?.accessIssues || 'TBC'}</p></div>
-                    </div>
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-200 pb-2">Designer Insights</h3>
-                    <div class="space-y-6">
-                        <div><p class="text-[10px] text-gray-900 font-bold uppercase tracking-widest mb-1">Site Preparation & Structural Requirements</p><p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${data.designerInsights?.prep || 'No structural insights recorded.'}</p></div>
-                        <div><p class="text-[10px] text-gray-900 font-bold uppercase tracking-widest mb-1">Design & Layout</p><p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${data.designerInsights?.design || 'No layout insights recorded.'}</p></div>
-                    </div>
-                </div>
-
-                <!-- PAGE 4: PROPERTY ELEVATIONS -->
-                <div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;">
-                    <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: ${brandData.theme};">Property Elevations</h2>
-                    <div class="grid grid-cols-2 gap-6 flex-grow">
-                        <div class="flex flex-col"><p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Front Elevation</p><div class="flex-grow bg-gray-100 rounded-xl border border-gray-300 overflow-hidden relative">${data.media?.front ? `<img src="${data.media.front}" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous">` : `<div class="flex items-center justify-center h-full text-xs text-gray-400">Awaiting Upload</div>`}</div></div>
-                        <div class="flex flex-col"><p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Side Elevation</p><div class="flex-grow bg-gray-100 rounded-xl border border-gray-300 overflow-hidden relative">${data.media?.side ? `<img src="${data.media.side}" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous">` : `<div class="flex items-center justify-center h-full text-xs text-gray-400">Awaiting Upload</div>`}</div></div>
-                        <div class="flex flex-col"><p class="text-[10px] font-bold text-[#0dcaf0] uppercase tracking-widest mb-2">Rear Elevation (Primary Focus)</p><div class="flex-grow bg-gray-100 rounded-xl border-2 border-[#0dcaf0] overflow-hidden relative shadow-md">${data.media?.rear ? `<img src="${data.media.rear}" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous">` : `<div class="flex items-center justify-center h-full text-xs text-gray-400">Awaiting Upload</div>`}</div></div>
-                        <div class="flex flex-col"><p class="text-[10px] font-bold text-[#238636] uppercase tracking-widest mb-2">Designer Sketch / Measurements</p><div class="flex-grow bg-gray-100 rounded-xl border-2 border-[#238636] overflow-hidden relative shadow-md">${data.media?.sketch ? `<img src="${data.media.sketch}" class="absolute inset-0 w-full h-full object-contain bg-white" crossorigin="anonymous">` : `<div class="flex items-center justify-center h-full text-xs text-gray-400">Awaiting Upload</div>`}</div></div>
+                <!-- PAGE 3: PROPERTY ELEVATIONS -->
+                <div style="page-break-before: always; height: 1123px; width: 794px; background: white; padding: 50px; box-sizing: border-box; font-family: sans-serif;">
+                    <h2 style="font-size: 30px; font-weight: 900; color: #111; text-transform: uppercase; border-bottom: 4px solid ${brandData.theme}; padding-bottom: 10px; margin-bottom: 30px; display: inline-block;">Property Elevations</h2>
+                    <div style="width: 100%;">
+                        <div style="width: 48%; display: inline-block; vertical-align: top; margin-bottom: 30px;">
+                            <p style="font-size: 10px; font-weight: bold; color: #666; text-transform: uppercase; margin: 0 0 5px 0;">Front Elevation</p>
+                            <div style="width: 100%; height: 350px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                                ${data.media?.front ? `<img src="${data.media.front}" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">` : `<div style="text-align: center; line-height: 350px; color: #999; font-size: 12px;">Awaiting Upload</div>`}
+                            </div>
+                        </div>
+                        <div style="width: 48%; display: inline-block; vertical-align: top; margin-bottom: 30px; margin-left: 3%;">
+                            <p style="font-size: 10px; font-weight: bold; color: #666; text-transform: uppercase; margin: 0 0 5px 0;">Side Elevation</p>
+                            <div style="width: 100%; height: 350px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                                ${data.media?.side ? `<img src="${data.media.side}" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">` : `<div style="text-align: center; line-height: 350px; color: #999; font-size: 12px;">Awaiting Upload</div>`}
+                            </div>
+                        </div>
+                        <div style="width: 48%; display: inline-block; vertical-align: top;">
+                            <p style="font-size: 10px; font-weight: bold; color: ${brandData.theme}; text-transform: uppercase; margin: 0 0 5px 0;">Rear Elevation (Primary Focus)</p>
+                            <div style="width: 100%; height: 350px; background: #f9f9f9; border: 2px solid ${brandData.theme}; border-radius: 8px; overflow: hidden;">
+                                ${data.media?.rear ? `<img src="${data.media.rear}" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">` : `<div style="text-align: center; line-height: 350px; color: #999; font-size: 12px;">Awaiting Upload</div>`}
+                            </div>
+                        </div>
+                        <div style="width: 48%; display: inline-block; vertical-align: top; margin-left: 3%;">
+                            <p style="font-size: 10px; font-weight: bold; color: #238636; text-transform: uppercase; margin: 0 0 5px 0;">Designer Sketch / Measurements</p>
+                            <div style="width: 100%; height: 350px; background: white; border: 2px solid #238636; border-radius: 8px; overflow: hidden;">
+                                ${data.media?.sketch ? `<img src="${data.media.sketch}" style="width: 100%; height: 100%; object-fit: contain;" crossorigin="anonymous">` : `<div style="text-align: center; line-height: 350px; color: #999; font-size: 12px;">Awaiting Upload</div>`}
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -336,9 +391,15 @@ if (btnDownload) {
             const generateGallery = (title, urls) => {
                 if (!urls || urls.length === 0) return '';
                 let html = '';
-                for (let i = 0; i < urls.length; i += 6) {
-                    html += `<div class="h-[1123px] w-[794px] bg-white p-12 flex flex-col" style="page-break-before: always;"><h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-8 pb-4 border-b-4 inline-block" style="border-color: ${brandData.theme};">${title} ${urls.length > 6 ? `(Part ${Math.floor(i/6)+1})` : ''}</h2><div class="grid grid-cols-2 gap-6 flex-grow">`;
-                    urls.slice(i, i + 6).forEach(url => { html += `<div class="relative w-full h-0 pb-[75%] bg-gray-100 rounded-xl overflow-hidden border border-gray-300 shadow-sm"><img src="${url}" class="absolute inset-0 w-full h-full object-cover" crossorigin="anonymous"></div>`; });
+                for (let i = 0; i < urls.length; i += 4) { // 4 per page to prevent image overlap
+                    html += `<div style="page-break-before: always; height: 1123px; width: 794px; background: white; padding: 50px; box-sizing: border-box; font-family: sans-serif;">
+                                <h2 style="font-size: 30px; font-weight: 900; color: #111; text-transform: uppercase; border-bottom: 4px solid ${brandData.theme}; padding-bottom: 10px; margin-bottom: 30px; display: inline-block;">${title} ${urls.length > 4 ? `(Part ${Math.floor(i/4)+1})` : ''}</h2>
+                                <div style="width: 100%;">`;
+                    urls.slice(i, i + 4).forEach((url, index) => { 
+                        html += `<div style="width: 48%; height: 400px; display: inline-block; background: #eee; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; margin-bottom: 20px; ${index % 2 !== 0 ? 'margin-left: 3%;' : ''}">
+                                    <img src="${url}" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
+                                 </div>`; 
+                    });
                     html += `</div></div>`;
                 } return html;
             };
@@ -353,8 +414,11 @@ if (btnDownload) {
             pdfContainer.style.display = 'block';
 
             await html2pdf().set({
-                margin: 0, filename: `${data.customerProfile?.leadName?.replace(/\s+/g, '_') || 'Project'}_Master_Report.pdf`,
-                image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                margin: 0, 
+                filename: `${data.customerProfile?.leadName?.replace(/\s+/g, '_') || 'Project'}_Master_Report.pdf`,
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             }).from(pdfContainer).save();
             
             pdfContainer.innerHTML = ''; pdfContainer.style.display = 'none';
