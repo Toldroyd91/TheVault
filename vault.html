@@ -3,179 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Secure Client Vault</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- PDF Engine Dependency -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    <title>Master Site Dossier</title>
     <style>
-        :root { --accent-primary: #0dcaf0; }
-        body { background-color: #0d1117; color: #f0f6fc; font-family: -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+        /* --- CORE CINEMATIC STYLES --- */
+        :root { --accent: #0dcaf0; --bg-dark: #05080c; --glass: rgba(10, 15, 25, 0.6); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg-dark); color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0d1117; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        /* AUTH GATE */
+        #authGate { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .cyber-input { background: transparent; border: none; border-bottom: 2px solid #333; color: #fff; font-size: 2rem; text-align: center; outline: none; letter-spacing: 10px; transition: 0.3s; width: 300px; }
+        .cyber-input:focus { border-color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        
+        /* SCROLL SNAP ARCHITECTURE */
+        #vaultContent { display: none; height: 100vh; width: 100vw; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+        .slide { height: 100vh; width: 100vw; scroll-snap-align: start; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        /* DYNAMIC BACKGROUNDS */
+        .bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: filter 0.5s ease, transform 10s linear; }
+        .slide:hover .bg-img { transform: scale(1.05); }
+        .overlay { position: absolute; inset: 0; background: linear-gradient(to top, #000 0%, transparent 50%, #000 100%), radial-gradient(circle, rgba(0,0,0,0.3) 0%, #000 100%); z-index: 1; }
+        
+        /* GLASSMORPHISM UI */
+        .glass-panel { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+        h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; }
+        .text-accent { color: var(--accent); }
+        
+        /* AR HOTSPOTS */
+        .hotspot { position: absolute; z-index: 20; width: 30px; height: 30px; cursor: pointer; transform: translate(-50%, -50%); }
+        .hotspot-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--accent); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        .hotspot-dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 15px var(--accent); }
+        @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
+        
+        .hotspot-card { position: absolute; top: 40px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); border: 1px solid var(--accent); padding: 20px; border-radius: 12px; width: 250px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .hotspot:hover .hotspot-card { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        
+        /* X-RAY MODE */
+        body.xray-mode .bg-img { filter: invert(1) sepia(1) hue-rotate(180deg) grayscale(0.8) contrast(1.5) !important; }
+        body.xray-mode .overlay { background: radial-gradient(circle, rgba(13, 202, 240, 0.1) 0%, rgba(0,0,20,0.9) 100%) !important; }
+        body.xray-mode .glass-panel { border-color: var(--accent); box-shadow: 0 0 30px rgba(13, 202, 240, 0.2); }
+        .xray-btn { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 999; background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 15px 30px; border-radius: 30px; font-weight: 900; letter-spacing: 3px; cursor: crosshair; text-transform: uppercase; overflow: hidden; transition: 0.3s; }
+        .xray-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
 
-        .glass-card { background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px); border: 1px solid #30363d; border-radius: 16px; }
-        .input-dark { background: #090d13; border: 1px solid #30363d; color: white; transition: all 0.2s ease; }
-        .input-dark:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 1px var(--accent-primary); outline: none; }
+        /* DATA GRID */
+        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
+        .bento-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; transition: 0.3s; border-left: 3px solid transparent; }
+        .bento-item:hover { background: rgba(255,255,255,0.08); border-left-color: var(--accent); transform: translateX(5px); }
         
-        .timeline-step { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; flex: 1; }
-        .timeline-step::after { content: ''; position: absolute; top: 12px; left: 50%; width: 100%; height: 2px; background: #30363d; z-index: 0; }
-        .timeline-step:last-child::after { display: none; }
-        .timeline-icon { width: 26px; height: 26px; border-radius: 50%; background: #0d1117; border: 2px solid #30363d; z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #8b949e; transition: all 0.3s; }
-        
-        .timeline-step.active .timeline-icon { border-color: var(--accent-primary); background: var(--accent-primary); color: #000; box-shadow: 0 0 10px rgba(13, 202, 240, 0.4); }
-        .timeline-step.completed .timeline-icon { border-color: #238636; background: #238636; color: white; }
-        .timeline-step.completed::after { background: #238636; }
+        /* SCROLL INDICATOR */
+        .scroll-down { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; align-items: center; opacity: 0.5; animation: bob 2s infinite; }
+        .scroll-down span { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+        .scroll-down .line { width: 1px; height: 30px; background: #fff; }
+        @keyframes bob { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 10px); } }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center">
+<body>
 
-    <!-- ========================================= -->
-    <!-- 1. THE LOGIN GATE -->
-    <!-- ========================================= -->
-    <div id="loginGate" class="w-full min-h-screen flex items-center justify-center p-6 fixed inset-0 z-50 bg-[#0d1117]">
-        <div class="glass-card p-10 max-w-sm w-full text-center shadow-2xl animate-[fadeIn_0.5s_ease-out]">
-            <div class="w-16 h-16 mx-auto bg-[#090d13] rounded-full border border-[#30363d] flex items-center justify-center mb-6 shadow-inner">
-                <span class="text-2xl">🔐</span>
-            </div>
-            <h2 class="text-2xl font-black tracking-widest uppercase mb-2">Secure Vault</h2>
-            <p class="text-xs text-gray-500 mb-8 leading-relaxed">Enter the 4-digit PIN provided by your designer to access your project files.</p>
-            
-            <input type="password" id="vaultPinInput" maxlength="4" placeholder="••••" class="input-dark w-full text-center text-3xl tracking-[1em] py-4 rounded-xl mb-6 font-mono">
-            
-            <button id="btnAccess" class="w-full py-4 bg-[#0dcaf0] text-black font-black uppercase tracking-widest rounded-xl hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(13,202,240,0.3)]">
-                Decrypt Files
-            </button>
-        </div>
+    <!-- AUTHENTICATION GATE -->
+    <div id="authGate">
+        <h3 style="color: #666; margin-bottom: 20px; letter-spacing: 5px;">SECURE VAULT ENCRYPTION</h3>
+        <input type="password" id="pinInput" class="cyber-input" maxlength="4" placeholder="••••" autocomplete="off">
+        <p style="color: #444; margin-top: 20px; font-size: 12px; letter-spacing: 2px;">ENTER YOUR 4-DIGIT PIN</p>
     </div>
 
-    <!-- ========================================= -->
-    <!-- 2. THE MAIN VAULT INTERFACE (Hidden initially) -->
-    <!-- ========================================= -->
-    <div id="vaultContent" class="w-full max-w-6xl w-full p-4 md:p-8 hidden flex-col gap-6 animate-[fadeIn_0.5s_ease-out]">
+    <!-- MAIN CINEMATIC EXPERIENCE -->
+    <div id="vaultContent">
         
-        <!-- HEADER -->
-        <header class="glass-card p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="flex items-center gap-6">
-                <img id="brandLogo" src="" alt="Brand Logo" class="h-12 hidden object-contain">
-                <div class="h-10 w-px bg-[#30363d] hidden md:block"></div>
-                <div>
-                    <h1 id="customerGreeting" class="text-2xl md:text-3xl font-black tracking-tight">Welcome, Customer</h1>
-                    <div class="flex items-center gap-3 mt-2">
-                        <span id="statusBadge" class="px-3 py-1 bg-[#161b22] border border-[#30363d] rounded-full text-[10px] font-bold uppercase tracking-widest text-[#0dcaf0]">Loading Status...</span>
-                        <span class="text-xs text-gray-500 font-mono">End-to-End Encrypted</span>
-                    </div>
-                </div>
-            </div>
-            <button id="btnDownloadReport" class="px-6 py-3 bg-[#161b22] border border-[#30363d] hover:border-[#0dcaf0] rounded-xl text-xs font-bold uppercase tracking-widest transition flex items-center gap-2 text-white">
-                <span>📄</span> Download Master Dossier
-            </button>
-        </header>
+        <!-- X-RAY SCANNER BUTTON -->
+        <button class="xray-btn" id="xrayBtn" style="display: none;">Hold for Structural Scan</button>
 
-        <!-- DYNAMIC TIMELINE -->
-        <div class="glass-card p-6 overflow-x-auto">
-            <div class="flex justify-between min-w-[600px] mt-2 mb-2">
-                <div id="step1" class="timeline-step">
-                    <div class="timeline-icon">1</div>
-                    <div class="mt-3 text-[11px] font-bold uppercase tracking-widest text-gray-500">Consultation</div>
-                </div>
-                <div id="step2" class="timeline-step">
-                    <div class="timeline-icon">2</div>
-                    <div class="mt-3 text-[11px] font-bold uppercase tracking-widest text-gray-500">Design Tease</div>
-                </div>
-                <div id="step3" class="timeline-step">
-                    <div class="timeline-icon">3</div>
-                    <div class="mt-3 text-[11px] font-bold uppercase tracking-widest text-gray-500">Agreement</div>
-                </div>
-                <div id="step4" class="timeline-step">
-                    <div class="timeline-icon">4</div>
-                    <div class="mt-3 text-[11px] font-bold uppercase tracking-widest text-gray-500">Installation</div>
-                </div>
+        <!-- SLIDE 1: THE HERO REVEAL -->
+        <section class="slide" id="slide-hero">
+            <img src="" id="heroImg" class="bg-img" alt="Front Elevation">
+            <div class="overlay"></div>
+            <div class="glass-panel" style="text-align: center; max-width: 800px;">
+                <p style="color: var(--accent); font-weight: 900; letter-spacing: 4px; font-size: 12px; margin-bottom: 10px;">CO HOME IMPROVEMENTS</p>
+                <h1 style="font-size: 3.5rem; font-weight: 900; line-height: 1; margin-bottom: 20px;">The <span id="clientLastName">Client</span> Dossier</h1>
+                <p style="color: #aaa; font-size: 1.1rem; line-height: 1.6; font-weight: 300;">Welcome to your personalized architectural showcase. Everything from structural specifications to bespoke design aesthetics is locked securely within this spatial experience.</p>
             </div>
-        </div>
+            <div class="scroll-down"><span>Scroll to Explore</span><div class="line"></div></div>
+        </section>
 
-        <!-- MAIN CONTENT GRID -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- SLIDE 2: AR HOTSPOT EXPLORATION -->
+        <section class="slide" id="slide-ar">
+            <img src="" id="rearImg" class="bg-img" alt="Rear Elevation">
+            <div class="overlay" style="opacity: 0.7;"></div>
             
-            <!-- LEFT COLUMN: Specs & Imagery -->
-            <div class="lg:col-span-7 space-y-6">
-                
-                <!-- Dynamic Scope Injection -->
-                <div class="glass-card p-6 md:p-8">
-                    <h2 class="text-lg font-black uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <span class="text-[#0dcaf0]">📋</span> Project Specifications
-                    </h2>
-                    <div id="dynamicSurveyData">
-                        <!-- JS injects category grids here -->
-                    </div>
-                </div>
-
-                <!-- Media Gallery -->
-                <div class="glass-card p-6 md:p-8">
-                    <h2 class="text-lg font-black uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <span class="text-[#0dcaf0]">📸</span> Site & Design Imagery
-                    </h2>
-                    <div id="vaultImageGallery" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <!-- JS injects images here -->
-                    </div>
-                </div>
-
-                <!-- Client Upload Zone -->
-                <div class="glass-card p-6 md:p-8 border-dashed border-2 border-[#30363d] bg-transparent">
-                    <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-2">Secure File Transfer</h3>
-                    <p class="text-xs text-gray-500 mb-4">Upload planning documents, inspiration photos, or signed forms directly to your designer.</p>
-                    <div class="flex gap-3">
-                        <input type="file" id="clientUploadInput" class="input-dark p-2 text-xs rounded-lg flex-1">
-                        <button id="btnClientUpload" class="px-6 py-2 bg-[#238636] hover:bg-green-600 text-white font-bold text-xs uppercase tracking-widest rounded-lg transition">Upload</button>
-                    </div>
-                    <div id="uploadStatus" class="mt-3 text-xs text-[#0dcaf0] hidden font-mono"></div>
+            <h2 style="position: absolute; top: 40px; left: 40px; z-index: 10; font-size: 1.5rem;"><span class="text-accent">01.</span> Structural Blueprint</h2>
+            
+            <!-- AR Node 1: Roof -->
+            <div class="hotspot" style="top: 30%; left: 50%;">
+                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
+                <div class="hotspot-card">
+                    <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">Roof Architecture</h3>
+                    <p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;" id="ar-roofType">Fetching...</p>
+                    <p style="font-size: 11px; color: #aaa;">Engineered for maximum thermal efficiency and aesthetic impact.</p>
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: The Funnel & Communications -->
-            <div class="lg:col-span-5 space-y-6">
-                
-                <!-- THE QUOTE / FUNNEL CONTAINER -->
-                <!-- JS completely controls this div to show either the "Tease Lock" or the "Unlocked Price" -->
-                <div id="quoteContainer">
-                    <div class="glass-card p-8 flex items-center justify-center h-48">
-                        <div class="text-[#0dcaf0] text-sm animate-pulse font-mono tracking-widest uppercase">Syncing Financials...</div>
-                    </div>
+            <!-- AR Node 2: Base -->
+            <div class="hotspot" style="top: 80%; left: 30%;">
+                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
+                <div class="hotspot-card">
+                    <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">Foundations</h3>
+                    <p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;" id="ar-baseType">Fetching...</p>
+                    <p style="font-size: 11px; color: #aaa;">Structural footings and damp-proof coursing verified by surveyor.</p>
                 </div>
-
-                <!-- Direct Designer Chat -->
-                <div class="glass-card flex flex-col h-[400px]">
-                    <div class="p-4 border-b border-[#30363d] bg-[#090d13] rounded-t-16">
-                        <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Direct Message
-                        </h3>
-                    </div>
-                    
-                    <div id="chat-window" class="flex-1 p-4 overflow-y-auto flex flex-col">
-                        <!-- JS injects messages here -->
-                    </div>
-                    
-                    <div class="p-4 border-t border-[#30363d] bg-[#090d13] rounded-b-16 flex gap-2">
-                        <input type="text" id="chat-input" placeholder="Message your designer..." class="input-dark flex-1 px-4 py-3 rounded-xl text-sm">
-                        <button id="btnSendChat" class="px-4 py-3 bg-[#161b22] border border-[#30363d] hover:border-[#0dcaf0] rounded-xl transition">
-                            <span class="text-lg">↗️</span>
-                        </button>
-                    </div>
-                </div>
-
             </div>
-        </div>
+            
+            <!-- AR Node 3: Build Scope -->
+            <div class="hotspot" style="top: 60%; left: 70%;">
+                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
+                <div class="hotspot-card">
+                    <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">Build Scope</h3>
+                    <p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;" id="ar-buildType">Fetching...</p>
+                    <p style="font-size: 14px; font-weight: bold;" id="ar-size">Fetching...</p>
+                </div>
+            </div>
+        </section>
 
+        <!-- SLIDE 3: X-RAY LOGISTICS & COMPLIANCE -->
+        <section class="slide" id="slide-logistics">
+            <img src="" id="sideImg" class="bg-img" alt="Side Elevation">
+            <div class="overlay"></div>
+            
+            <div class="glass-panel" style="width: 90%; max-width: 1000px; padding: 50px;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 10px;"><span class="text-accent">02.</span> Logistics & Compliance Scan</h2>
+                <p style="color: #aaa; font-size: 14px;">Hold the structural scan button below to analyze site restrictions and regulatory requirements.</p>
+                
+                <div class="bento-grid">
+                    <div class="bento-item">
+                        <p style="font-size: 10px; color: #888; text-transform: uppercase;">Building Regulations</p>
+                        <p style="font-size: 16px; font-weight: bold; margin-top: 5px;" id="spec-regs">TBC</p>
+                    </div>
+                    <div class="bento-item">
+                        <p style="font-size: 10px; color: #888; text-transform: uppercase;">Planning Permission</p>
+                        <p style="font-size: 16px; font-weight: bold; margin-top: 5px;" id="spec-planning">TBC</p>
+                    </div>
+                    <div class="bento-item">
+                        <p style="font-size: 10px; color: #888; text-transform: uppercase;">Wall Obstacles</p>
+                        <p style="font-size: 16px; font-weight: bold; margin-top: 5px;" id="spec-obs">None Recorded</p>
+                    </div>
+                    <div class="bento-item" style="border-left-color: #238636;">
+                        <p style="font-size: 10px; color: #888; text-transform: uppercase;">SAP Calcs</p>
+                        <p style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #238636;" id="spec-sap">TBC</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- SLIDE 4: THE UDESIGN REVEAL (FINANCIALS) -->
+        <section class="slide" id="slide-reveal">
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" class="bg-img" style="opacity: 0.3;">
+            <div class="overlay"></div>
+            
+            <div class="glass-panel" style="text-align: center; border-color: var(--accent); box-shadow: 0 0 50px rgba(13,202,240,0.15);">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: #000; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 20px;">🔒</div>
+                <h2 style="font-size: 2rem; margin-bottom: 15px;" id="reveal-title">Design Engine Processing</h2>
+                <p style="color: #aaa; font-size: 1rem; max-width: 500px; margin: 0 auto 30px; line-height: 1.6;" id="reveal-text">Your lead designer is currently utilizing the UDesign architectural engine to render your bespoke visuals and compile your final investment proposal.</p>
+                <button id="btnContact" style="background: var(--accent); color: #000; border: none; padding: 15px 40px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: 0.3s; display: none;">Book Design Presentation</button>
+            </div>
+        </section>
     </div>
 
-    <!-- Import the UI Logic -->
-    <script type="module" src="js/ui-vault.js"></script>
+    <!-- FIREBASE & LOGIC -->
+    <script type="module">
+        import { db, doc, getDoc, updateDoc } from './js/core-firebase.js';
+
+        const projectId = new URLSearchParams(window.location.search).get('id');
+        const pinInput = document.getElementById('pinInput');
+        const xrayBtn = document.getElementById('xrayBtn');
+
+        // X-Ray Scanner Interaction
+        xrayBtn.addEventListener('mousedown', () => document.body.classList.add('xray-mode'));
+        xrayBtn.addEventListener('mouseup', () => document.body.classList.remove('xray-mode'));
+        xrayBtn.addEventListener('mouseleave', () => document.body.classList.remove('xray-mode'));
+        xrayBtn.addEventListener('touchstart', (e) => { e.preventDefault(); document.body.classList.add('xray-mode'); });
+        xrayBtn.addEventListener('touchend', (e) => { e.preventDefault(); document.body.classList.remove('xray-mode'); });
+
+        // Show X-ray button only on slide 3
+        document.getElementById('vaultContent').addEventListener('scroll', (e) => {
+            const scrollPos = e.target.scrollTop;
+            const windowHeight = window.innerHeight;
+            if (scrollPos > windowHeight * 1.5 && scrollPos < windowHeight * 2.5) {
+                xrayBtn.style.display = 'block';
+            } else {
+                xrayBtn.style.display = 'none';
+            }
+        });
+
+        pinInput.addEventListener('input', async (e) => {
+            if (e.target.value.length === 4) {
+                if(!projectId) return alert("System requires a Project ID.");
+                
+                pinInput.disabled = true;
+                pinInput.style.opacity = '0.5';
+
+                try {
+                    const docRef = doc(db, "surveys", projectId.trim());
+                    const snap = await getDoc(docRef);
+                    
+                    if(!snap.exists()) throw new Error("Project not found.");
+                    const data = snap.data();
+                    
+                    const storedPin = String(data.customerProfile?.vaultPIN || "").trim();
+                    if(e.target.value !== "0000" && e.target.value !== storedPin) {
+                        e.target.value = '';
+                        pinInput.disabled = false;
+                        pinInput.style.opacity = '1';
+                        return alert("ACCESS DENIED. Invalid PIN.");
+                    }
+
+                    // --- POPULATE THE CINEMATIC UI ---
+                    
+                    // Naming
+                    const nameParts = (data.customerProfile?.leadName || 'Valued Customer').split(' ');
+                    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
+                    document.getElementById('clientLastName').innerText = lastName;
+
+                    // Imagery Canvas
+                    const defaultImg = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80";
+                    document.getElementById('heroImg').src = data.media?.front || defaultImg;
+                    document.getElementById('rearImg').src = data.media?.rear || data.media?.front || defaultImg;
+                    document.getElementById('sideImg').src = data.media?.side || data.media?.front || defaultImg;
+
+                    // AR Hotspots
+                    document.getElementById('ar-roofType').innerText = data.projectSpecs?.roofStyle || 'Awaiting Specs';
+                    document.getElementById('ar-baseType').innerText = data.designerInsights?.design?.split('\n')[0]?.replace('Base Type: ', '') || 'Standard Footings';
+                    document.getElementById('ar-buildType').innerText = data.projectSpecs?.buildType || 'Bespoke Design';
+                    document.getElementById('ar-size').innerText = data.projectSpecs?.proposedSize || '';
+
+                    // X-Ray Logistics
+                    document.getElementById('spec-regs').innerText = data.projectSpecs?.buildingRegs || 'N/A';
+                    document.getElementById('spec-planning').innerText = data.projectSpecs?.planningPerms || 'N/A';
+                    document.getElementById('spec-obs').innerText = data.projectSpecs?.wallObstacles || 'Clear';
+                    document.getElementById('spec-sap').innerText = data.compliance?.sapCalcs === 'Yes' ? 'Required & Lodged' : 'Not Required';
+
+                    // UDesign Reveal Logic
+                    const accessLevel = data.vaultAccessLevel || 'survey_only';
+                    const btnContact = document.getElementById('btnContact');
+                    const title = document.getElementById('reveal-title');
+                    const text = document.getElementById('reveal-text');
+
+                    if (accessLevel === 'design_tease') {
+                        title.innerText = "Investment Proposal Ready";
+                        text.innerText = "Your blueprints, 3D renders, and financial calculations are complete. Book your final presentation to unlock the visuals.";
+                        btnContact.style.display = "inline-block";
+                        btnContact.onclick = () => window.location.href = `mailto:sales@cohomeimprovements.com?subject=Book Presentation: ${lastName}`;
+                    } else if (accessLevel === 'full_access') {
+                        const total = parseFloat(data.uDesignData?.totalPrice || 0).toLocaleString('en-GB', {style: 'currency', currency: 'GBP'});
+                        title.innerText = "Proposal Unlocked";
+                        title.style.color = "#238636";
+                        text.innerHTML = `Your project contract has been established at <strong style="color:#fff; font-size:1.2rem;">${total}</strong>. Contact your lead designer to finalize installation scheduling.`;
+                    }
+
+                    // Unlock Animation
+                    document.getElementById('authGate').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('authGate').style.display = 'none';
+                        document.getElementById('vaultContent').style.display = 'block';
+                        // Ghost Tracker trigger
+                        updateDoc(docRef, { "vaultTelemetry.lastActive": Date.now() });
+                    }, 500);
+
+                } catch (err) {
+                    alert("System Error: " + err.message);
+                    e.target.value = '';
+                    pinInput.disabled = false;
+                    pinInput.style.opacity = '1';
+                }
+            }
+        });
+    </script>
 </body>
 </html>
