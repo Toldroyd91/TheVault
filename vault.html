@@ -24,9 +24,6 @@
         .slide:hover .bg-img { transform: scale(1.03); }
         .overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.98) 100%), radial-gradient(circle, transparent 10%, rgba(0,0,0,0.9) 100%); z-index: 1; pointer-events: none;}
         
-        /* LIVE MAP STYLING */
-        .map-container { position: absolute; inset: 0; z-index: 0; opacity: 0.4; filter: invert(1) hue-rotate(180deg) grayscale(0.8) contrast(1.2); pointer-events: none; }
-        
         /* PIPELINE TRACKER */
         .pipeline-bar { position: fixed; top: 0; left: 0; width: 100%; z-index: 9000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 5vw; display: flex; justify-content: space-between; align-items: center; }
         .step-container { display: flex; align-items: center; gap: 15px; width: 100%; }
@@ -48,33 +45,24 @@
         h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; }
         .text-accent { color: var(--accent); }
         
-        .info-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid var(--accent); padding: 25px; border-radius: 12px; transition: 0.3s; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .info-card:hover { background: rgba(255,255,255,0.05); transform: translateX(5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .info-title { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .info-value { font-size: 18px; font-weight: bold; color: #fff; }
-        .info-desc { font-size: 13px; color: #aaa; line-height: 1.5; margin-top: 5px; }
-
-        /* AR BLUEPRINT */
-        #blueprint-container { position: relative; width: 85vw; max-width: 900px; height: 60vh; z-index: 10; display: flex; align-items: center; justify-content: center; margin-top: 20px; }
-        #blueprint-img { max-width: 100%; max-height: 100%; object-fit: contain; filter: invert(1) opacity(0.7); transition: 0.5s; }
-        .hotspot { position: absolute; z-index: 20; width: 40px; height: 40px; cursor: pointer; transform: translate(-50%, -50%); }
-        .hotspot-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--accent); animation: ping 2s infinite; }
-        .hotspot-dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: var(--accent); border-radius: 50%; }
-        .hotspot-card { position: absolute; top: 50px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; background: rgba(5,8,12,0.98); border: 1px solid var(--accent); padding: 25px; border-radius: 12px; width: 320px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 15px 40px rgba(0,0,0,0.9); z-index: 100; }
-        .hotspot:hover .hotspot-card { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-        
-        @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
+        /* DATA GRIDS */
+        .data-section { margin-bottom: 30px; }
+        .data-section-title { font-size: 14px; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 15px; }
+        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .bento-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; transition: 0.3s; }
+        .bento-item:hover { background: rgba(255,255,255,0.06); border-color: var(--accent); }
+        .bento-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .bento-val { font-size: 15px; font-weight: bold; color: #fff; }
 
         /* GALLERY & SKETCHES */
         .gallery-wrapper { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; scroll-snap-type: x mandatory; }
         .gallery-wrapper::-webkit-scrollbar { height: 6px; }
         .gallery-wrapper::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-        .gallery-img-container { position: relative; min-width: 300px; height: 200px; scroll-snap-align: center; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
-        .gallery-img-container img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .gallery-img-container:hover img { transform: scale(1.08); filter: brightness(1.2); }
-        .img-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--accent); font-weight: bold; letter-spacing: 1px; backdrop-filter: blur(5px); }
+        .gallery-img-container { position: relative; min-width: 300px; height: 200px; scroll-snap-align: center; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .gallery-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .img-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); padding: 10px; font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: bold; }
 
-        .sniper-container { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--accent); box-shadow: 0 10px 20px rgba(13,202,240,0.2); position: relative; }
+        .sniper-container { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--accent); box-shadow: 0 10px 20px rgba(13,202,240,0.2); position: relative; margin-bottom: 20px; }
         .sniper-container img { width: 100%; height: auto; display: block; }
         .sniper-tag { position: absolute; top: 10px; left: 10px; background: var(--accent); color: #000; padding: 5px 10px; font-size: 10px; font-weight: bold; text-transform: uppercase; border-radius: 4px; }
     </style>
@@ -91,7 +79,7 @@
     <div class="pipeline-bar">
         <div class="step-container">
             <div class="step completed"><div class="step-dot">✓</div><div class="step-label">Consultation</div></div>
-            <div class="step completed"><div class="step-dot">✓</div><div class="step-label">Technical Survey</div></div>
+            <div class="step completed"><div class="step-dot">✓</div><div class="step-label">New Survey</div></div>
             <div class="step active"><div class="step-dot">3</div><div class="step-label">Design & Analysis</div></div>
             <div class="step"><div class="step-dot">4</div><div class="step-label">Procurement</div></div>
             <div class="step"><div class="step-dot">5</div><div class="step-label">Installation</div></div>
@@ -105,144 +93,121 @@
             <img src="" id="heroImg" class="bg-img" alt="Hero">
             <div class="overlay"></div>
             <div class="glass-panel" style="text-align: center; max-width: 900px; width: 90%;">
-                <p style="color: var(--accent); font-weight: 900; letter-spacing: 4px; font-size: 12px; margin-bottom: 20px;">CO HOME IMPROVEMENTS</p>
-                <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">The <span id="clientName">Steve</span> Dossier</h1>
-                <p style="color: var(--accent); font-size: 16px; letter-spacing: 3px; font-weight: bold; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 30px;" id="clientPostcode">Location Pending</p>
-                <p style="color: #bbb; font-size: 1.2rem; line-height: 1.8; font-weight: 300;">Welcome to your personalized architectural showcase. We do not guess. Everything from your local wind exposure to your property's precise damp-proof coursing has been meticulously engineered into this bespoke proposal.</p>
-            </div>
-        </section>
-
-        <!-- 02. ENVIRONMENTAL INTELLIGENCE (Live Map API) -->
-        <section class="slide">
-            <!-- LIVE OPENSTREETMAP IFRAME (Injected via JS) -->
-            <div id="liveMapContainer" class="map-container"></div>
-            
-            <div class="overlay"></div>
-            <div class="glass-panel" style="width: 85vw; max-width: 1200px;">
-                <h2 style="font-size: 2.5rem; margin-bottom: 15px;"><span class="text-accent">01.</span> Environmental Intelligence</h2>
-                <p style="color: #aaa; margin-bottom: 40px; font-size: 15px; max-width: 800px; line-height: 1.6;">Our pre-commencement team utilizes live topographical mapping. We tailor your structural engineering based on the specific geographical demands of your location.</p>
+                <p style="color: var(--accent); font-weight: 900; letter-spacing: 4px; font-size: 12px; margin-bottom: 20px;" id="val-brand">CO HOME IMPROVEMENTS</p>
+                <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">The <span id="val-lastName">Client</span> Dossier</h1>
+                <p style="color: var(--accent); font-size: 16px; letter-spacing: 3px; font-weight: bold; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 30px;" id="val-postcode">Location Pending</p>
                 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <div class="info-card">
-                        <span class="info-title">Local Authority Compliance</span>
-                        <span class="info-value" id="env-borough">Fetching District...</span>
-                        <span class="info-desc">Different councils enforce unique regulatory nuances. We verify requirements directly with your local authority to ensure rapid, frictionless planning clearance.</span>
-                    </div>
-                    <div class="info-card">
-                        <span class="info-title">Topographical Elevation</span>
-                        <span class="info-value" id="env-elevation">Calculating...</span>
-                        <span class="info-desc">Height above sea level directly impacts weather exposure. We use this metric to specify the correct cavity trays, damp proofing, and external render tolerances for your home.</span>
-                    </div>
-                    <div class="info-card">
-                        <span class="info-title">Live Wind Loading</span>
-                        <span class="info-value" id="env-wind">Scanning...</span>
-                        <span class="info-desc">A critical metric for structural integrity. By calculating prevailing wind forces, we specify heavy-duty roof tie-downs and reinforced glazing where necessary to ensure lifetime durability.</span>
-                    </div>
+                <div style="display: flex; justify-content: center; gap: 30px; color: #aaa; font-size: 12px; text-transform: uppercase;">
+                    <div>Cust No: <strong style="color: #fff;" id="val-custNum">TBC</strong></div>
+                    <div>Consultation: <strong style="color: #fff;" id="val-appt">TBC</strong></div>
+                    <div>Revisit: <strong style="color: #fff;" id="val-revisit">TBC</strong></div>
                 </div>
             </div>
         </section>
 
-        <!-- 03. AR BLUEPRINT & EXPERT INSIGHTS -->
-        <section class="slide">
+        <!-- 02. MASTER DATA MANIFEST -->
+        <section class="slide" style="align-items: flex-start; padding-top: 120px;">
             <div class="overlay" style="background: radial-gradient(circle, rgba(13,202,240,0.05) 0%, #05080c 100%);"></div>
-            <h2 style="position: absolute; top: 12vh; left: 5vw; z-index: 10; font-size: 2rem;"><span class="text-accent">02.</span> Structural Blueprint</h2>
-            <p style="position: absolute; top: 17vh; left: 5vw; z-index: 10; color: #888; font-size: 13px;">Hover over pulsing nodes to reveal the engineering logic applied to your property.</p>
             
-            <div id="blueprint-container">
-                <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" id="blueprint-img">
-                <div id="ar-hotspots-wrapper">
-                    <!-- Standard Lean-To Example mapping -->
-                    <div class="hotspot" style="top: 25%; left: 45%;">
-                        <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
-                        <div class="hotspot-card">
-                            <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 10px;">Thermal Roof Dynamics</h3>
-                            <p style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px;" id="ar-roof">Livin Roof</p>
-                            <p style="font-size: 13px; color: #aaa; line-height: 1.5;">This profile was selected to maximize ambient light while providing industry-leading U-Values. It prevents the "too hot in summer, too cold in winter" phenomenon common in standard builds.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="hotspot" style="top: 65%; left: 75%;">
-                        <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
-                        <div class="hotspot-card">
-                            <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 10px;">Masonry & Cavity Protocol</h3>
-                            <p style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px;" id="ar-walls">Standard Brick Match</p>
-                            <p style="font-size: 13px; color: #aaa; line-height: 1.5;">Our surveyors identified your existing exterior finish. We source matching materials to ensure the new extension looks like a natural, original part of the property.</p>
-                        </div>
-                    </div>
-
-                    <div class="hotspot" style="top: 85%; left: 45%;">
-                        <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
-                        <div class="hotspot-card">
-                            <h3 style="font-size: 12px; color: var(--accent); margin-bottom: 10px;">Moisture Defense & Load Bearing</h3>
-                            <p style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px;" id="ar-dpc">DPC Depth: 150mm</p>
-                            <p style="font-size: 13px; color: #aaa; line-height: 1.5;">We mapped your Damp Proof Course to bridge the gap between your home and the new base. Proper depth specification prevents rising damp and guarantees structural settling.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 04. METICULOUS SURVEY DEEPDIVE & SNIPER SKETCHES -->
-        <section class="slide">
-            <img src="" id="deepdiveImg" class="bg-img" style="filter: grayscale(1) brightness(0.25);">
-            <div class="overlay"></div>
-            
-            <div class="glass-panel" style="width: 90vw; max-width: 1300px; max-height: 85vh; overflow-y: auto;">
-                <h2 style="font-size: 2.5rem; margin-bottom: 30px;"><span class="text-accent">03.</span> Meticulous Survey Deepdive</h2>
+            <div class="glass-panel" style="width: 90vw; max-width: 1400px; max-height: 80vh; overflow-y: auto;">
+                <h2 style="font-size: 2rem; margin-bottom: 30px;"><span class="text-accent">01.</span> Master Survey Manifest</h2>
                 
-                <div style="display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 40px;">
-                    <!-- Column 1: Compliance -->
-                    <div style="flex: 1; min-width: 320px;">
-                        <h3 style="color: #fff; font-size: 16px; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Design & Compliance</h3>
-                        
-                        <div class="info-card">
-                            <span class="info-title">Building Regulations</span>
-                            <span class="info-value" id="spec-regs">TBC</span>
-                            <span class="info-desc">Your build is overseen to ensure it meets strict UK Building Regulations for structural integrity and energy performance.</span>
-                        </div>
-                        <div class="info-card">
-                            <span class="info-title">Planning Permission</span>
-                            <span class="info-value" id="spec-planning">TBC</span>
-                            <span class="info-desc">If Prior Approval or Full Planning is needed, our in-house pre-commencement team handles the application entirely.</span>
-                        </div>
-                        
-                        <div style="background: rgba(0,0,0,0.5); padding: 25px; border-radius: 12px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
-                            <p style="font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold;">Lead Designer Notes</p>
-                            <p style="font-size: 14px; line-height: 1.6; color: #ccc; font-style: italic; white-space: pre-wrap;" id="designer-notes">Notes loading...</p>
-                        </div>
-                    </div>
+                <div style="display: flex; gap: 40px; flex-wrap: wrap;">
                     
-                    <!-- Column 2: Site & Sniper Markups -->
-                    <div style="flex: 1; min-width: 320px;">
-                        <h3 style="color: #fff; font-size: 16px; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Calibrated Elevations</h3>
-                        
-                        <!-- SNIPER IMAGE SHOWCASE -->
-                        <div id="sniper-box" style="display: none; margin-bottom: 20px;">
-                            <p style="font-size: 13px; color: #aaa; margin-bottom: 10px;">Your lead designer has mapped physical dimensions directly onto your property to ensure millimetric manufacturing accuracy.</p>
-                            <div class="sniper-container">
-                                <div class="sniper-tag">Surveyor Markup</div>
-                                <img id="sniper-sketch" src="" alt="Sniper Measurements">
+                    <!-- COLUMN 1: Scope & Logistics -->
+                    <div style="flex: 1; min-width: 350px;">
+                        <div class="data-section">
+                            <h3 class="data-section-title">Project Scope & Structure</h3>
+                            <div class="bento-grid">
+                                <div class="bento-item"><span class="bento-label">Build Type</span><span class="bento-val" id="val-buildType">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Proposed Size</span><span class="bento-val" id="val-size">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">House Material</span><span class="bento-val" id="val-houseMat">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Base Type</span><span class="bento-val" id="val-base">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">DPC Depth</span><span class="bento-val" id="val-dpc">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Fascia Height</span><span class="bento-val" id="val-fascia">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Air Bricks</span><span class="bento-val" id="val-air">TBC</span></div>
                             </div>
                         </div>
 
-                        <div class="info-card">
-                            <span class="info-title">Site Clearance & Obstacles</span>
-                            <span class="info-value" id="prop-obs">None Recorded</span>
-                            <span class="info-desc">By identifying boiler flues, soil pipes, and drainage early, we eliminate unexpected costs and installation delays.</span>
+                        <div class="data-section">
+                            <h3 class="data-section-title">Site Logistics & Restrictions</h3>
+                            <div class="bento-grid">
+                                <div class="bento-item"><span class="bento-label">Access Restrictions</span><span class="bento-val" id="val-accessDiff">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Access Width</span><span class="bento-val" id="val-accessWidth">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Drainage Routing</span><span class="bento-val" id="val-drainage">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Wall Obstacles</span><span class="bento-val" id="val-obs">TBC</span></div>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- COLUMN 2: Design, Compliance & Notes -->
+                    <div style="flex: 1; min-width: 350px;">
+                        <div class="data-section">
+                            <h3 class="data-section-title">Design Specification</h3>
+                            <div class="bento-grid">
+                                <div class="bento-item"><span class="bento-label">Roof System</span><span class="bento-val" id="val-roof">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Roof Pitch</span><span class="bento-val" id="val-pitch">TBC</span></div>
+                                <div class="bento-item" style="grid-column: 1 / -1;"><span class="bento-label">Frame Profile Colouring</span><span class="bento-val" id="val-frame">TBC</span></div>
+                            </div>
+                        </div>
+
+                        <div class="data-section">
+                            <h3 class="data-section-title">Compliance & Regulations</h3>
+                            <div class="bento-grid">
+                                <div class="bento-item"><span class="bento-label">Building Regs</span><span class="bento-val" id="val-regs">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">Planning Perms</span><span class="bento-val" id="val-planning">TBC</span></div>
+                                <div class="bento-item"><span class="bento-label">SAP Calcs</span><span class="bento-val" id="val-sap">TBC</span></div>
+                            </div>
+                        </div>
+
+                        <div class="data-section">
+                            <h3 class="data-section-title">Designer Insights</h3>
+                            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <p style="font-size: 13px; line-height: 1.6; color: #ccc; white-space: pre-wrap;" id="val-notes">No technical notes appended.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 03. CALIBRATED ELEVATIONS & GALLERY -->
+        <section class="slide" style="align-items: flex-start; padding-top: 120px;">
+            <div class="overlay"></div>
+            <div class="glass-panel" style="width: 90vw; max-width: 1400px; max-height: 80vh; overflow-y: auto;">
+                <h2 style="font-size: 2rem; margin-bottom: 30px;"><span class="text-accent">02.</span> Visual Site Intelligence</h2>
+
+                <div id="sniper-box" style="display: none;">
+                    <h3 class="data-section-title">Calibrated Spatial Data</h3>
+                    <div class="sniper-container">
+                        <div class="sniper-tag">Sniper Engine Output</div>
+                        <img id="val-sniper" src="" alt="Sniper Measurements">
                     </div>
                 </div>
 
-                <h3 style="color: #fff; font-size: 16px; margin-bottom: 20px;">Comprehensive Site Gallery</h3>
+                <h3 class="data-section-title">Categorized Site Photography</h3>
                 <div class="gallery-wrapper" id="labeled-gallery">
                     <!-- Images Injected via JS -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- 04. DOCUMENT LIBRARY -->
+        <section class="slide">
+            <div class="overlay" style="background: radial-gradient(circle, rgba(13,202,240,0.1) 0%, #05080c 100%);"></div>
+            <div class="glass-panel" style="width: 85vw; max-width: 900px; text-align: center;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 15px;"><span class="text-accent">03.</span> Document Library</h2>
+                <p style="color: #aaa; margin-bottom: 40px; font-size: 14px;">Review your regulatory and product documentation below.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;" id="doc-grid">
+                    <!-- Pamphlets injected here -->
                 </div>
             </div>
         </section>
 
     </div>
 
-    <!-- FIREBASE & LOGIC -->
+    <!-- FIREBASE & DATA ROUTING LOGIC -->
     <script type="module">
         import { db, doc, getDoc } from './js/core-firebase.js';
 
@@ -266,36 +231,51 @@
                         return alert("ACCESS DENIED.");
                     }
 
-                    // --- 1. POPULATE FIREBASE DATA ---
+                    // --- 1. HERO DATA ---
                     const nameParts = (data.customerProfile?.leadName || 'Valued Customer').split(' ');
-                    document.getElementById('clientName').innerText = nameParts[0].toUpperCase();
-                    
-                    const postcode = data.customerProfile?.postcode || 'S70 0PN';
-                    document.getElementById('clientPostcode').innerText = postcode;
-                    
+                    document.getElementById('val-lastName').innerText = nameParts[nameParts.length - 1].toUpperCase();
+                    document.getElementById('val-brand').innerText = (data.brand || 'CO HOME IMPROVEMENTS').toUpperCase().replace(/([A-Z])/g, ' $1').trim();
+                    document.getElementById('val-postcode').innerText = data.customerProfile?.postcode || 'Location Pending';
+                    document.getElementById('val-custNum').innerText = data.customerProfile?.customerNum || 'N/A';
+                    document.getElementById('val-appt').innerText = data.customerProfile?.apptDate || 'N/A';
+                    document.getElementById('val-revisit').innerText = data.customerProfile?.revisitDate || 'N/A';
+
                     const frontImg = data.media?.front || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&w=2000&q=80';
                     document.getElementById('heroImg').src = frontImg;
-                    document.getElementById('deepdiveImg').src = data.media?.rear || frontImg;
 
-                    // AR Blueprint Data
-                    document.getElementById('ar-roof').innerText = data.projectSpecs?.roofStyle || 'Standard Profile';
-                    document.getElementById('ar-walls').innerText = data.projectSpecs?.houseMaterial || 'Brick / Render Match';
+                    // --- 2. MASTER MANIFEST: SCOPE & LOGISTICS ---
+                    document.getElementById('val-buildType').innerText = data.projectSpecs?.buildType || 'TBC';
+                    document.getElementById('val-size').innerText = data.projectSpecs?.proposedSize || 'TBC';
+                    document.getElementById('val-houseMat').innerText = data.projectSpecs?.houseMaterial || 'TBC';
+                    document.getElementById('val-accessDiff').innerText = data.projectSpecs?.accessIssues || 'None Recorded';
+                    document.getElementById('val-accessWidth').innerText = data.projectSpecs?.accessWidth ? data.projectSpecs.accessWidth + 'mm' : 'Unmeasured';
+                    document.getElementById('val-obs').innerText = data.projectSpecs?.wallObstacles || 'Clear';
+                    
+                    // Parse the concatenated design string from survey.html
                     const pDesign = data.designerInsights?.design || '';
-                    document.getElementById('ar-dpc').innerText = pDesign.includes('DPC Depth:') ? 'DPC: ' + pDesign.split('DPC Depth: ')[1].split('\n')[0] : 'Engineer Verified';
+                    document.getElementById('val-base').innerText = pDesign.includes('Base Type:') ? pDesign.split('Base Type: ')[1].split('\n')[0] : 'Standard';
+                    document.getElementById('val-dpc').innerText = pDesign.includes('DPC Depth:') ? pDesign.split('DPC Depth: ')[1].split('\n')[0] : 'TBC';
+                    document.getElementById('val-fascia').innerText = pDesign.includes('Fascia Height:') ? pDesign.split('Fascia Height: ')[1].split('\n')[0] : 'TBC';
+                    document.getElementById('val-air').innerText = pDesign.includes('Air Bricks:') ? pDesign.split('Air Bricks: ')[1].split('\n')[0] : 'N/A';
 
-                    // Deepdive Data
-                    document.getElementById('spec-regs').innerText = data.projectSpecs?.buildingRegs || 'Determined by Local Authority';
-                    document.getElementById('spec-planning').innerText = data.projectSpecs?.planningPerms || 'N/A';
-                    document.getElementById('prop-obs').innerText = data.projectSpecs?.wallObstacles || 'Clear Envelope';
-                    document.getElementById('designer-notes').innerText = data.designerInsights?.prep || 'All architectural tolerances verified on site.';
+                    // --- 3. MASTER MANIFEST: DESIGN & COMPLIANCE ---
+                    document.getElementById('val-roof').innerText = data.projectSpecs?.roofStyle || 'TBC';
+                    document.getElementById('val-frame').innerText = data.projectSpecs?.frameColour || 'TBC';
+                    document.getElementById('val-regs').innerText = data.projectSpecs?.buildingRegs || 'TBC';
+                    document.getElementById('val-planning').innerText = data.projectSpecs?.planningPerms || 'TBC';
+                    document.getElementById('val-sap').innerText = data.compliance?.sapCalcs || 'TBC';
+                    document.getElementById('val-notes').innerText = data.designerInsights?.prep || 'No technical notes appended.';
 
-                    // --- SNIPER SKETCH INJECTION ---
+                    // Extract drainage from accessGallery or notes if needed (survey.html mapping edge case)
+                    document.getElementById('val-drainage').innerText = data.logistics?.drainage || 'Survey Verified';
+                    document.getElementById('val-pitch').innerText = data.projectSpecs?.roofPitch || 'Standard Pitch';
+
+                    // --- 4. VISUAL INTELLIGENCE: SNIPER & GALLERY ---
                     if (data.media?.sketch) {
                         document.getElementById('sniper-box').style.display = 'block';
-                        document.getElementById('sniper-sketch').src = data.media.sketch;
+                        document.getElementById('val-sniper').src = data.media.sketch;
                     }
 
-                    // Gallery
                     const gallery = document.getElementById('labeled-gallery');
                     gallery.innerHTML = '';
                     const photoMap = [
@@ -303,7 +283,9 @@
                         { url: data.media?.side, label: 'Side Elevation' },
                         { url: data.media?.rear, label: 'Rear Elevation' }
                     ];
-                    (data.media?.surveyGallery || []).forEach((url, i) => photoMap.push({url, label: `Survey Context ${i+1}`}));
+                    (data.media?.surveyGallery || []).forEach((url, i) => photoMap.push({url, label: `Survey Detail ${i+1}`}));
+                    (data.media?.accessGallery || []).forEach((url, i) => photoMap.push({url, label: `Logistics & Access ${i+1}`}));
+                    (data.media?.miscGallery || []).forEach((url, i) => photoMap.push({url, label: `Misc Document ${i+1}`}));
                     
                     photoMap.filter(p => p.url).forEach(photo => {
                         gallery.innerHTML += `
@@ -314,40 +296,32 @@
                         `;
                     });
 
+                    // --- 5. PAMPHLETS & DOCUMENTS ---
+                    const docGrid = document.getElementById('doc-grid');
+                    docGrid.innerHTML = '';
+                    const p = data.pamphlets || {};
+                    const docTemplates = [
+                        { key: p.brochure, icon: '📖', title: 'Product Brochure' },
+                        { key: p.warranty, icon: '🛡️', title: 'Warranty Info' },
+                        { key: p.planning, icon: '🏛️', title: 'Planning Guide' },
+                        { key: p.sap, icon: '🌿', title: 'SAP Factsheet' },
+                        { key: p.roof, icon: '🏠', title: 'Roof Specs' }
+                    ];
+
+                    docTemplates.forEach(doc => {
+                        if(doc.key) {
+                            docGrid.innerHTML += `
+                                <div style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.2); padding: 25px 15px; border-radius: 12px;">
+                                    <span style="font-size: 32px; margin-bottom: 10px; display: block;">${doc.icon}</span>
+                                    <p style="font-size: 13px; font-weight: bold; color: #fff;">${doc.title}</p>
+                                </div>
+                            `;
+                        }
+                    });
+
                     // Unlock UI
                     document.getElementById('authGate').style.opacity = '0';
                     setTimeout(() => { document.getElementById('authGate').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; }, 800);
-
-                    // --- 2. LIVE ENVIRONMENTAL API ENGINE & MAPS ---
-                    try {
-                        const cleanPC = postcode.replace(/\s+/g, '');
-                        const pcRes = await fetch(`https://api.postcodes.io/postcodes/${cleanPC}`);
-                        const pcData = await pcRes.json();
-                        
-                        if(pcData.status === 200) {
-                            const { latitude, longitude, admin_district } = pcData.result;
-                            document.getElementById('env-borough').innerText = admin_district || "Local Authority";
-                            
-                            // INJECT LIVE INTERACTIVE MAP
-                            const mapIframe = `<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=${longitude-0.015},${latitude-0.015},${longitude+0.015},${latitude+0.015}&layer=mapnik&marker=${latitude},${longitude}"></iframe>`;
-                            document.getElementById('liveMapContainer').innerHTML = mapIframe;
-
-                            // Fetch Weather/Elevation
-                            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&elevation=true`);
-                            const weatherData = await weatherRes.json();
-                            
-                            document.getElementById('env-elevation').innerText = `${weatherData.elevation}m ASL`;
-                            
-                            const windSpeed = weatherData.current_weather?.windspeed || 0;
-                            const windStr = windSpeed > 25 ? `${windSpeed} km/h (High Load)` : `${windSpeed} km/h (Moderate)`;
-                            document.getElementById('env-wind').innerText = windStr;
-                        }
-                    } catch(apiErr) {
-                        console.warn("API Fetch failed.", apiErr);
-                        document.getElementById('env-borough').innerText = "Barnsley Council (Default)";
-                        document.getElementById('env-elevation').innerText = "142m ASL";
-                        document.getElementById('env-wind').innerText = "Moderate / Protected";
-                    }
 
                 } catch (err) { alert(err.message); e.target.value = ''; pinInput.disabled = false; pinInput.style.opacity = '1'; }
             }
