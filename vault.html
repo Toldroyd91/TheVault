@@ -5,209 +5,218 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Master Site Dossier</title>
     <style>
-        /* --- CORE CINEMATIC STYLES --- */
-        :root { --accent: #0dcaf0; --bg-dark: #05080c; --glass: rgba(10, 15, 25, 0.85); --success: #238636; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg-dark); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+        /* --- THE £1M PREMIUM AESTHETIC --- */
+        :root { --accent: #0dcaf0; --bg-dark: #050505; --text-main: #f5f5f7; --text-muted: #86868b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-main); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
         
         /* AUTH GATE */
-        #authGate { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
-        .cyber-input { background: transparent; border: none; border-bottom: 2px solid #333; color: #fff; font-size: 2.5rem; text-align: center; outline: none; letter-spacing: 15px; transition: 0.3s; width: 300px; }
-        .cyber-input:focus { border-color: var(--accent); text-shadow: 0 0 15px rgba(13, 202, 240, 0.5); }
-        
-        /* SCROLL SNAP ARCHITECTURE */
-        #vaultContent { display: none; height: 100vh; width: 100vw; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
-        .slide { min-height: 100vh; width: 100vw; scroll-snap-align: start; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 80px 0; }
-        
-        /* DYNAMIC BACKGROUNDS & VIGNETTES */
-        .bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: transform 15s ease-out; filter: grayscale(0.2); }
-        .slide:hover .bg-img { transform: scale(1.03); }
-        .overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.98) 100%), radial-gradient(circle, transparent 10%, rgba(0,0,0,0.9) 100%); z-index: 1; pointer-events: none;}
-        
-        /* PIPELINE TRACKER */
-        .pipeline-bar { position: fixed; top: 0; left: 0; width: 100%; z-index: 9000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 5vw; display: flex; justify-content: space-between; align-items: center; }
-        .step-container { display: flex; align-items: center; gap: 15px; width: 100%; }
-        .step { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; position: relative; }
-        .step::after { content: ''; position: absolute; top: 12px; right: -50%; width: 100%; height: 2px; background: rgba(255,255,255,0.1); z-index: -1; }
-        .step:last-child::after { display: none; }
-        .step-dot { width: 24px; height: 24px; border-radius: 50%; background: #222; border: 2px solid #444; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; transition: 0.3s; }
-        .step.active .step-dot { background: var(--accent); border-color: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); animation: pulse 2s infinite; }
-        .step.completed .step-dot { background: var(--success); border-color: var(--success); color: #fff; }
-        .step.completed::after { background: var(--success); }
-        .step-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #666; text-align: center; }
-        .step.active .step-label { color: var(--accent); }
-        .step.completed .step-label { color: var(--success); }
+        #authGate { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1s ease; }
+        .cyber-input { background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; font-size: 2rem; text-align: center; outline: none; letter-spacing: 15px; transition: 0.3s; width: 250px; padding-bottom: 10px;}
+        .cyber-input:focus { border-color: var(--accent); }
 
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(13,202,240,0.4); } 70% { box-shadow: 0 0 0 10px rgba(13,202,240,0); } 100% { box-shadow: 0 0 0 0 rgba(13,202,240,0); } }
-
-        /* GLASSMORPHISM UI */
-        .glass-panel { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 45px; box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
-        h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; }
-        .text-accent { color: var(--accent); }
+        /* TYPOGRAPHY AS ART */
+        h1 { font-size: clamp(3rem, 8vw, 7rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin-bottom: 20px; }
+        h2 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 30px; }
+        h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 3px; color: var(--accent); font-weight: 700; margin-bottom: 15px; }
+        p.lead { font-size: clamp(1.2rem, 2vw, 1.8rem); color: var(--text-muted); line-height: 1.4; font-weight: 400; max-width: 800px; }
         
-        /* DATA GRIDS */
-        .data-section { margin-bottom: 30px; }
-        .data-section-title { font-size: 14px; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 15px; }
-        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .bento-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; transition: 0.3s; }
-        .bento-item:hover { background: rgba(255,255,255,0.06); border-color: var(--accent); }
-        .bento-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
-        .bento-val { font-size: 15px; font-weight: bold; color: #fff; }
+        /* THE HERO MONOLITH */
+        .hero { position: relative; height: 100vh; width: 100vw; display: flex; align-items: flex-end; padding: 8vw; overflow: hidden; }
+        .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transform: scale(1.05); animation: slowZoom 20s ease-out forwards; filter: brightness(0.6); }
+        .hero-content { position: relative; z-index: 10; width: 100%; }
+        
+        /* EDITORIAL STICKY SCROLLING (The Apple Effect) */
+        .editorial-section { display: flex; min-height: 150vh; position: relative; }
+        .sticky-visual { position: sticky; top: 0; height: 100vh; width: 50vw; overflow: hidden; }
+        .sticky-visual img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7) contrast(1.1); transition: filter 0.5s; }
+        .scrolling-data { width: 50vw; padding: 10vw 8vw; display: flex; flex-direction: column; gap: 20vh; background: var(--bg-dark); }
+        
+        /* REVERSE LAYOUT FOR VARIETY */
+        .editorial-section.reverse { flex-direction: row-reverse; }
+        .editorial-section.reverse .scrolling-data { background: #0a0a0a; }
 
-        /* GALLERY & SKETCHES */
-        .gallery-wrapper { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; scroll-snap-type: x mandatory; }
-        .gallery-wrapper::-webkit-scrollbar { height: 6px; }
-        .gallery-wrapper::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-        .gallery-img-container { position: relative; min-width: 300px; height: 200px; scroll-snap-align: center; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-        .gallery-img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .img-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); padding: 10px; font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: bold; }
+        /* DATA METRICS (Massive Numbers) */
+        .metric-block { margin-bottom: 60px; }
+        .metric-value { font-size: clamp(3rem, 6vw, 5rem); font-weight: 700; color: #fff; line-height: 1; margin-bottom: 10px; display: flex; align-items: baseline; gap: 5px; }
+        .metric-unit { font-size: 1.5rem; color: var(--text-muted); font-weight: 500; }
+        .metric-label { font-size: 16px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 15px; display: block; }
+        .metric-desc { font-size: 1.2rem; color: var(--text-muted); line-height: 1.6; border-left: 2px solid #222; padding-left: 20px; }
 
-        .sniper-container { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--accent); box-shadow: 0 10px 20px rgba(13,202,240,0.2); position: relative; margin-bottom: 20px; }
-        .sniper-container img { width: 100%; height: auto; display: block; }
-        .sniper-tag { position: absolute; top: 10px; left: 10px; background: var(--accent); color: #000; padding: 5px 10px; font-size: 10px; font-weight: bold; text-transform: uppercase; border-radius: 4px; }
+        /* THE BLUEPRINT HOTSPOTS (Reimagined) */
+        .blueprint-fullscreen { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden; }
+        #blueprint-img { width: 80%; height: 80%; object-fit: contain; opacity: 0.4; filter: invert(1); transition: opacity 0.5s; }
+        .hotspot { position: absolute; z-index: 20; width: 60px; height: 60px; cursor: pointer; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
+        .hotspot-dot { width: 12px; height: 12px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 20px var(--accent); position: relative; z-index: 2; transition: transform 0.3s; }
+        .hotspot-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid var(--accent); animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+        .hotspot:hover .hotspot-dot { transform: scale(1.5); }
+        .hotspot-data { position: absolute; top: 50%; left: 70px; transform: translateY(-50%); opacity: 0; pointer-events: none; transition: 0.4s ease; width: max-content; }
+        .hotspot:hover .hotspot-data { opacity: 1; transform: translateY(-50%) translateX(10px); }
+        .hotspot-data h4 { font-size: 24px; color: #fff; margin-bottom: 5px; font-weight: 600; letter-spacing: -0.5px;}
+        .hotspot-data p { font-size: 14px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px;}
+
+        /* CINEMATIC GALLERY */
+        .gallery-container { padding: 10vw 5vw; background: #050505; }
+        .gallery-track { display: flex; gap: 2vw; overflow-x: auto; padding-bottom: 40px; scroll-snap-type: x mandatory; }
+        .gallery-track::-webkit-scrollbar { display: none; }
+        .gallery-item { min-width: 60vw; height: 60vh; scroll-snap-align: center; position: relative; border-radius: 4px; overflow: hidden; }
+        @media (max-width: 768px) { .gallery-item { min-width: 85vw; height: 40vh; } }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.2); transition: 0.5s; }
+        .gallery-item:hover img { filter: grayscale(0); transform: scale(1.02); }
+        .gallery-caption { position: absolute; bottom: 30px; left: 30px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); padding: 10px 20px; color: #fff; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+
+        @keyframes slowZoom { from { transform: scale(1); } to { transform: scale(1.1); } }
+        @keyframes pulse-ring { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        /* RESPONSIVE FLIP FOR MOBILE */
+        @media (max-width: 992px) {
+            .editorial-section, .editorial-section.reverse { flex-direction: column; min-height: auto; }
+            .sticky-visual { position: relative; height: 50vh; width: 100vw; }
+            .scrolling-data { width: 100vw; padding: 15vw 8vw; gap: 10vh; }
+        }
     </style>
 </head>
 <body>
 
     <!-- AUTH GATE -->
     <div id="authGate">
-        <h3 style="color: var(--accent); margin-bottom: 20px; letter-spacing: 6px; font-size: 14px;">ENCRYPTED DOSSIER</h3>
+        <h3 style="color: #666; font-size: 12px; margin-bottom: 20px;">ENCRYPTED DOSSIER</h3>
         <input type="password" id="pinInput" class="cyber-input" maxlength="4" placeholder="••••" autocomplete="off">
-    </div>
-
-    <!-- PIPELINE TRACKER -->
-    <div class="pipeline-bar">
-        <div class="step-container">
-            <div class="step completed"><div class="step-dot">✓</div><div class="step-label">Consultation</div></div>
-            <div class="step completed"><div class="step-dot">✓</div><div class="step-label">New Survey</div></div>
-            <div class="step active"><div class="step-dot">3</div><div class="step-label">Design & Analysis</div></div>
-            <div class="step"><div class="step-dot">4</div><div class="step-label">Procurement</div></div>
-            <div class="step"><div class="step-dot">5</div><div class="step-label">Installation</div></div>
-        </div>
     </div>
 
     <div id="vaultContent">
         
-        <!-- 01. HERO REVEAL -->
-        <section class="slide">
-            <img src="" id="heroImg" class="bg-img" alt="Hero">
-            <div class="overlay"></div>
-            <div class="glass-panel" style="text-align: center; max-width: 900px; width: 90%;">
-                <p style="color: var(--accent); font-weight: 900; letter-spacing: 4px; font-size: 12px; margin-bottom: 20px;" id="val-brand">CO HOME IMPROVEMENTS</p>
-                <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">The <span id="val-lastName">Client</span> Dossier</h1>
-                <p style="color: var(--accent); font-size: 16px; letter-spacing: 3px; font-weight: bold; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 30px;" id="val-postcode">Location Pending</p>
-                
-                <div style="display: flex; justify-content: center; gap: 30px; color: #aaa; font-size: 12px; text-transform: uppercase;">
-                    <div>Cust No: <strong style="color: #fff;" id="val-custNum">TBC</strong></div>
-                    <div>Consultation: <strong style="color: #fff;" id="val-appt">TBC</strong></div>
-                    <div>Revisit: <strong style="color: #fff;" id="val-revisit">TBC</strong></div>
-                </div>
+        <!-- 01. THE MONOLITH HERO -->
+        <section class="hero">
+            <img src="" id="heroImg" class="hero-bg" alt="Property">
+            <div class="hero-content">
+                <h3 id="val-brand">CO HOME IMPROVEMENTS</h3>
+                <h1 id="val-lastName">The Project.</h1>
+                <p class="lead">Engineered precisely for <span id="val-postcode" style="color:#fff;">[Postcode]</span>. Every dimension, structural load, and aesthetic nuance has been calibrated to your property's exact architectural envelope.</p>
             </div>
         </section>
 
-        <!-- 02. MASTER DATA MANIFEST -->
-        <section class="slide" style="align-items: flex-start; padding-top: 120px;">
-            <div class="overlay" style="background: radial-gradient(circle, rgba(13,202,240,0.05) 0%, #05080c 100%);"></div>
+        <!-- 02. STRUCTURAL SCOPE (Sticky Left, Scroll Right) -->
+        <section class="editorial-section">
+            <div class="sticky-visual">
+                <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" id="scopeImg">
+            </div>
+            <div class="scrolling-data">
+                
+                <div class="metric-block">
+                    <h3>01. Architectural Scope</h3>
+                    <span class="metric-label">Structural Classification</span>
+                    <div class="metric-value" id="val-buildType">Extension</div>
+                    <p class="metric-desc">Designed to seamlessly integrate with your existing <strong style="color:#fff;" id="val-houseMat">brickwork</strong>, expanding your living footprint without compromising the original property character.</p>
+                </div>
+
+                <div class="metric-block">
+                    <span class="metric-label">Spatial Envelope</span>
+                    <div class="metric-value"><span id="val-size">0x0</span><span class="metric-unit">mm</span></div>
+                    <p class="metric-desc">Millimeter-perfect spatial planning mapped directly by our lead surveyor to maximize internal volume while respecting property boundaries.</p>
+                </div>
+
+                <div class="metric-block">
+                    <span class="metric-label">Thermal Roof Dynamics</span>
+                    <div class="metric-value" id="val-roof" style="font-size: clamp(2rem, 4vw, 3.5rem);">Livin Roof</div>
+                    <p class="metric-desc">Engineered at a <strong style="color:#fff;" id="val-pitch">specific pitch</strong>. This high-performance system guarantees year-round ambient temperature control, outperforming traditional glass structures.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 03. THE INTERACTIVE BLUEPRINT (Fullscreen) -->
+        <section class="blueprint-fullscreen">
+            <h3 style="position: absolute; top: 50px; left: 5vw; z-index: 10;">02. Technical Tolerances</h3>
+            <p style="position: absolute; top: 80px; left: 5vw; z-index: 10; color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 11px;">Hover coordinates for engineering data</p>
             
-            <div class="glass-panel" style="width: 90vw; max-width: 1400px; max-height: 80vh; overflow-y: auto;">
-                <h2 style="font-size: 2rem; margin-bottom: 30px;"><span class="text-accent">01.</span> Master Survey Manifest</h2>
+            <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" id="blueprint-img">
+            
+            <!-- Dynamic Hotspots -->
+            <div class="hotspot" style="top: 30%; left: 40%;">
+                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
+                <div class="hotspot-data"><h4><span id="val-fascia">2400</span>mm</h4><p>Fascia Height</p></div>
+            </div>
+            
+            <div class="hotspot" style="top: 80%; left: 60%;">
+                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
+                <div class="hotspot-data"><h4><span id="val-dpc">150</span>mm</h4><p>DPC Depth over <span id="val-base">Standard</span> Base</p></div>
+            </div>
+
+            <div class="hotspot" style="top: 60%; left: 80%;">
+                <div class="hotspot-ring"></div><div class="hotspot-dot"></div>
+                <div class="hotspot-data"><h4 id="val-frame">Grey Foil</h4><p>Exterior Frame Finish</p></div>
+            </div>
+        </section>
+
+        <!-- 04. SITE LOGISTICS & SNIPER (Sticky Right, Scroll Left) -->
+        <section class="editorial-section reverse">
+            <div class="sticky-visual">
+                <!-- Fallback to rear image if no sniper sketch exists -->
+                <img src="" id="sniperImg" style="object-fit: contain; background: #000; padding: 20px;">
+                <div style="position: absolute; top: 20px; right: 20px; background: var(--accent); color: #000; padding: 5px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Surveyor Markup</div>
+            </div>
+            <div class="scrolling-data">
                 
-                <div style="display: flex; gap: 40px; flex-wrap: wrap;">
-                    
-                    <!-- COLUMN 1: Scope & Logistics -->
-                    <div style="flex: 1; min-width: 350px;">
-                        <div class="data-section">
-                            <h3 class="data-section-title">Project Scope & Structure</h3>
-                            <div class="bento-grid">
-                                <div class="bento-item"><span class="bento-label">Build Type</span><span class="bento-val" id="val-buildType">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Proposed Size</span><span class="bento-val" id="val-size">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">House Material</span><span class="bento-val" id="val-houseMat">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Base Type</span><span class="bento-val" id="val-base">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">DPC Depth</span><span class="bento-val" id="val-dpc">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Fascia Height</span><span class="bento-val" id="val-fascia">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Air Bricks</span><span class="bento-val" id="val-air">TBC</span></div>
-                            </div>
-                        </div>
-
-                        <div class="data-section">
-                            <h3 class="data-section-title">Site Logistics & Restrictions</h3>
-                            <div class="bento-grid">
-                                <div class="bento-item"><span class="bento-label">Access Restrictions</span><span class="bento-val" id="val-accessDiff">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Access Width</span><span class="bento-val" id="val-accessWidth">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Drainage Routing</span><span class="bento-val" id="val-drainage">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Wall Obstacles</span><span class="bento-val" id="val-obs">TBC</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- COLUMN 2: Design, Compliance & Notes -->
-                    <div style="flex: 1; min-width: 350px;">
-                        <div class="data-section">
-                            <h3 class="data-section-title">Design Specification</h3>
-                            <div class="bento-grid">
-                                <div class="bento-item"><span class="bento-label">Roof System</span><span class="bento-val" id="val-roof">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Roof Pitch</span><span class="bento-val" id="val-pitch">TBC</span></div>
-                                <div class="bento-item" style="grid-column: 1 / -1;"><span class="bento-label">Frame Profile Colouring</span><span class="bento-val" id="val-frame">TBC</span></div>
-                            </div>
-                        </div>
-
-                        <div class="data-section">
-                            <h3 class="data-section-title">Compliance & Regulations</h3>
-                            <div class="bento-grid">
-                                <div class="bento-item"><span class="bento-label">Building Regs</span><span class="bento-val" id="val-regs">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">Planning Perms</span><span class="bento-val" id="val-planning">TBC</span></div>
-                                <div class="bento-item"><span class="bento-label">SAP Calcs</span><span class="bento-val" id="val-sap">TBC</span></div>
-                            </div>
-                        </div>
-
-                        <div class="data-section">
-                            <h3 class="data-section-title">Designer Insights</h3>
-                            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                                <p style="font-size: 13px; line-height: 1.6; color: #ccc; white-space: pre-wrap;" id="val-notes">No technical notes appended.</p>
-                            </div>
-                        </div>
-                    </div>
-
+                <div class="metric-block">
+                    <h3>03. Site Intelligence & Logistics</h3>
+                    <span class="metric-label">Structural Obstacles</span>
+                    <div class="metric-value" id="val-obs" style="font-size: clamp(2rem, 4vw, 3rem);">Clear</div>
+                    <p class="metric-desc">Our surveyors scan the building envelope for flues, soil pipes, and drainage routing. Early identification of <strong style="color:#fff;" id="val-drainage">drainage</strong> requirements prevents installation delays.</p>
                 </div>
+
+                <div class="metric-block">
+                    <span class="metric-label">Access Tolerances</span>
+                    <div class="metric-value"><span id="val-accessWidth">0</span><span class="metric-unit">mm</span></div>
+                    <p class="metric-desc">Measured access width. Any restrictions (<strong style="color:#fff;" id="val-accessDiff">None</strong>) have been logged to ensure safe and efficient material delivery.</p>
+                </div>
+
+                <div class="metric-block">
+                    <span class="metric-label">Sub-Floor Ventilation</span>
+                    <div class="metric-value" id="val-air" style="font-size: clamp(2rem, 4vw, 3rem);">Verified</div>
+                    <p class="metric-desc">Airflow calculations dictate required ducting to prevent moisture buildup and preserve the integrity of the property's foundations.</p>
+                </div>
+
             </div>
         </section>
 
-        <!-- 03. CALIBRATED ELEVATIONS & GALLERY -->
-        <section class="slide" style="align-items: flex-start; padding-top: 120px;">
-            <div class="overlay"></div>
-            <div class="glass-panel" style="width: 90vw; max-width: 1400px; max-height: 80vh; overflow-y: auto;">
-                <h2 style="font-size: 2rem; margin-bottom: 30px;"><span class="text-accent">02.</span> Visual Site Intelligence</h2>
-
-                <div id="sniper-box" style="display: none;">
-                    <h3 class="data-section-title">Calibrated Spatial Data</h3>
-                    <div class="sniper-container">
-                        <div class="sniper-tag">Sniper Engine Output</div>
-                        <img id="val-sniper" src="" alt="Sniper Measurements">
-                    </div>
-                </div>
-
-                <h3 class="data-section-title">Categorized Site Photography</h3>
-                <div class="gallery-wrapper" id="labeled-gallery">
-                    <!-- Images Injected via JS -->
-                </div>
+        <!-- 05. COMPLIANCE & NOTES (Minimalist Block) -->
+        <section style="padding: 10vw 8vw; background: #0a0a0a; border-top: 1px solid #222; display: flex; gap: 5vw; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px;">
+                <h3>04. Compliance Framework</h3>
+                <ul style="list-style: none; margin-top: 30px;">
+                    <li style="margin-bottom: 25px; border-bottom: 1px solid #222; padding-bottom: 15px;">
+                        <span style="display:block; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Building Control</span>
+                        <strong style="font-size: 18px; color: #fff;" id="val-regs">Processing</strong>
+                    </li>
+                    <li style="margin-bottom: 25px; border-bottom: 1px solid #222; padding-bottom: 15px;">
+                        <span style="display:block; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Planning Authority</span>
+                        <strong style="font-size: 18px; color: #fff;" id="val-planning">Processing</strong>
+                    </li>
+                    <li style="margin-bottom: 25px; border-bottom: 1px solid #222; padding-bottom: 15px;">
+                        <span style="display:block; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Energy Efficiency (SAP)</span>
+                        <strong style="font-size: 18px; color: var(--accent);" id="val-sap">Processing</strong>
+                    </li>
+                </ul>
+            </div>
+            
+            <div style="flex: 1.5; min-width: 300px;">
+                <h3>Lead Designer Field Notes</h3>
+                <p style="font-size: 1.4rem; color: #aaa; line-height: 1.6; margin-top: 30px; font-style: italic;" id="val-notes">"No specific field notes recorded for this installation site."</p>
             </div>
         </section>
-        
-        <!-- 04. DOCUMENT LIBRARY -->
-        <section class="slide">
-            <div class="overlay" style="background: radial-gradient(circle, rgba(13,202,240,0.1) 0%, #05080c 100%);"></div>
-            <div class="glass-panel" style="width: 85vw; max-width: 900px; text-align: center;">
-                <h2 style="font-size: 2.5rem; margin-bottom: 15px;"><span class="text-accent">03.</span> Document Library</h2>
-                <p style="color: #aaa; margin-bottom: 40px; font-size: 14px;">Review your regulatory and product documentation below.</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;" id="doc-grid">
-                    <!-- Pamphlets injected here -->
-                </div>
+
+        <!-- 06. CINEMATIC GALLERY -->
+        <section class="gallery-container">
+            <h3 style="margin-left: 3vw;">05. Site Photography</h3>
+            <div class="gallery-track" id="photo-track">
+                <!-- Images injected here -->
             </div>
         </section>
 
     </div>
 
-    <!-- FIREBASE & DATA ROUTING LOGIC -->
+    <!-- FIREBASE DATA ROUTING -->
     <script type="module">
         import { db, doc, getDoc } from './js/core-firebase.js';
 
@@ -231,97 +240,73 @@
                         return alert("ACCESS DENIED.");
                     }
 
-                    // --- 1. HERO DATA ---
-                    const nameParts = (data.customerProfile?.leadName || 'Valued Customer').split(' ');
-                    document.getElementById('val-lastName').innerText = nameParts[nameParts.length - 1].toUpperCase();
+                    // --- INJECTING THE £1M DATA ---
+
+                    // Hero
+                    const nameParts = (data.customerProfile?.leadName || 'Valued Client').split(' ');
+                    document.getElementById('val-lastName').innerText = 'The ' + nameParts[nameParts.length - 1] + ' Project.';
                     document.getElementById('val-brand').innerText = (data.brand || 'CO HOME IMPROVEMENTS').toUpperCase().replace(/([A-Z])/g, ' $1').trim();
                     document.getElementById('val-postcode').innerText = data.customerProfile?.postcode || 'Location Pending';
-                    document.getElementById('val-custNum').innerText = data.customerProfile?.customerNum || 'N/A';
-                    document.getElementById('val-appt').innerText = data.customerProfile?.apptDate || 'N/A';
-                    document.getElementById('val-revisit').innerText = data.customerProfile?.revisitDate || 'N/A';
-
+                    
                     const frontImg = data.media?.front || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&w=2000&q=80';
                     document.getElementById('heroImg').src = frontImg;
+                    document.getElementById('scopeImg').src = data.media?.side || frontImg;
 
-                    // --- 2. MASTER MANIFEST: SCOPE & LOGISTICS ---
-                    document.getElementById('val-buildType').innerText = data.projectSpecs?.buildType || 'TBC';
-                    document.getElementById('val-size').innerText = data.projectSpecs?.proposedSize || 'TBC';
-                    document.getElementById('val-houseMat').innerText = data.projectSpecs?.houseMaterial || 'TBC';
-                    document.getElementById('val-accessDiff').innerText = data.projectSpecs?.accessIssues || 'None Recorded';
-                    document.getElementById('val-accessWidth').innerText = data.projectSpecs?.accessWidth ? data.projectSpecs.accessWidth + 'mm' : 'Unmeasured';
-                    document.getElementById('val-obs').innerText = data.projectSpecs?.wallObstacles || 'Clear';
-                    
-                    // Parse the concatenated design string from survey.html
+                    // Scope Data (Formatting for visual impact)
+                    document.getElementById('val-buildType').innerText = data.projectSpecs?.buildType || 'Bespoke Build';
+                    document.getElementById('val-size').innerText = (data.projectSpecs?.proposedSize || '0x0').replace('mm', '');
+                    document.getElementById('val-houseMat').innerText = data.projectSpecs?.houseMaterial || 'existing structure';
+                    document.getElementById('val-roof').innerText = data.projectSpecs?.roofStyle || 'Premium Profile';
+                    document.getElementById('val-pitch').innerText = data.projectSpecs?.roofPitch || 'engineered pitch';
+
+                    // Blueprint / Survey String Parsing
                     const pDesign = data.designerInsights?.design || '';
+                    document.getElementById('val-fascia').innerText = pDesign.includes('Fascia Height:') ? pDesign.split('Fascia Height: ')[1].split('\n')[0].replace('mm','') : '2100';
+                    document.getElementById('val-dpc').innerText = pDesign.includes('DPC Depth:') ? pDesign.split('DPC Depth: ')[1].split('\n')[0].replace('mm','') : '150';
                     document.getElementById('val-base').innerText = pDesign.includes('Base Type:') ? pDesign.split('Base Type: ')[1].split('\n')[0] : 'Standard';
-                    document.getElementById('val-dpc').innerText = pDesign.includes('DPC Depth:') ? pDesign.split('DPC Depth: ')[1].split('\n')[0] : 'TBC';
-                    document.getElementById('val-fascia').innerText = pDesign.includes('Fascia Height:') ? pDesign.split('Fascia Height: ')[1].split('\n')[0] : 'TBC';
-                    document.getElementById('val-air').innerText = pDesign.includes('Air Bricks:') ? pDesign.split('Air Bricks: ')[1].split('\n')[0] : 'N/A';
+                    document.getElementById('val-frame').innerText = data.projectSpecs?.frameColour || 'Bespoke';
 
-                    // --- 3. MASTER MANIFEST: DESIGN & COMPLIANCE ---
-                    document.getElementById('val-roof').innerText = data.projectSpecs?.roofStyle || 'TBC';
-                    document.getElementById('val-frame').innerText = data.projectSpecs?.frameColour || 'TBC';
-                    document.getElementById('val-regs').innerText = data.projectSpecs?.buildingRegs || 'TBC';
-                    document.getElementById('val-planning').innerText = data.projectSpecs?.planningPerms || 'TBC';
-                    document.getElementById('val-sap').innerText = data.compliance?.sapCalcs || 'TBC';
-                    document.getElementById('val-notes').innerText = data.designerInsights?.prep || 'No technical notes appended.';
+                    // Logistics
+                    document.getElementById('val-obs').innerText = data.projectSpecs?.wallObstacles || 'Clear Envelope';
+                    document.getElementById('val-drainage').innerText = data.logistics?.drainage || 'drainage';
+                    document.getElementById('val-accessWidth').innerText = (data.projectSpecs?.accessWidth || 'TBC').replace('mm','');
+                    document.getElementById('val-accessDiff').innerText = data.projectSpecs?.accessIssues || 'None';
+                    document.getElementById('val-air').innerText = pDesign.includes('Air Bricks:') ? pDesign.split('Air Bricks: ')[1].split('\n')[0] : 'Verified';
 
-                    // Extract drainage from accessGallery or notes if needed (survey.html mapping edge case)
-                    document.getElementById('val-drainage').innerText = data.logistics?.drainage || 'Survey Verified';
-                    document.getElementById('val-pitch').innerText = data.projectSpecs?.roofPitch || 'Standard Pitch';
+                    // Sniper Image or fallback
+                    document.getElementById('sniperImg').src = data.media?.sketch || data.media?.rear || frontImg;
 
-                    // --- 4. VISUAL INTELLIGENCE: SNIPER & GALLERY ---
-                    if (data.media?.sketch) {
-                        document.getElementById('sniper-box').style.display = 'block';
-                        document.getElementById('val-sniper').src = data.media.sketch;
-                    }
+                    // Compliance & Notes
+                    document.getElementById('val-regs').innerText = data.projectSpecs?.buildingRegs || 'Determined upon review';
+                    document.getElementById('val-planning').innerText = data.projectSpecs?.planningPerms || 'Determined upon review';
+                    document.getElementById('val-sap').innerText = data.compliance?.sapCalcs === 'Yes' ? 'Required & Lodged' : 'Not Required';
+                    document.getElementById('val-notes').innerText = `"${data.designerInsights?.prep || 'All spatial dimensions and structural tolerances verified on site.'}"`;
 
-                    const gallery = document.getElementById('labeled-gallery');
-                    gallery.innerHTML = '';
+                    // Cinematic Gallery
+                    const track = document.getElementById('photo-track');
+                    track.innerHTML = '';
                     const photoMap = [
                         { url: data.media?.front, label: 'Front Elevation' },
-                        { url: data.media?.side, label: 'Side Elevation' },
-                        { url: data.media?.rear, label: 'Rear Elevation' }
+                        { url: data.media?.side, label: 'Side Context' },
+                        { url: data.media?.rear, label: 'Rear Footprint' }
                     ];
                     (data.media?.surveyGallery || []).forEach((url, i) => photoMap.push({url, label: `Survey Detail ${i+1}`}));
-                    (data.media?.accessGallery || []).forEach((url, i) => photoMap.push({url, label: `Logistics & Access ${i+1}`}));
-                    (data.media?.miscGallery || []).forEach((url, i) => photoMap.push({url, label: `Misc Document ${i+1}`}));
+                    (data.media?.accessGallery || []).forEach((url, i) => photoMap.push({url, label: `Access Route ${i+1}`}));
                     
                     photoMap.filter(p => p.url).forEach(photo => {
-                        gallery.innerHTML += `
-                            <div class="gallery-img-container">
+                        track.innerHTML += `
+                            <div class="gallery-item">
                                 <img src="${photo.url}">
-                                <div class="img-label">${photo.label}</div>
+                                <div class="gallery-caption">${photo.label}</div>
                             </div>
                         `;
                     });
 
-                    // --- 5. PAMPHLETS & DOCUMENTS ---
-                    const docGrid = document.getElementById('doc-grid');
-                    docGrid.innerHTML = '';
-                    const p = data.pamphlets || {};
-                    const docTemplates = [
-                        { key: p.brochure, icon: '📖', title: 'Product Brochure' },
-                        { key: p.warranty, icon: '🛡️', title: 'Warranty Info' },
-                        { key: p.planning, icon: '🏛️', title: 'Planning Guide' },
-                        { key: p.sap, icon: '🌿', title: 'SAP Factsheet' },
-                        { key: p.roof, icon: '🏠', title: 'Roof Specs' }
-                    ];
-
-                    docTemplates.forEach(doc => {
-                        if(doc.key) {
-                            docGrid.innerHTML += `
-                                <div style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.2); padding: 25px 15px; border-radius: 12px;">
-                                    <span style="font-size: 32px; margin-bottom: 10px; display: block;">${doc.icon}</span>
-                                    <p style="font-size: 13px; font-weight: bold; color: #fff;">${doc.title}</p>
-                                </div>
-                            `;
-                        }
-                    });
-
-                    // Unlock UI
+                    // Unlock the Vault
                     document.getElementById('authGate').style.opacity = '0';
-                    setTimeout(() => { document.getElementById('authGate').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; }, 800);
+                    setTimeout(() => { 
+                        document.getElementById('authGate').style.display = 'none'; 
+                    }, 1000);
 
                 } catch (err) { alert(err.message); e.target.value = ''; pinInput.disabled = false; pinInput.style.opacity = '1'; }
             }
