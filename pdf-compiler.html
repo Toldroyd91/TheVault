@@ -13,7 +13,7 @@
         h1 { margin: 0; color: #fff; font-size: 20px; text-transform: uppercase; letter-spacing: 2px; }
         
         .survey-list { display: grid; gap: 15px; max-width: 800px; }
-        .survey-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .survey-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .client-info h3 { margin: 0 0 5px 0; color: #fff; font-size: 16px; }
         .client-info p { margin: 0; font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
         
@@ -22,7 +22,7 @@
         .btn-pdf:disabled { background: #444; cursor: not-allowed; }
 
         /* LOADING SPINNER FOR AUTO-TRIGGER */
-        .loading-overlay { display: none; text-align: center; padding: 40px; background: var(--card); border-radius: 8px; border: 1px solid var(--border-color); }
+        .loading-overlay { display: none; text-align: center; padding: 40px; background: var(--card); border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--accent); animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -53,7 +53,6 @@
         
         .pdf-image-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .pdf-img-container { border: 1px solid #ccc; padding: 5px; text-align: center; height: 260px; background: #fff; }
-        /* Notice the object-fit is contain to prevent distortion on weird crops */
         .pdf-img-container img { width: 100%; height: 100%; object-fit: contain; }
         .pdf-img-title { font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; background: #000; color: #fff; padding: 6px; letter-spacing: 1px;}
         
@@ -82,17 +81,17 @@
             <h1>PDF Compiler Engine</h1>
             <p style="margin: 5px 0 0 0; font-size: 12px; color: #8b949e;">Strict Factual & Financial Document Generation Utility</p>
         </div>
-        <button onclick="window.location.href='dashboard.html'" style="background: transparent; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Return to Dashboard</button>
+        <button onclick="window.location.href='survey.html'" style="background: transparent; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Return to Survey Engine</button>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <h3 style="color: #fff; margin:0;">Compiling Architectural Dossier</h3>
-        <p id="loadingStatus" style="color: #8b949e; font-size: 12px; margin-top: 10px;">Establishing secure database connection...</p>
+        <div class="spinner" id="mainSpinner"></div>
+        <h3 style="color: #fff; margin:0;" id="loadingHeader">Authenticating User</h3>
+        <p id="loadingStatus" style="color: #8b949e; font-size: 12px; margin-top: 10px;">Verifying secure session...</p>
     </div>
 
     <div class="survey-list" id="surveyList">
-        <p>Loading database records...</p>
+        <p style="color: #0dcaf0; font-weight: bold;">Authenticating secure connection...</p>
     </div>
 
     <div id="pdf-engine">
@@ -100,44 +99,62 @@
     </div>
 
     <script type="module">
-        import { db, collection, getDocs, doc, getDoc } from './js/core-firebase.js';
+        import { auth, db, collection, getDocs, doc, getDoc, onAuthStateChanged } from './js/core-firebase.js';
 
         let surveysData = {};
+
+        // 1. THE FIX: Force the compiler to wait for Firebase to confirm you are logged in.
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                document.getElementById('surveyList').innerHTML = '<p style="color: red; font-weight: bold;">Authentication Error: You must be logged in to pull secure survey data.</p>';
+                if(document.getElementById('loadingOverlay').style.display === 'block') {
+                    document.getElementById('loadingStatus').innerText = "Authentication Error. Please log in.";
+                    document.getElementById('loadingStatus').style.color = "red";
+                    document.getElementById('mainSpinner').style.display = "none";
+                }
+                return;
+            }
+            
+            // User is authenticated, proceed to load data.
+            await loadCompiler();
+        });
 
         async function loadCompiler() {
             const list = document.getElementById('surveyList');
             const urlId = new URLSearchParams(window.location.search).get('id');
 
-            // AUTO-TRIGGER LOGIC: If an ID was passed from survey.html, skip the list and build it
+            // AUTO-TRIGGER LOGIC: If an ID was passed from survey.html
             if (urlId) {
                 list.style.display = 'none';
                 document.getElementById('loadingOverlay').style.display = 'block';
+                document.getElementById('loadingHeader').innerText = "Compiling Architectural Dossier";
                 
                 try {
-                    document.getElementById('loadingStatus').innerText = "Fetching survey payload...";
+                    document.getElementById('loadingStatus').innerText = "Fetching secure survey payload...";
                     const snap = await getDoc(doc(db, "surveys", urlId));
                     
                     if (snap.exists()) {
                         surveysData[urlId] = snap.data();
                         document.getElementById('loadingStatus').innerText = "Calculating structural yields...";
-                        await generatePDF(urlId, null); // Call generator
-                        document.getElementById('loadingStatus').innerText = "Download Complete. You may return to the Dashboard.";
-                        document.querySelector('.spinner').style.display = 'none';
+                        await generatePDF(urlId, null); 
+                        document.getElementById('loadingStatus').innerText = "Download Complete. You may close this tab or return to the Survey Engine.";
+                        document.getElementById('mainSpinner').style.display = 'none';
                     } else {
                         document.getElementById('loadingStatus').innerText = "Survey not found in database.";
                         document.getElementById('loadingStatus').style.color = "red";
-                        document.querySelector('.spinner').style.display = 'none';
+                        document.getElementById('mainSpinner').style.display = 'none';
                     }
                 } catch (e) {
                     document.getElementById('loadingStatus').innerText = "Connection Error: " + e.message;
                     document.getElementById('loadingStatus').style.color = "red";
-                    document.querySelector('.spinner').style.display = 'none';
+                    document.getElementById('mainSpinner').style.display = 'none';
                 }
-                return; // Stop execution so the list doesn't load
+                return; 
             }
 
-            // STANDARD LIST LOAD (If arriving from Dashboard)
+            // STANDARD LIST LOAD (If you opened pdf-compiler.html directly)
             try {
+                list.innerHTML = '<p style="color: #8b949e;">Loading database records...</p>';
                 const querySnapshot = await getDocs(collection(db, "surveys"));
                 list.innerHTML = '';
                 
@@ -146,9 +163,9 @@
                     return;
                 }
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    surveysData[doc.id] = data;
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    surveysData[docSnap.id] = data;
                     
                     const name = data.customerProfile?.leadName || 'Unnamed Lead';
                     const postcode = data.customerProfile?.postcode || 'No Postcode';
@@ -160,12 +177,12 @@
                                 <h3>${name}</h3>
                                 <p>${postcode} | ${buildType}</p>
                             </div>
-                            <button class="btn-pdf" onclick="generatePDF('${doc.id}', this)">Compile Master Report</button>
+                            <button class="btn-pdf" onclick="generatePDF('${docSnap.id}', this)">Compile Master Report</button>
                         </div>
                     `;
                 });
             } catch (error) {
-                list.innerHTML = `<p style="color: red;">Connection Error: ${error.message}</p>`;
+                list.innerHTML = `<p style="color: red;">Database Connection Error: ${error.message}</p>`;
             }
         }
 
@@ -178,6 +195,12 @@
             }
 
             const data = surveysData[docId];
+            if(!data) {
+                alert("Critical Error: Survey data is missing from memory.");
+                if (btnElement) { btnElement.innerText = originalText; btnElement.disabled = false; }
+                return;
+            }
+
             const pdfContent = document.getElementById('pdf-content');
             
             const brandRaw = data.brand || 'CO HOME IMPROVEMENTS';
@@ -567,9 +590,6 @@
                 }
             }
         };
-
-        // Initialize the compiler
-        loadCompiler();
     </script>
 </body>
 </html>
