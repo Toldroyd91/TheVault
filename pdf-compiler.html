@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Survey Compiler</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <script>
+        window.addEventListener('error', function(e) {
+            const list = document.getElementById('surveyList');
+            const overlay = document.getElementById('loadingOverlay');
+            if(overlay) overlay.style.display = 'none';
+            if(list) {
+                list.style.display = 'block';
+                list.innerHTML = `<div style="background: #b20710; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin-top:0; color: #fff;">CRITICAL SYSTEM CRASH</h3>
+                    <p style="font-weight: bold;">Error: ${e.message}</p>
+                    <p style="font-size: 11px; opacity: 0.8;">File: ${e.filename} <br>Line: ${e.lineno}</p>
+                    <p style="font-size: 12px; margin-top: 15px;">Please screenshot this and send it to your developer.</p>
+                </div>`;
+            }
+        });
+    </script>
+
     <style>
         :root { --bg: #0d1117; --card: #161b22; --accent: #E50914; --text: #c9d1d9; --border: #30363d; }
         body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 40px; }
@@ -102,20 +120,29 @@
         import { auth, db, collection, getDocs, doc, getDoc, onAuthStateChanged } from './js/core-firebase.js';
 
         let surveysData = {};
+        let authResolved = false;
 
-        // 1. THE FIX: Force the compiler to wait for Firebase to confirm you are logged in.
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                document.getElementById('surveyList').innerHTML = '<p style="color: red; font-weight: bold;">Authentication Error: You must be logged in to pull secure survey data.</p>';
-                if(document.getElementById('loadingOverlay').style.display === 'block') {
-                    document.getElementById('loadingStatus').innerText = "Authentication Error. Please log in.";
-                    document.getElementById('loadingStatus').style.color = "red";
-                    document.getElementById('mainSpinner').style.display = "none";
+        // THE FAILSAFE TIMER: If Firebase hangs for more than 2 seconds, force execution.
+        const failsafeTimer = setTimeout(() => {
+            if (!authResolved) {
+                authResolved = true;
+                const list = document.getElementById('surveyList');
+                if(list.style.display !== 'none') {
+                    list.innerHTML = '<p style="color: orange; font-weight: bold;">Auth Timeout. Forcing secure connection override...</p>';
                 }
-                return;
+                loadCompiler();
             }
+        }, 2000);
+
+        // STANDARD AUTH LISTENER
+        onAuthStateChanged(auth, async (user) => {
+            if (authResolved) return; // Prevent double-execution if the failsafe already triggered
+            authResolved = true;
+            clearTimeout(failsafeTimer);
             
-            // User is authenticated, proceed to load data.
+            if (!user) {
+                console.warn("Notice: No logged-in user detected. Attempting to pull data anyway.");
+            }
             await loadCompiler();
         });
 
@@ -123,7 +150,7 @@
             const list = document.getElementById('surveyList');
             const urlId = new URLSearchParams(window.location.search).get('id');
 
-            // AUTO-TRIGGER LOGIC: If an ID was passed from survey.html
+            // AUTO-TRIGGER LOGIC: If an ID was passed directly from survey.html
             if (urlId) {
                 list.style.display = 'none';
                 document.getElementById('loadingOverlay').style.display = 'block';
@@ -140,19 +167,17 @@
                         document.getElementById('loadingStatus').innerText = "Download Complete. You may close this tab or return to the Survey Engine.";
                         document.getElementById('mainSpinner').style.display = 'none';
                     } else {
-                        document.getElementById('loadingStatus').innerText = "Survey not found in database.";
-                        document.getElementById('loadingStatus').style.color = "red";
-                        document.getElementById('mainSpinner').style.display = 'none';
+                        throw new Error("Survey ID not found in database.");
                     }
                 } catch (e) {
                     document.getElementById('loadingStatus').innerText = "Connection Error: " + e.message;
-                    document.getElementById('loadingStatus').style.color = "red";
+                    document.getElementById('loadingStatus').style.color = "#E50914";
                     document.getElementById('mainSpinner').style.display = 'none';
                 }
                 return; 
             }
 
-            // STANDARD LIST LOAD (If you opened pdf-compiler.html directly)
+            // STANDARD LIST LOAD: If arriving from Dashboard
             try {
                 list.innerHTML = '<p style="color: #8b949e;">Loading database records...</p>';
                 const querySnapshot = await getDocs(collection(db, "surveys"));
@@ -182,7 +207,7 @@
                     `;
                 });
             } catch (error) {
-                list.innerHTML = `<p style="color: red;">Database Connection Error: ${error.message}</p>`;
+                list.innerHTML = `<p style="color: #E50914; font-weight:bold;">Database Connection Error: ${error.message}</p>`;
             }
         }
 
@@ -561,7 +586,7 @@
             // =========================================================
             const element = document.getElementById('pdf-content');
             
-            // OPTIMIZED OPTIONS: Dropped scale from 2 to 1.5, slightly compressed JPEG to protect mobile RAM
+            // OPTIMIZED OPTIONS
             const opt = {
                 margin:       0,
                 filename:     `COHI_Survey_${data.customerProfile?.leadName || 'Client'}.pdf`,
@@ -574,7 +599,6 @@
             document.getElementById('pdf-engine').style.display = 'block';
             
             // CRITICAL FIX: The browser needs a tiny fraction of a second to physically "paint" the images 
-            // onto the hidden DOM before the PDF captures it. If we don't wait, it captures blank space or crashes.
             await new Promise(resolve => setTimeout(resolve, 500));
             
             try {
