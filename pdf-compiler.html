@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Survey Compiler</title>
-    <!-- PDF Generation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --bg: #0d1117; --card: #161b22; --accent: #E50914; --text: #c9d1d9; --border: #30363d; }
@@ -21,6 +20,11 @@
         .btn-pdf { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; transition: 0.2s; }
         .btn-pdf:hover { background: #b20710; }
         .btn-pdf:disabled { background: #444; cursor: not-allowed; }
+
+        /* LOADING SPINNER FOR AUTO-TRIGGER */
+        .loading-overlay { display: none; text-align: center; padding: 40px; background: var(--card); border-radius: 8px; border: 1px solid var(--border-color); }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--accent); animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* --- STRICT A4 PRINT TEMPLATE (Hidden from UI) --- */
         #pdf-engine { display: none; }
@@ -49,7 +53,8 @@
         
         .pdf-image-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .pdf-img-container { border: 1px solid #ccc; padding: 5px; text-align: center; height: 260px; background: #fff; }
-        .pdf-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        /* Notice the object-fit is contain to prevent distortion on weird crops */
+        .pdf-img-container img { width: 100%; height: 100%; object-fit: contain; }
         .pdf-img-title { font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; background: #000; color: #fff; padding: 6px; letter-spacing: 1px;}
         
         /* TOC STYLES */
@@ -80,22 +85,58 @@
         <button onclick="window.location.href='dashboard.html'" style="background: transparent; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Return to Dashboard</button>
     </div>
 
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <h3 style="color: #fff; margin:0;">Compiling Architectural Dossier</h3>
+        <p id="loadingStatus" style="color: #8b949e; font-size: 12px; margin-top: 10px;">Establishing secure database connection...</p>
+    </div>
+
     <div class="survey-list" id="surveyList">
         <p>Loading database records...</p>
     </div>
 
-    <!-- THE HIDDEN PDF ENGINE -->
     <div id="pdf-engine">
         <div id="pdf-content"></div>
     </div>
 
     <script type="module">
-        import { db, collection, getDocs } from './js/core-firebase.js';
+        import { db, collection, getDocs, doc, getDoc } from './js/core-firebase.js';
 
         let surveysData = {};
 
         async function loadCompiler() {
             const list = document.getElementById('surveyList');
+            const urlId = new URLSearchParams(window.location.search).get('id');
+
+            // AUTO-TRIGGER LOGIC: If an ID was passed from survey.html, skip the list and build it
+            if (urlId) {
+                list.style.display = 'none';
+                document.getElementById('loadingOverlay').style.display = 'block';
+                
+                try {
+                    document.getElementById('loadingStatus').innerText = "Fetching survey payload...";
+                    const snap = await getDoc(doc(db, "surveys", urlId));
+                    
+                    if (snap.exists()) {
+                        surveysData[urlId] = snap.data();
+                        document.getElementById('loadingStatus').innerText = "Calculating structural yields...";
+                        await generatePDF(urlId, null); // Call generator
+                        document.getElementById('loadingStatus').innerText = "Download Complete. You may return to the Dashboard.";
+                        document.querySelector('.spinner').style.display = 'none';
+                    } else {
+                        document.getElementById('loadingStatus').innerText = "Survey not found in database.";
+                        document.getElementById('loadingStatus').style.color = "red";
+                        document.querySelector('.spinner').style.display = 'none';
+                    }
+                } catch (e) {
+                    document.getElementById('loadingStatus').innerText = "Connection Error: " + e.message;
+                    document.getElementById('loadingStatus').style.color = "red";
+                    document.querySelector('.spinner').style.display = 'none';
+                }
+                return; // Stop execution so the list doesn't load
+            }
+
+            // STANDARD LIST LOAD (If arriving from Dashboard)
             try {
                 const querySnapshot = await getDocs(collection(db, "surveys"));
                 list.innerHTML = '';
@@ -129,9 +170,12 @@
         }
 
         window.generatePDF = async function(docId, btnElement) {
-            const originalText = btnElement.innerText;
-            btnElement.innerText = "Extracting Data & Calculating Yields...";
-            btnElement.disabled = true;
+            let originalText = "Compile Master Report";
+            if (btnElement) {
+                originalText = btnElement.innerText;
+                btnElement.innerText = "Extracting Data & Calculating Yields...";
+                btnElement.disabled = true;
+            }
 
             const data = surveysData[docId];
             const pdfContent = document.getElementById('pdf-content');
@@ -178,6 +222,9 @@
             let elevation = "Pending API";
             let district = "Local Authority";
             try {
+                if(btnElement) btnElement.innerText = "Querying Meteorological Servers...";
+                if(document.getElementById('loadingStatus')) document.getElementById('loadingStatus').innerText = "Querying Meteorological Servers...";
+                
                 const cleanPC = postcode.replace(/\s+/g, '');
                 const pcRes = await fetch(`https://api.postcodes.io/postcodes/${cleanPC}`);
                 const pcData = await pcRes.json();
@@ -226,7 +273,15 @@
             }
             tocHtml += `<div class="toc-row"><span class="toc-num">0${sectionCounter}</span><span class="toc-text">Architectural Glossary of Terms</span></div>`;
 
-            btnElement.innerText = "Rendering Master PDF...";
+            if(btnElement) btnElement.innerText = "Rendering Master PDF...";
+            if(document.getElementById('loadingStatus')) document.getElementById('loadingStatus').innerText = "Rendering PDF format...";
+
+            // CRITICAL CORS FIX: Add crossorigin="anonymous" to all Cloudinary images
+            const fallbackImg = 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
+            const imgFront = data.media?.front || fallbackImg;
+            const imgSide = data.media?.side || fallbackImg;
+            const imgRear = data.media?.rear || fallbackImg;
+            const imgSketch = data.media?.sketch || fallbackImg;
 
             // =========================================================
             // PAGE 1: TITLE PAGE & TABLE OF CONTENTS
@@ -389,7 +444,6 @@
             // =========================================================
             // PAGE 4: VISUAL INTELLIGENCE
             // =========================================================
-            const fallbackImg = 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
             html += `
                 <div class="pdf-page">
                     <div class="pdf-watermark">${brandName}</div>
@@ -400,15 +454,15 @@
                         <div class="pdf-image-grid">
                             <div class="pdf-img-container">
                                 <div class="pdf-img-title">Front Context</div>
-                                <img src="${data.media?.front || fallbackImg}">
+                                <img src="${imgFront}" crossorigin="anonymous">
                             </div>
                             <div class="pdf-img-container">
                                 <div class="pdf-img-title">Access Route</div>
-                                <img src="${data.media?.side || fallbackImg}">
+                                <img src="${imgSide}" crossorigin="anonymous">
                             </div>
                             <div class="pdf-img-container" style="grid-column: 1 / -1; height: 350px; border: 2px solid #E50914;">
                                 <div class="pdf-img-title">Primary Build Footprint</div>
-                                <img src="${data.media?.rear || fallbackImg}">
+                                <img src="${imgRear}" crossorigin="anonymous">
                             </div>
                         </div>
                     </div>
@@ -428,7 +482,7 @@
                         </div>
                         <p style="font-size: 12px; color: #333; margin-bottom: 15px;"><strong>Note for manufacturing teams:</strong> The following spatial markings denote critical millimeter tolerances established by the lead surveyor on site.</p>
                         <div class="pdf-img-container" style="height: 600px; border: 3px solid #E50914;">
-                            <img src="${data.media.sketch}">
+                            <img src="${imgSketch}" crossorigin="anonymous">
                         </div>
                     </div>
                 </div>`;
@@ -479,29 +533,42 @@
 
             pdfContent.innerHTML = html;
 
-            // GENERATE PDF
+            // =========================================================
+            // GENERATE PDF (CRASH-PROOFED)
+            // =========================================================
             const element = document.getElementById('pdf-content');
+            
+            // OPTIMIZED OPTIONS: Dropped scale from 2 to 1.5, slightly compressed JPEG to protect mobile RAM
             const opt = {
                 margin:       0,
                 filename:     `COHI_Survey_${data.customerProfile?.leadName || 'Client'}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                image:        { type: 'jpeg', quality: 0.85 },
+                html2canvas:  { scale: 1.5, useCORS: true, allowTaint: true, logging: false },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
+            // Un-hide the DOM so html2canvas can read it
             document.getElementById('pdf-engine').style.display = 'block';
+            
+            // CRITICAL FIX: The browser needs a tiny fraction of a second to physically "paint" the images 
+            // onto the hidden DOM before the PDF captures it. If we don't wait, it captures blank space or crashes.
+            await new Promise(resolve => setTimeout(resolve, 500));
             
             try {
                 await html2pdf().set(opt).from(element).save();
             } catch (err) {
-                alert("PDF Generation Failed: " + err.message);
+                alert("PDF Generation Failed. Your device memory may be full: " + err.message);
             } finally {
+                // Re-hide the DOM and reset buttons
                 document.getElementById('pdf-engine').style.display = 'none';
-                btnElement.innerText = originalText;
-                btnElement.disabled = false;
+                if (btnElement) {
+                    btnElement.innerText = originalText;
+                    btnElement.disabled = false;
+                }
             }
         };
 
+        // Initialize the compiler
         loadCompiler();
     </script>
 </body>
