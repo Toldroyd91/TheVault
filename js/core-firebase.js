@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-// Added arrayUnion to the import list below
-import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// ADDED getDocs TO THIS IMPORT LIST
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const appConfig = {
@@ -41,23 +41,24 @@ export const BRAND_CONFIG = {
         theme: "#f59e0b" 
     },
     "Orion": { 
-        name: "Orion Windows", // Update this name
-        assetPath: "assets/orion/", // Create this folder
+        name: "Orion Windows", 
+        assetPath: "assets/orion/", 
         theme: "#10b981" 
     },
     "ClearView": { 
-        name: "Clearview", // Update this name
-        assetPath: "assets/clearview/", // Create this folder
+        name: "Clearview", 
+        assetPath: "assets/clearview/", 
         theme: "#8b5cf6" 
     },
     "Planet": { 
-        name: "Planet", // Update this name
-        assetPath: "assets/planet/", // Create this folder
+        name: "Planet", 
+        assetPath: "assets/planet/", 
         theme: "#ec4899" 
     }
 };
 
 // Export all modules for the rest of the application to use securely
+// ADDED getDocs TO THIS EXPORT LIST
 export { 
     onAuthStateChanged, 
     signInWithEmailAndPassword, 
@@ -66,12 +67,13 @@ export {
     doc, 
     setDoc, 
     getDoc, 
+    getDocs,
     updateDoc, 
     addDoc, 
     onSnapshot, 
     query, 
     orderBy, 
     serverTimestamp, 
-    arrayUnion, // Added arrayUnion to the export list
+    arrayUnion,
     httpsCallable 
 };
