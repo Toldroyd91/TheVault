@@ -15,6 +15,7 @@
             --text-muted: #8b949e;
             --border-color: #30363d;
             --input-bg: #090d13;
+            --success: #238636;
         }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
@@ -43,18 +44,22 @@
         .photo-btn { background: var(--input-bg); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; font-size: 12px; color: #c9d1d9; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
         .photo-btn:hover { border-color: #0dcaf0; color: #fff; }
         .photo-btn .badge { background: var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: black; }
-        .photo-btn.has-photos { border-color: #238636; color: #fff; background: rgba(35, 134, 54, 0.1); }
-        .photo-btn.has-photos .badge { background: #238636; color: #fff; }
+        .photo-btn.has-photos { border-color: var(--success); color: #fff; background: rgba(35, 134, 54, 0.1); }
+        .photo-btn.has-photos .badge { background: var(--success); color: #fff; }
 
         .action-bar { display: flex; gap: 15px; margin-top: 20px; }
         button { background: var(--accent); color: white; border: none; padding: 16px 24px; border-radius: 6px; font-size: 14px; font-weight: 900; cursor: pointer; transition: all 0.2s; flex: 1; text-transform: uppercase; letter-spacing: 1px; }
         button:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3); }
-        button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
         .btn-secondary { background: #21262d; border: 1px solid var(--border-color); color: #fff; }
         .btn-secondary:hover { background: #30363d; border-color: #8b949e; box-shadow: none; }
-        .btn-success { background: #238636; }
+        .btn-success { background: var(--success); }
         .btn-success:hover { background: #2ea043; box-shadow: 0 4px 15px rgba(35, 134, 54, 0.3); }
         
+        #syncProgressWrapper { display: none; margin-top: 15px; width: 100%; }
+        .progress-bg { height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+
         @media (max-width: 992px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -62,18 +67,17 @@
 
     <div class="header">
         <h2>COHI Pro Survey Engine</h2>
-        <select id="brandSelect" style="width: auto; padding: 8px 12px; font-size: 14px; background: #161b22; font-weight: bold;"></select>
+        <select id="brandSelect" style="width: auto; padding: 8px 12px; font-size: 14px; background: #161b22; font-weight: bold; border-color: var(--border-color);"></select>
     </div>
 
     <div class="grid-container">
-        <!-- LEFT COLUMN: SITE DATA -->
         <div>
             <div class="card">
                 <h3>Client Profile</h3>
                 <div class="form-grid">
                     <div><label>Lead Name *</label><input type="text" id="clientName" placeholder="e.g. John Dall"></div>
                     <div><label>Customer Number</label><input type="text" id="clientNum" placeholder="e.g. 10245"></div>
-                    <div class="full-width"><label>Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70 0PN"></div>
+                    <div class="full-width"><label>Site Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70 0PN" style="text-transform: uppercase;"></div>
                     <div><label>Consultation Date</label><input type="date" id="apptDate"></div>
                     <div><label>Revisit Date</label><input type="date" id="revisitDate"></div>
                 </div>
@@ -82,29 +86,81 @@
             <div class="card">
                 <h3>Project Scope & Structure</h3>
                 <div class="form-grid">
-                    <div class="full-width"><label>Build Type</label><input type="text" id="buildType" placeholder="e.g. Conservatory Extension"></div>
-                    <div><label>Proposed Size</label><input type="text" id="proposedSize" placeholder="e.g. 3000x4000mm"></div>
-                    <div><label>House Material</label><input type="text" id="houseMaterial" placeholder="e.g. Brick/Render"></div>
-                    <div><label>Base Type</label><input type="text" id="baseType" placeholder="e.g. Concrete"></div>
-                    <div><label>DPC Depth (mm)</label><input type="text" id="dpcDepth" placeholder="e.g. 150"></div>
-                    <div><label>Fascia Height (mm)</label><input type="text" id="fasciaHeight" placeholder="e.g. 2400"></div>
-                    <div class="full-width"><label>Air Brick Ducts Required</label><input type="text" id="airBricks" placeholder="e.g. 4x Telescopic"></div>
+                    <div class="full-width">
+                        <label>Build Type</label>
+                        <select id="buildType">
+                            <option value="">Select...</option>
+                            <option value="Single Storey Extension">Single Storey Extension</option>
+                            <option value="Conservatory">Conservatory</option>
+                            <option value="Orangery">Orangery</option>
+                            <option value="Hybrid Extension">Hybrid Extension</option>
+                            <option value="Porch">Porch</option>
+                            <option value="Garage Conversion">Garage Conversion</option>
+                        </select>
+                    </div>
+                    <div><label>Proposed Size (mm)</label><input type="text" id="proposedSize" placeholder="e.g. 3000x4000"></div>
+                    <div>
+                        <label>Existing House Material</label>
+                        <select id="houseMaterial">
+                            <option value="">Select...</option>
+                            <option value="Standard Brick">Standard Brick</option>
+                            <option value="Stone">Stone</option>
+                            <option value="Rendered">Rendered</option>
+                            <option value="Pebbledash">Pebbledash</option>
+                            <option value="Timber Clad">Timber Clad</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Base Type</label>
+                        <select id="baseType">
+                            <option value="">Select...</option>
+                            <option value="Standard Concrete">Standard Concrete</option>
+                            <option value="Block & Beam">Block & Beam</option>
+                            <option value="Piled / Steel">Piled / Steel</option>
+                            <option value="Existing Base">Existing Base (Retained)</option>
+                        </select>
+                    </div>
+                    <div><label>DPC Depth (mm)</label><input type="number" id="dpcDepth" placeholder="e.g. 150"></div>
+                    <div><label>Fascia Height (mm)</label><input type="number" id="fasciaHeight" placeholder="e.g. 2400"></div>
+                    <div class="full-width">
+                        <label>Sub-Floor Venting (Air Bricks)</label>
+                        <select id="airBricks">
+                            <option value="">Select...</option>
+                            <option value="Standard Venting Required">Standard Venting Required</option>
+                            <option value="Telescopic Sub-Floor Ducts">Telescopic Sub-Floor Ducts</option>
+                            <option value="None Required">None Required</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <div class="card">
                 <h3>Logistics & Restrictions</h3>
                 <div class="form-grid">
-                    <div><label>Access Difficulties</label><input type="text" id="accessDifficult" placeholder="e.g. Side gate only"></div>
-                    <div><label>Access Width (mm)</label><input type="text" id="accessWidth" placeholder="e.g. 900"></div>
                     <div>
-                        <label>Plumbing to move</label>
-                        <select id="drainage">
-                            <option value="">Select...</option><option value="MH">MH</option><option value="RWP">RWP</option>
-                            <option value="Soil">Soil</option><option value="Gulley">Gulley</option>
+                        <label>Access Difficulties</label>
+                        <select id="accessDifficult">
+                            <option value="">Select...</option>
+                            <option value="Unrestricted Access">Unrestricted Access</option>
+                            <option value="Narrow Side Gate">Narrow Side Gate</option>
+                            <option value="Through Garage Only">Through Garage Only</option>
+                            <option value="Through House Only">Through House Only</option>
+                            <option value="Severe Incline / Steps">Severe Incline / Steps</option>
                         </select>
                     </div>
-                    <div class="full-width"><label>Wall Obstacles</label><input type="text" id="wallObstacles" placeholder="e.g. Boiler flue, soil pipe"></div>
+                    <div><label>Access Width (mm)</label><input type="number" id="accessWidth" placeholder="e.g. 900"></div>
+                    <div>
+                        <label>Drainage Relocations</label>
+                        <select id="drainage">
+                            <option value="">Select...</option>
+                            <option value="Clear / No Action">Clear / No Action</option>
+                            <option value="Manhole Cover Move">Manhole Cover Move</option>
+                            <option value="Rainwater Pipe Move">Rainwater Pipe Move</option>
+                            <option value="Soil Pipe Move">Soil Pipe Move</option>
+                            <option value="Gulley Move">Gulley Move</option>
+                        </select>
+                    </div>
+                    <div class="full-width"><label>Wall Obstacles</label><input type="text" id="wallObstacles" placeholder="e.g. Boiler flue, extraction vents, cables"></div>
                 </div>
             </div>
 
@@ -114,22 +170,34 @@
                     <div>
                         <label>Roof System</label>
                         <select id="roofType">
-                            <option value="">Select...</option><option value="Flat Roof">Flat Roof</option><option value="Glass/Poly Roof">Glass/Poly Roof</option>
-                            <option value="Hybrid/Livin Roof">Hybrid/Livin Roof</option><option value="Ultra380">Ultra380</option>
+                            <option value="">Select...</option>
+                            <option value="Ultra380 Solid Roof">Ultra380 Solid Roof</option>
+                            <option value="Hybrid/Livin Roof">Hybrid/Livin Roof</option>
+                            <option value="Glass Conservatory Roof">Glass Conservatory Roof</option>
+                            <option value="Polycarbonate Roof">Polycarbonate Roof</option>
+                            <option value="Standard Flat Roof">Standard Flat Roof</option>
                         </select>
                     </div>
-                    <div><label>Roof Pitch</label><input type="text" id="roofPitch" placeholder="e.g. 25 degrees"></div>
+                    <div><label>Roof Pitch (Degrees)</label><input type="number" id="roofPitch" placeholder="e.g. 25"></div>
                     <div>
                         <label>Frame Colour (External)</label>
                         <select id="frameColour">
-                            <option value="">Select...</option><option value="White">White</option><option value="Grey Foil">Grey Foil</option>
-                            <option value="Rosewood">Rosewood</option><option value="Light Oak">Light Oak</option><option value="Black Brown Foil">Black Brown Foil</option>
-                            <option value="Cream Foil">Cream Foil</option><option value="Chartwell Green Foil">Chartwell Green Foil</option><option value="Agate Grey">Agate Grey</option>
+                            <option value="">Select...</option>
+                            <option value="White">White</option>
+                            <option value="Anthracite Grey (Smooth)">Anthracite Grey (Smooth)</option>
+                            <option value="Grey Foil">Grey Foil</option>
+                            <option value="Chartwell Green">Chartwell Green</option>
+                            <option value="Rosewood">Rosewood</option>
+                            <option value="Light Oak">Light Oak</option>
+                            <option value="Black Foil">Black Foil</option>
                         </select>
                     </div>
                     <div>
                         <label>Frame Colour (Internal)</label>
-                        <select id="internalFrameColour"><option value="White">White</option><option value="Match External">Match External</option></select>
+                        <select id="internalFrameColour">
+                            <option value="White">White</option>
+                            <option value="Match External">Match External</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -138,23 +206,31 @@
                 <h3>Compliance & Regulations</h3>
                 <div class="form-grid">
                     <div>
-                        <label>Building Regs Required?</label>
+                        <label>Building Regs Requirement</label>
                         <select id="buildingRegs">
-                            <option value="">Select...</option><option value="New Build Full Regs">New Build Full Regs</option>
-                            <option value="Replacement With Masonry Alterations">Replacement With Masonry Alterations</option>
-                            <option value="Replacement Without Masonry Alterations">Replacement Without Masonry Alterations</option><option value="No">No</option>
+                            <option value="">Select...</option>
+                            <option value="Full Building Control Required">Full Building Control Required</option>
+                            <option value="Replacement - Masonry Alterations">Replacement - Masonry Alterations</option>
+                            <option value="Replacement - No Alterations">Replacement - No Alterations</option>
+                            <option value="Exempt / Not Required">Exempt / Not Required</option>
                         </select>
                     </div>
                     <div>
-                        <label>Planning Perms Required?</label>
+                        <label>Planning Authority Status</label>
                         <select id="planningPerms">
-                            <option value="">Select...</option><option value="Full Planning">Full Planning</option>
-                            <option value="NCS Prior approval Planning">NCS Prior Approval Planning</option><option value="No">No</option>
+                            <option value="">Select...</option>
+                            <option value="Full Planning Permission Needed">Full Planning Permission Needed</option>
+                            <option value="NCS Prior Approval Needed">NCS Prior Approval Needed</option>
+                            <option value="Permitted Development (No Action)">Permitted Development (No Action)</option>
                         </select>
                     </div>
                     <div>
-                        <label>SAP Calcs Required?</label>
-                        <select id="sapCalcs"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select>
+                        <label>SAP Energy Calcs</label>
+                        <select id="sapCalcs">
+                            <option value="">Select...</option>
+                            <option value="Yes">Yes - Required</option>
+                            <option value="No">No - Exempt</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -169,9 +245,7 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: IMAGERY & NOTES -->
         <div>
-            <!-- EXPERT SNIPER UI -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">
                     <h3 style="border: none; margin: 0; padding: 0;">Elevation Sniper Engine</h3>
@@ -204,19 +278,19 @@
                     <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()"><span>Back Elev</span><span class="badge" id="badge-back">0</span></div>
                     <input type="file" id="upload-back" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'back')">
                     
-                    <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()"><span>Access</span><span class="badge" id="badge-access">0</span></div>
+                    <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()"><span>Access Route</span><span class="badge" id="badge-access">0</span></div>
                     <input type="file" id="upload-access" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'access')">
                     
                     <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()"><span>Drainage</span><span class="badge" id="badge-drainage">0</span></div>
                     <input type="file" id="upload-drainage" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'drainage')">
                     
-                    <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()"><span>Trees</span><span class="badge" id="badge-trees">0</span></div>
+                    <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()"><span>Trees/Roots</span><span class="badge" id="badge-trees">0</span></div>
                     <input type="file" id="upload-trees" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'trees')">
                     
-                    <div class="photo-btn" id="btn-brick" onclick="document.getElementById('upload-brick').click()"><span>Brickwork</span><span class="badge" id="badge-brick">0</span></div>
+                    <div class="photo-btn" id="btn-brick" onclick="document.getElementById('upload-brick').click()"><span>Brick Match</span><span class="badge" id="badge-brick">0</span></div>
                     <input type="file" id="upload-brick" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'brick')">
                     
-                    <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()"><span>Misc</span><span class="badge" id="badge-misc">0</span></div>
+                    <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()"><span>Misc Doc</span><span class="badge" id="badge-misc">0</span></div>
                     <input type="file" id="upload-misc" multiple accept="image/*" style="display:none;" onchange="handlePhotoUpload(this, 'misc')">
                 </div>
             </div>
@@ -224,24 +298,25 @@
             <div class="card">
                 <h3>Designer Survey Notes</h3>
                 <div class="full-width">
-                    <textarea id="designerNotes" rows="6" placeholder="Enter site notes (e.g., transom bars required, render details, obstacles)..."></textarea>
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-                    <input type="checkbox" id="includeNotesInPack" checked style="accent-color: var(--accent);">
-                    <label for="includeNotesInPack" style="margin:0; text-transform:none; color: #fff; font-size: 13px;">Include these notes in Customer PDF</label>
+                    <textarea id="designerNotes" rows="6" placeholder="Enter specific field notes for installers, structural anomalies, or specific design requests from the client..."></textarea>
                 </div>
                 
                 <button id="btn-ai-polish" class="btn-secondary" style="margin-top: 15px; width: 100%;">✨ AI Polish Notes</button>
                 
                 <div class="action-bar">
                     <button id="btn-sync" class="btn-success">Save & Sync</button>
-                    <button id="btn-generate-pdf">Open Vault PDF</button>
+                    <button id="btn-generate-pdf">Generate Digital PDF</button>
+                    <button id="btn-vault" class="btn-secondary" style="flex: 0.5;">Interactive Vault</button>
+                </div>
+
+                <div id="syncProgressWrapper">
+                    <label id="progressText" style="margin-bottom: 5px; color: var(--accent); font-size: 12px; font-weight: bold; display: block; text-transform: uppercase;">Initializing Sync...</label>
+                    <div class="progress-bg"><div id="progressFill" class="progress-fill"></div></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- INTERNAL SCRIPTS (FIREBASE & CORE SYNC LOGIC) -->
     <script type="module">
         import { auth, db, doc, setDoc, getDoc, collection, serverTimestamp, onAuthStateChanged, BRAND_CONFIG } from './js/core-firebase.js';
 
@@ -288,20 +363,33 @@
                     if(el('proposedSize')) el('proposedSize').value = SurveyState.projectSpecs?.proposedSize || "";
                     if(el('houseMaterial')) el('houseMaterial').value = SurveyState.projectSpecs?.houseMaterial || "";
                     
-                    // Decode legacy designer Insights if they exist
+                    // Intelligent parsing of legacy data to maintain backward compatibility
                     if(SurveyState.designerInsights?.design) {
                         const d = SurveyState.designerInsights.design;
-                        if(d.includes('Base Type:')) el('baseType').value = d.split('Base Type: ')[1].split('\n')[0] || "";
-                        if(d.includes('DPC Depth:')) el('dpcDepth').value = d.split('DPC Depth: ')[1].split('mm')[0] || "";
-                        if(d.includes('Fascia Height:')) el('fasciaHeight').value = d.split('Fascia Height: ')[1].split('mm')[0] || "";
-                        if(d.includes('Air Bricks:')) el('airBricks').value = d.split('Air Bricks: ')[1].split('\n')[0] || "";
+                        if(d.includes('Base Type:')) el('baseType').value = d.split('Base Type: ')[1].split('\n')[0].trim() || "";
+                        if(d.includes('DPC Depth:')) el('dpcDepth').value = d.split('DPC Depth: ')[1].split('mm')[0].trim() || "";
+                        if(d.includes('Fascia Height:')) el('fasciaHeight').value = d.split('Fascia Height: ')[1].split('mm')[0].trim() || "";
+                        if(d.includes('Air Bricks:')) el('airBricks').value = d.split('Air Bricks: ')[1].split('\n')[0].trim() || "";
                     }
 
                     if(el('accessDifficult')) el('accessDifficult').value = SurveyState.projectSpecs?.accessIssues || "";
                     if(el('accessWidth')) el('accessWidth').value = SurveyState.projectSpecs?.accessWidth || "";
                     if(el('wallObstacles')) el('wallObstacles').value = SurveyState.projectSpecs?.wallObstacles || "";
+                    if(el('drainage')) el('drainage').value = SurveyState.logistics?.drainage || "";
                     
                     if(el('roofType')) el('roofType').value = SurveyState.projectSpecs?.roofStyle || "";
+                    if(el('roofPitch')) el('roofPitch').value = SurveyState.projectSpecs?.roofPitch || "";
+                    
+                    // Parse frame colour
+                    const combinedFrame = SurveyState.projectSpecs?.frameColour || "";
+                    if(combinedFrame.includes(' / Int: ')) {
+                        const parts = combinedFrame.split(' / Int: ');
+                        if(el('frameColour')) el('frameColour').value = parts[0];
+                        if(el('internalFrameColour')) el('internalFrameColour').value = parts[1];
+                    } else {
+                        if(el('frameColour')) el('frameColour').value = combinedFrame;
+                    }
+
                     if(el('buildingRegs')) el('buildingRegs').value = SurveyState.projectSpecs?.buildingRegs || "";
                     if(el('planningPerms')) el('planningPerms').value = SurveyState.projectSpecs?.planningPerms || "";
                     if(el('sapCalcs')) el('sapCalcs').value = SurveyState.compliance?.sapCalcs || "";
@@ -326,6 +414,13 @@
             } catch (err) { return null; }
         }
 
+        const setProgress = (percent, label) => {
+            const wrapper = el('syncProgressWrapper');
+            wrapper.style.display = 'block';
+            el('progressFill').style.width = percent + '%';
+            el('progressText').innerText = label;
+        };
+
         el('btn-ai-polish')?.addEventListener('click', (e) => {
             e.preventDefault();
             const notesEl = el('designerNotes');
@@ -345,10 +440,17 @@
 
         el('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
-            if (!val('clientName') || !val('postCode')) return alert("Lead Name and Postcode are mandatory.");
+            if (!val('clientName') || !val('postCode')) return alert("Lead Name and Postcode are mandatory for document generation.");
 
             const btn = e.target;
-            btn.innerText = "Processing Assets..."; btn.disabled = true;
+            const btnPdf = el('btn-generate-pdf');
+            const btnVault = el('btn-vault');
+            
+            btn.disabled = true;
+            if(btnPdf) btnPdf.disabled = true;
+            if(btnVault) btnVault.disabled = true;
+
+            setProgress(10, "Initializing Sync & Compressing Layers...");
 
             try {
                 if (window.sniperPoints && window.sniperPoints.length > 0) {
@@ -360,16 +462,21 @@
                 let uploadedPhotoData = SurveyState.rawAssets || { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
                 let hasUploads = false;
 
+                let totalItems = 0;
+                for(let cat in window.sitePhotos) totalItems += window.sitePhotos[cat].length;
+                
+                let processed = 0;
                 for (const category in window.sitePhotos) {
                     if(window.sitePhotos[category] && window.sitePhotos[category].length > 0) {
                         for (const base64 of window.sitePhotos[category]) {
-                            btn.innerText = `Uploading ${category}...`;
+                            setProgress(20 + ((processed / totalItems) * 40), `Uploading ${category} imagery (${processed+1}/${totalItems})...`);
                             const url = await uploadBase64ToCloudinary(base64);
                             if (url) {
                                 if(!uploadedPhotoData[category]) uploadedPhotoData[category] = [];
                                 uploadedPhotoData[category].push(url);
                                 hasUploads = true;
                             }
+                            processed++;
                         }
                     }
                 }
@@ -380,30 +487,29 @@
                     document.querySelectorAll('.photo-btn .badge').forEach(b => { b.innerText = '0'; b.parentElement.classList.remove('has-photos'); });
                 }
 
-                btn.innerText = "Syncing to Vault...";
+                setProgress(70, "Syncing Survey Architecture to Firebase...");
 
-                // ==========================================
-                // EXACT VAULT / PDF DATA MAPPING OVERRIDE
-                // ==========================================
                 SurveyState.brand = val('brandSelect') || "YorkshireWindows";
                 SurveyState.pipelineStatus = SurveyState.pipelineStatus || "1. Consultation";
                 SurveyState.owner = SurveyState.owner || "Thomas Oldroyd";
 
                 SurveyState.customerProfile = {
-                    leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode'),
+                    leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode').toUpperCase(),
                     apptDate: val('apptDate'), revisitDate: val('revisitDate'),
                     vaultPIN: SurveyState.customerProfile?.vaultPIN || Math.floor(1000 + Math.random() * 9000).toString()
                 };
 
                 SurveyState.projectSpecs = {
-                    buildType: val('buildType'), proposedSize: val('proposedSize'), roofStyle: val('roofType'),
+                    buildType: val('buildType'), proposedSize: val('proposedSize'), roofStyle: val('roofType'), roofPitch: val('roofPitch'),
                     frameColour: val('frameColour') + (val('internalFrameColour') ? ' / Int: ' + val('internalFrameColour') : ''),
                     buildingRegs: val('buildingRegs'), planningPerms: val('planningPerms'), houseMaterial: val('houseMaterial'),
                     wallObstacles: val('wallObstacles'), accessWidth: val('accessWidth'), accessIssues: val('accessDifficult')
                 };
 
+                SurveyState.logistics = { drainage: val('drainage') };
                 SurveyState.compliance = { sapCalcs: val('sapCalcs') };
 
+                // Ensures backwards compatibility with PDF generation and Vault displays
                 SurveyState.designerInsights = {
                     prep: val('designerNotes'), 
                     design: `Base Type: ${val('baseType') || 'N/A'}\nDPC Depth: ${val('dpcDepth') ? val('dpcDepth') + 'mm' : 'N/A'}\nFascia Height: ${val('fasciaHeight') ? val('fasciaHeight') + 'mm' : 'N/A'}\n${val('airBricks') ? 'Air Bricks: ' + val('airBricks') : ''}`
@@ -426,23 +532,41 @@
                 await setDoc(docRef, SurveyState, { merge: true });
                 SurveyState.id = docRef.id;
                 
+                setProgress(100, "Pack Saved Successfully ✓");
                 btn.style.backgroundColor = "#2ea043"; btn.innerText = "Complete Pack Saved ✓";
-                setTimeout(() => { btn.style.backgroundColor = ""; btn.innerText = "Save & Sync"; btn.disabled = false; }, 3000);
+                
+                if(btnPdf) btnPdf.disabled = false;
+                if(btnVault) btnVault.disabled = false;
+
+                setTimeout(() => { 
+                    el('syncProgressWrapper').style.display = 'none';
+                    btn.style.backgroundColor = ""; btn.innerText = "Save & Sync"; btn.disabled = false; 
+                }, 3000);
 
             } catch(err) {
                 alert("Database Sync Error: " + err.message);
-                btn.innerText = "Save & Sync"; btn.disabled = false;
+                el('syncProgressWrapper').style.display = 'none';
+                btn.innerText = "Save & Sync"; 
+                btn.disabled = false;
+                if(btnPdf) btnPdf.disabled = false;
+                if(btnVault) btnVault.disabled = false;
             }
         });
 
+        // ROUTING
         el('btn-generate-pdf')?.addEventListener('click', (e) => { 
             e.preventDefault(); 
             if(!SurveyState.id) return alert("Please click 'Save & Sync' first to lock in the data.");
+            window.location.href = `pdf-compiler.html?id=${SurveyState.id}`;
+        });
+
+        el('btn-vault')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(!SurveyState.id) return alert("Please click 'Save & Sync' first.");
             window.location.href = `vault.html?id=${SurveyState.id}`;
         });
     </script>
 
-    <!-- INTERNAL SCRIPTS (SNIPER & UPLOADS) -->
     <script>
         const canvas = document.getElementById('sniperCanvas');
         const ctx = canvas.getContext('2d');
@@ -537,17 +661,39 @@
         function resetMarkButton() { if (markBtn) { markBtn.innerText = "🎯 Drop Target Pin"; markBtn.style.backgroundColor = ""; markBtn.style.color = ""; } }
 
         window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
+        
+        // IMAGE COMPRESSION UTILITY
         window.handlePhotoUpload = function(input, category) {
             const files = input.files; if(!files.length) return;
             const badge = document.getElementById('badge-' + category); const btn = document.getElementById('btn-' + category);
+            
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
-                reader.onload = (e) => { window.sitePhotos[category].push(e.target.result); badge.innerText = window.sitePhotos[category].length; btn.classList.add('has-photos'); };
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200; // Limits image resolution to prevent memory crashes
+                        let scaleSize = MAX_WIDTH / img.width;
+                        if(scaleSize > 1) scaleSize = 1; // Don't up-scale small images
+                        
+                        canvas.width = img.width * scaleSize;
+                        canvas.height = img.height * scaleSize;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        window.sitePhotos[category].push(canvas.toDataURL('image/jpeg', 0.8));
+                        badge.innerText = window.sitePhotos[category].length;
+                        btn.classList.add('has-photos');
+                    };
+                    img.src = e.target.result;
+                };
                 reader.readAsDataURL(file);
-            }); input.value = ''; 
+            });
+            input.value = ''; 
         };
 
-        document.getElementById('planningPerms')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-planning'); if(cb) cb.checked = (e.target.value !== 'No' && e.target.value !== ''); });
+        document.getElementById('planningPerms')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-planning'); if(cb) cb.checked = (e.target.value !== 'Permitted Development (No Action)' && e.target.value !== ''); });
         document.getElementById('sapCalcs')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-sap'); if(cb) cb.checked = (e.target.value === 'Yes'); });
         document.getElementById('roofType')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-roof'); if(cb) cb.checked = (e.target.value !== ''); });
     </script>
