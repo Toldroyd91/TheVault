@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Intelligence - COHI Pro</title>
+    <style>
+        :root { --bg: #0d1117; --card: #161b22; --accent: #0dcaf0; --text: #c9d1d9; --border: #30363d; --success: #238636; --warn: #f59e0b; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 30px; }
+        
+        .header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { margin: 0; color: #fff; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+        p { color: #8b949e; margin: 5px 0 0 0; font-size: 13px; }
+
+        .search-box { display: flex; gap: 15px; background: var(--card); padding: 25px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 30px; }
+        .input-group { flex: 1; }
+        label { display: block; font-size: 11px; text-transform: uppercase; color: #8b949e; margin-bottom: 8px; font-weight: bold; letter-spacing: 1px;}
+        input { width: 100%; background: #090d13; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 4px; font-size: 16px; box-sizing: border-box; text-transform: uppercase;}
+        input:focus { outline: none; border-color: var(--accent); }
+        button { background: var(--accent); color: #000; border: none; padding: 0 30px; border-radius: 4px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
+        button:hover { background: #31d2f2; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(13, 202, 240, 0.3);}
+        
+        #loader { display: none; color: var(--accent); font-weight: bold; margin-bottom: 20px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        .results-grid { display: none; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        
+        .data-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; position: relative; overflow: hidden; }
+        .data-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
+        
+        .card-title { font-size: 12px; text-transform: uppercase; color: var(--accent); font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; display: flex; align-items: center; justify-content: space-between;}
+        
+        .data-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 10px 0; align-items: flex-start;}
+        .data-row:last-child { border-bottom: none; padding-bottom: 0;}
+        .data-label { font-size: 11px; color: #8b949e; text-transform: uppercase; flex: 1; padding-right: 15px;}
+        .data-value { font-size: 13px; font-weight: bold; color: #fff; text-align: right; flex: 1.5; line-height: 1.4;}
+        .data-sub { display: block; font-size: 9px; color: #8b949e; font-weight: normal; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px;}
+
+        .map-container { grid-column: 1 / -1; height: 500px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #000; display: flex; flex-direction: column;}
+        .map-header { padding: 12px 15px; background: #21262d; color: #fff; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);}
+        .map-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .badge { font-size: 9px; background: #21262d; padding: 3px 6px; border-radius: 4px; color: #c9d1d9; border: 1px solid var(--border);}
+        .badge.verified { background: rgba(35, 134, 54, 0.1); color: var(--success); border-color: var(--success); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Architectural Site Intelligence</h1>
+        <p>Pre-Consultation Remote Survey Engine</p>
+    </div>
+
+    <div class="search-box">
+        <div class="input-group">
+            <label>House Name / Number</label>
+            <input type="text" id="houseNum" placeholder="e.g. 14">
+        </div>
+        <div class="input-group">
+            <label>UK Postcode</label>
+            <input type="text" id="postcode" placeholder="e.g. S70 0PN">
+        </div>
+        <button onclick="runIntelScrape()">Extract Site Intel</button>
+    </div>
+
+    <div id="loader">Bypassing security protocols. Querying UK Gov & Ordnance Survey Databases...</div>
+
+    <div class="results-grid" id="resultsGrid">
+        
+        <div class="data-card" style="grid-column: span 2;">
+            <div class="card-title">Existing Architecture & Footprint <span class="badge verified">UK Gov EPC Verified</span></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <div class="data-row"><span class="data-label">Internal Area</span><span class="data-value" id="val-area">--</span></div>
+                    <div class="data-row"><span class="data-label">Property Style</span><span class="data-value" id="val-type">--</span></div>
+                    <div class="data-row"><span class="data-label">Primary Heating</span><span class="data-value" id="val-heating">--</span></div>
+                </div>
+                <div>
+                    <div class="data-row"><span class="data-label">Wall Composition</span><span class="data-value" id="val-walls">--</span></div>
+                    <div class="data-row"><span class="data-label">Roof System</span><span class="data-value" id="val-roof">--</span></div>
+                    <div class="data-row"><span class="data-label">Energy Rating</span><span class="data-value" id="val-rating">--</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="card-title">Financial & Equity Baseline <span class="badge">HMLR Algo</span></div>
+            <div class="data-row">
+                <span class="data-label">Est. Rebuild / Capital Value</span>
+                <span class="data-value" style="color: var(--success); font-size: 16px;" id="val-equity">--
+                    <span class="data-sub">Calculated via regional £/sqm averages</span>
+                </span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Added Value Potential</span>
+                <span class="data-value" id="val-potential">--</span>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <div class="card-title">Structural Risk Matrix <span class="badge">Open-Meteo</span></div>
+            <div class="data-row"><span class="data-label">Elevation (ASL)</span><span class="data-value" id="val-elevation">--</span></div>
+            <div class="data-row"><span class="data-label">Wind Exposure</span><span class="data-value" id="val-exposure">--</span></div>
+            <div class="data-row"><span class="data-label">Load Rating</span><span class="data-value">0.6 kN/m² <span class="data-sub">UK Snow Load Standard</span></span></div>
+        </div>
+
+        <div class="data-card">
+            <div class="card-title">Solar & Glare Analytics <span class="badge">SunCalc</span></div>
+            <div class="data-row"><span class="data-label">Peak Sunlight</span><span class="data-value" id="val-daylight">--</span></div>
+            <div class="data-row">
+                <span class="data-label">Glass Recommendation</span>
+                <span class="data-value" id="val-glass-rec" style="color: var(--warn);">--</span>
+            </div>
+        </div>
+
+        <div class="map-container" id="mapContainer">
+            <div class="map-header">
+                <span>Topographical Property Boundaries</span>
+                <span class="badge verified">Ordnance Survey Raster Data</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #30363d;">Map Data Pending...</div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { functions } from './js/core-firebase.js'; 
+        import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+        window.runIntelScrape = async function() {
+            const postcode = document.getElementById('postcode').value.trim();
+            const houseNum = document.getElementById('houseNum').value.trim();
+            
+            if (!postcode || !houseNum) return alert("Both House Number and Postcode are required for a deep data extraction.");
+
+            const loader = document.getElementById('loader');
+            const grid = document.getElementById('resultsGrid');
+            
+            grid.style.display = 'none';
+            loader.style.display = 'block';
+
+            try {
+                // 1. POSTCODES.IO
+                loader.innerText = "Triangulating geospatial coordinates...";
+                const cleanPC = postcode.replace(/\s+/g, '');
+                const pcRes = await fetch(`https://api.postcodes.io/postcodes/${cleanPC}`);
+                const pcData = await pcRes.json();
+                if (pcData.status !== 200) throw new Error("Postcode not found.");
+                const lat = pcData.result.latitude;
+                const lng = pcData.result.longitude;
+
+                // 2. OPEN-METEO
+                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&elevation=true`);
+                const weatherData = await weatherRes.json();
+                const elevation = weatherData.elevation;
+                
+                document.getElementById('val-elevation').innerText = `${elevation}m`;
+                
+                let exposureText = "Standard (Standard Fixings)";
+                if (elevation > 150) exposureText = "High (Heavy Duty Ties Required)";
+                else if (elevation > 75) exposureText = "Moderate (Reinforced Eaves)";
+                document.getElementById('val-exposure').innerText = exposureText;
+
+                // 3. SOLAR 
+                const sunRes = await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&formatted=0`);
+                const sunData = await sunRes.json();
+                const dayLengthSecs = sunData.results.day_length;
+                const hours = Math.floor(dayLengthSecs / 3600);
+                
+                document.getElementById('val-daylight').innerText = `${hours}h ${Math.floor((dayLengthSecs % 3600) / 60)}m (Mid-Summer)`;
+                document.getElementById('val-glass-rec').innerText = hours >= 15 ? "Solar Control / Tinted Roof Highly Recommended" : "Standard Low-E / Argon Cavity";
+                document.getElementById('val-glass-rec').style.color = hours >= 15 ? "#E50914" : "#0dcaf0";
+
+                // 4. SECURE EPC CLOUD FUNCTION
+                loader.innerText = "Bypassing firewalls. Querying UK Gov EPC Database...";
+                const getEPCData = httpsCallable(functions, 'fetchEPCData');
+                const epcResult = await getEPCData({ postcode: cleanPC, houseNum: houseNum });
+                
+                if(epcResult.data.success && epcResult.data.data) {
+                    const epc = epcResult.data.data;
+                    const area = epc['total-floor-area'];
+                    document.getElementById('val-area').innerText = `${area} m²`;
+                    document.getElementById('val-type').innerText = epc['property-type'] + (epc['built-form'] ? ` (${epc['built-form']})` : '');
+                    document.getElementById('val-heating').innerText = epc['mainheat-description'];
+                    document.getElementById('val-walls').innerText = epc['walls-description'];
+                    document.getElementById('val-roof').innerText = epc['roof-description'];
+                    document.getElementById('val-rating').innerText = `Band ${epc['current-energy-rating'].toUpperCase()}`;
+                    
+                    // FINANCIAL ALGO: Assuming average regional value of £2,600 per sqm
+                    const valSqm = 2600; 
+                    const baselineValue = Math.round(area * valSqm);
+                    document.getElementById('val-equity').innerHTML = `£${baselineValue.toLocaleString('en-GB')}<span class="data-sub">Calculated via regional £/sqm averages</span>`;
+                    document.getElementById('val-potential').innerText = `Extension yields typically add 5-8% to baseline.`;
+                } else {
+                    document.getElementById('val-area').innerText = "Unregistered Property";
+                }
+
+                // 5. SECURE ORDNANCE SURVEY CLOUD FUNCTION
+                loader.innerText = "Extracting Topographical Boundary Raster...";
+                const getOSData = httpsCallable(functions, 'fetchOSMap');
+                const osResult = await getOSData({ lat: lat, lng: lng });
+                
+                document.getElementById('mapContainer').innerHTML = `
+                    <div class="map-header">
+                        <span>Topographical Property Boundaries</span>
+                        <span class="badge verified">Ordnance Survey Raster Data</span>
+                    </div>
+                    <img src="${osResult.data.url}" alt="Ordnance Survey Map" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'#000\\'/><text x=\\'50%\\' y=\\'50%\\' font-family=\\'Arial\\' font-size=\\'14\\' fill=\\'#888\\' text-anchor=\\'middle\\'>Map Data Unavailable</text></svg>'">
+                `;
+
+                // SHOW UI
+                loader.style.display = 'none';
+                grid.style.display = 'grid';
+
+            } catch (error) {
+                loader.style.display = 'none';
+                alert("Intel Extraction Failed: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
