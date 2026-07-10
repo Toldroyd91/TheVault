@@ -77,7 +77,8 @@
                 <div class="form-grid">
                     <div><label>Lead Name *</label><input type="text" id="clientName" placeholder="e.g. John Dall"></div>
                     <div><label>Customer Number</label><input type="text" id="clientNum" placeholder="e.g. 10245"></div>
-                    <div class="full-width"><label>Site Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70 0PN" style="text-transform: uppercase;"></div>
+                    <div><label>House No. / Name *</label><input type="text" id="houseNum" placeholder="e.g. 15 or 'The Barn'"></div>
+                    <div><label>Site Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70 0PN" style="text-transform: uppercase;"></div>
                     <div><label>Consultation Date</label><input type="date" id="apptDate"></div>
                     <div><label>Revisit Date</label><input type="date" id="revisitDate"></div>
                 </div>
@@ -355,6 +356,7 @@
                     if(el('brandSelect')) el('brandSelect').value = SurveyState.brand || "YorkshireWindows";
                     if(el('clientName')) el('clientName').value = SurveyState.customerProfile?.leadName || "";
                     if(el('clientNum')) el('clientNum').value = SurveyState.customerProfile?.customerNum || "";
+                    if(el('houseNum')) el('houseNum').value = SurveyState.customerProfile?.houseNumber || "";
                     if(el('postCode')) el('postCode').value = SurveyState.customerProfile?.postcode || "";
                     if(el('apptDate')) el('apptDate').value = SurveyState.customerProfile?.apptDate || "";
                     if(el('revisitDate')) el('revisitDate').value = SurveyState.customerProfile?.revisitDate || "";
@@ -440,7 +442,7 @@
 
         el('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
-            if (!val('clientName') || !val('postCode')) return alert("Lead Name and Postcode are mandatory for document generation.");
+            if (!val('clientName') || !val('postCode') || !val('houseNum')) return alert("Lead Name, House Number, and Postcode are mandatory for document generation.");
 
             const btn = e.target;
             const btnPdf = el('btn-generate-pdf');
@@ -494,8 +496,12 @@
                 SurveyState.owner = SurveyState.owner || "Thomas Oldroyd";
 
                 SurveyState.customerProfile = {
-                    leadName: val('clientName'), customerNum: val('clientNum'), postcode: val('postCode').toUpperCase(),
-                    apptDate: val('apptDate'), revisitDate: val('revisitDate'),
+                    leadName: val('clientName'), 
+                    customerNum: val('clientNum'), 
+                    houseNumber: val('houseNum'),
+                    postcode: val('postCode').toUpperCase(),
+                    apptDate: val('apptDate'), 
+                    revisitDate: val('revisitDate'),
                     vaultPIN: SurveyState.customerProfile?.vaultPIN || Math.floor(1000 + Math.random() * 9000).toString()
                 };
 
