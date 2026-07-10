@@ -17,79 +17,81 @@
                     <h3 style="margin-top:0; color: #fff;">CRITICAL SYSTEM CRASH</h3>
                     <p style="font-weight: bold;">Error: ${e.message}</p>
                     <p style="font-size: 11px; opacity: 0.8;">File: ${e.filename} <br>Line: ${e.lineno}</p>
-                    <p style="font-size: 12px; margin-top: 15px;">Please screenshot this and send it to your developer.</p>
                 </div>`;
             }
         });
     </script>
 
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --accent: #E50914; --text: #c9d1d9; --border: #30363d; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 40px; }
+        :root { --bg: #0d1117; --card: #161b22; --accent: #0f3559; --text: #c9d1d9; --border: #30363d; }
+        body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 40px; }
         
         .compiler-header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
         h1 { margin: 0; color: #fff; font-size: 20px; text-transform: uppercase; letter-spacing: 2px; }
         
         .survey-list { display: grid; gap: 15px; max-width: 800px; }
-        .survey-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .survey-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
         .client-info h3 { margin: 0 0 5px 0; color: #fff; font-size: 16px; }
         .client-info p { margin: 0; font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
         
         .btn-pdf { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; transition: 0.2s; }
-        .btn-pdf:hover { background: #b20710; }
         .btn-pdf:disabled { background: #444; cursor: not-allowed; }
 
-        /* LOADING SPINNER FOR AUTO-TRIGGER */
-        .loading-overlay { display: none; text-align: center; padding: 40px; background: var(--card); border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .loading-overlay { display: none; text-align: center; padding: 40px; background: var(--card); border-radius: 8px; border: 1px solid var(--border-color); }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--accent); animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- STRICT A4 PRINT TEMPLATE (Hidden from UI) --- */
+        /* --- STRICT A4 EDITORIAL PRINT TEMPLATE --- */
         #pdf-engine { display: none; }
-        .pdf-page { width: 210mm; min-height: 297mm; background: #fff; color: #000; padding: 20mm; box-sizing: border-box; font-family: 'Helvetica', sans-serif; position: relative; page-break-after: always; overflow: hidden;}
+        .pdf-page { width: 210mm; min-height: 297mm; background: #fff; color: #000; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; position: relative; page-break-after: always; overflow: hidden; }
         
-        /* DYNAMIC WATERMARK */
-        .pdf-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 120px; color: rgba(0,0,0,0.02); font-weight: 900; white-space: nowrap; pointer-events: none; z-index: 0; text-align: center; width: 200%; line-height: 1; letter-spacing: -2px;}
+        /* STANDARD PAGE PADDING */
+        .page-padded { padding: 20mm; display: flex; flex-direction: column; height: 100%; }
         
-        .pdf-content-wrapper { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;}
-        
-        .pdf-header { border-bottom: 3px solid #E50914; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;}
-        .pdf-title { font-size: 28px; font-weight: 900; margin: 0; color: #000; text-transform: uppercase; letter-spacing: -1px; line-height: 1;}
-        .pdf-subtitle { font-size: 10px; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;}
-        .pdf-meta-right { text-align: right; font-size: 9px; color: #666; text-transform: uppercase; }
-        
-        .section-title { background: #000; color: #fff; padding: 10px 15px; font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
-        
-        .pdf-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; }
-        .pdf-box { border: 1px solid #ddd; padding: 15px; flex: 1; min-width: 45%; background: rgba(255,255,255,0.9); border-left: 4px solid #000; }
-        .pdf-box.highlight { border-left-color: #E50914; background: rgba(229,9,20,0.03); }
-        .pdf-box.full-width { min-width: 100%; }
-        .pdf-label { font-size: 9px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: bold; letter-spacing: 1px; }
-        .pdf-val { font-size: 15px; font-weight: bold; color: #000; margin: 0 0 5px 0; }
-        .pdf-desc { font-size: 11px; color: #444; line-height: 1.5; margin: 0; }
-        .pdf-math { font-family: monospace; background: #eee; padding: 4px 8px; font-size: 10px; border-radius: 4px; display: inline-block; margin-top: 5px; color: #333; border: 1px solid #ccc;}
-        
-        .pdf-image-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .pdf-img-container { border: 1px solid #ccc; padding: 5px; text-align: center; height: 260px; background: #fff; }
-        .pdf-img-container img { width: 100%; height: 100%; object-fit: contain; }
-        .pdf-img-title { font-size: 9px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; background: #000; color: #fff; padding: 6px; letter-spacing: 1px;}
-        
-        /* TOC STYLES */
-        .toc-row { display: flex; align-items: baseline; margin-bottom: 15px; border-bottom: 1px dotted #ccc; padding-bottom: 5px;}
-        .toc-num { font-size: 18px; font-weight: 900; color: #E50914; margin-right: 15px; }
-        .toc-text { font-size: 14px; font-weight: bold; color: #000; text-transform: uppercase; flex-grow: 1;}
-        
-        /* GLOSSARY STYLES */
-        .glossary-item { margin-bottom: 15px; }
-        .glossary-term { font-size: 12px; font-weight: bold; color: #E50914; text-transform: uppercase; margin-bottom: 3px; display: block;}
-        .glossary-def { font-size: 11px; color: #333; line-height: 1.5; margin: 0;}
+        /* COVER PAGE STYLES */
+        .cover-page { background-color: #111; background-size: cover; background-position: center; }
+        .cover-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(229, 9, 20, 0.92); clip-path: polygon(0 0, 75% 0, 45% 100%, 0% 100%); z-index: 1; }
+        .cover-content { position: absolute; bottom: 30mm; left: 20mm; z-index: 2; color: #fff; max-width: 60%; }
+        .cover-logo { font-size: 24px; font-weight: 900; letter-spacing: 4px; border-bottom: 2px solid #fff; padding-bottom: 10px; margin-bottom: 20px; display: inline-block; }
+        .cover-title { font-size: 42px; font-weight: 900; line-height: 1; text-transform: uppercase; margin: 0 0 10px 0; letter-spacing: -1px; }
+        .cover-client { font-size: 16px; color: #f8cdda; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* PAMPHLET COVER STYLES */
-        .pamphlet-cover { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 4px solid #000; padding: 40px;}
-        .pamphlet-icon { font-size: 60px; margin-bottom: 20px;}
-        .pamphlet-title { font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px;}
+        /* SPLIT PAGE STYLES */
+        .split-page { display: flex; flex-direction: row; height: 297mm; padding: 0; }
+        .split-img { width: 45%; height: 100%; background-size: cover; background-position: center; border-right: 4px solid #0f3559; }
+        .split-content { width: 55%; padding: 20mm; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        .pdf-citation { font-size: 8px; color: #666; text-align: left; border-top: 1px solid #eee; padding-top: 10px; margin-top: auto; line-height: 1.4;}
+        /* FULL BLEED IMAGE PAGE */
+        .img-page { width: 100%; height: 100%; background-size: cover; background-position: center; }
+
+        /* EDITORIAL TYPOGRAPHY */
+        .ed-header { border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 25px; }
+        .ed-subtitle { font-size: 10px; font-weight: 900; color: #0f3559; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+        .ed-title { font-size: 28px; font-weight: 900; margin: 0; text-transform: uppercase; line-height: 1; letter-spacing: -1px; }
+        
+        .section-title { font-size: 12px; font-weight: bold; background: #000; color: #fff; padding: 8px 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        
+        .pdf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .pdf-box { border: 1px solid #ddd; padding: 15px; background: #fafafa; }
+        .pdf-box.full { grid-column: 1 / -1; }
+        .pdf-box.highlight { border-left: 4px solid #0f3559; background: #fffcfc; }
+        
+        .pdf-label { font-size: 9px; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: bold; letter-spacing: 1px; }
+        .pdf-val { font-size: 16px; font-weight: 900; color: #000; margin: 0 0 5px 0; }
+        .pdf-desc { font-size: 11px; color: #444; line-height: 1.5; margin: 0; }
+        
+        /* TABLE OF CONTENTS */
+        .toc-wrapper { margin-top: 30px; flex-grow: 1; }
+        .toc-row { display: flex; align-items: baseline; margin-bottom: 18px; border-bottom: 1px dotted #ccc; padding-bottom: 8px; }
+        .toc-num { font-size: 14px; font-weight: 900; color: #0f3559; margin-right: 15px; }
+        .toc-text { font-size: 13px; font-weight: bold; color: #000; text-transform: uppercase; flex-grow: 1; }
+
+        /* BIOS SECTION */
+        .bio-section { margin-top: auto; padding-top: 20px; border-top: 1px solid #eee; }
+        .bio-title { font-size: 10px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .bio-name { font-size: 16px; font-weight: 900; color: #000; margin: 0; }
+        .bio-role { font-size: 11px; color: #0f3559; margin-bottom: 5px; font-weight: bold; }
+        .bio-text { font-size: 10px; color: #555; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -97,20 +99,17 @@
     <div class="compiler-header">
         <div>
             <h1>PDF Compiler Engine</h1>
-            <p style="margin: 5px 0 0 0; font-size: 12px; color: #8b949e;">Strict Factual & Financial Document Generation Utility</p>
+            <p style="margin: 5px 0 0 0; font-size: 12px; color: #8b949e;">High-End Dossier Layout</p>
         </div>
-        <button onclick="window.location.href='survey.html'" style="background: transparent; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Return to Survey Engine</button>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
         <div class="spinner" id="mainSpinner"></div>
-        <h3 style="color: #fff; margin:0;" id="loadingHeader">Authenticating User</h3>
+        <h3 style="color: #fff; margin:0;" id="loadingHeader">Compiling Dossier</h3>
         <p id="loadingStatus" style="color: #8b949e; font-size: 12px; margin-top: 10px;">Verifying secure session...</p>
     </div>
 
-    <div class="survey-list" id="surveyList">
-        <p style="color: #0dcaf0; font-weight: bold;">Authenticating secure connection...</p>
-    </div>
+    <div class="survey-list" id="surveyList"></div>
 
     <div id="pdf-engine">
         <div id="pdf-content"></div>
@@ -123,27 +122,17 @@
         let surveysData = {};
         let authResolved = false;
 
-        // THE FAILSAFE TIMER
         const failsafeTimer = setTimeout(() => {
             if (!authResolved) {
                 authResolved = true;
-                const list = document.getElementById('surveyList');
-                if(list.style.display !== 'none') {
-                    list.innerHTML = '<p style="color: orange; font-weight: bold;">Auth Timeout. Forcing secure connection override...</p>';
-                }
                 loadCompiler();
             }
         }, 2000);
 
-        // STANDARD AUTH LISTENER
         onAuthStateChanged(auth, async (user) => {
             if (authResolved) return; 
             authResolved = true;
             clearTimeout(failsafeTimer);
-            
-            if (!user) {
-                console.warn("Notice: No logged-in user detected. Attempting to pull data anyway.");
-            }
             await loadCompiler();
         });
 
@@ -151,488 +140,221 @@
             const list = document.getElementById('surveyList');
             const urlId = new URLSearchParams(window.location.search).get('id');
 
-            // AUTO-TRIGGER LOGIC
             if (urlId) {
                 list.style.display = 'none';
                 document.getElementById('loadingOverlay').style.display = 'block';
-                document.getElementById('loadingHeader').innerText = "Compiling Architectural Dossier";
-                
                 try {
-                    document.getElementById('loadingStatus').innerText = "Fetching secure survey payload...";
                     const snap = await getDoc(doc(db, "surveys", urlId));
-                    
                     if (snap.exists()) {
                         surveysData[urlId] = snap.data();
-                        document.getElementById('loadingStatus').innerText = "Calculating structural yields...";
                         await generatePDF(urlId, null); 
-                        document.getElementById('loadingStatus').innerText = "Download Complete. You may close this tab or return to the Survey Engine.";
+                        document.getElementById('loadingStatus').innerText = "Download Complete.";
                         document.getElementById('mainSpinner').style.display = 'none';
-                    } else {
-                        throw new Error("Survey ID not found in database.");
                     }
                 } catch (e) {
-                    document.getElementById('loadingStatus').innerText = "Connection Error: " + e.message;
-                    document.getElementById('loadingStatus').style.color = "#E50914";
-                    document.getElementById('mainSpinner').style.display = 'none';
+                    document.getElementById('loadingStatus').innerText = "Error: " + e.message;
                 }
                 return; 
             }
 
-            // STANDARD LIST LOAD
             try {
-                list.innerHTML = '<p style="color: #8b949e;">Loading database records...</p>';
                 const querySnapshot = await getDocs(collection(db, "surveys"));
                 list.innerHTML = '';
-                
-                if(querySnapshot.empty) {
-                    list.innerHTML = '<p>No survey records found.</p>';
-                    return;
-                }
-
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     surveysData[docSnap.id] = data;
-                    
-                    const name = data.customerProfile?.leadName || 'Unnamed Lead';
-                    const postcode = data.customerProfile?.postcode || 'No Postcode';
-                    const buildType = data.projectSpecs?.buildType || 'TBC';
-
                     list.innerHTML += `
                         <div class="survey-card">
                             <div class="client-info">
-                                <h3>${name}</h3>
-                                <p>${postcode} | ${buildType}</p>
+                                <h3>${data.customerProfile?.leadName || 'Unnamed Lead'}</h3>
+                                <p>${data.customerProfile?.postcode || 'No Postcode'} | ${data.projectSpecs?.buildType || 'TBC'}</p>
                             </div>
-                            <button class="btn-pdf" onclick="generatePDF('${docSnap.id}', this)">Compile Master Report</button>
+                            <button class="btn-pdf" onclick="generatePDF('${docSnap.id}', this)">Compile Dossier</button>
                         </div>
                     `;
                 });
             } catch (error) {
-                list.innerHTML = `<p style="color: #E50914; font-weight:bold;">Database Connection Error: ${error.message}</p>`;
+                list.innerHTML = `<p style="color:red;">Database Error</p>`;
             }
         }
 
         window.generatePDF = async function(docId, btnElement) {
-            let originalText = "Compile Master Report";
-            if (btnElement) {
-                originalText = btnElement.innerText;
-                btnElement.innerText = "Extracting Data & Calculating Yields...";
-                btnElement.disabled = true;
-            }
-
             const data = surveysData[docId];
-            if(!data) {
-                alert("Critical Error: Survey data is missing from memory.");
-                if (btnElement) { btnElement.innerText = originalText; btnElement.disabled = false; }
-                return;
-            }
-
             const pdfContent = document.getElementById('pdf-content');
             
-            const brandRaw = data.brand || 'CO HOME IMPROVEMENTS';
+            const brandRaw = data.brand || 'YORKSHIRE WINDOWS';
             const brandName = brandRaw.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
-            
-            const postcode = data.customerProfile?.postcode || 'TBC';
-            
-            // House Number Smart Extractor
-            const rawAddress = data.customerProfile?.addressLine1 || "";
-            const houseNum = data.customerProfile?.houseNumber || rawAddress.split(' ')[0] || "1";
-
-            const rawSize = data.projectSpecs?.proposedSize || '0x0';
-            const buildType = data.projectSpecs?.buildType || 'TBC';
-            const roofStyle = data.projectSpecs?.roofStyle || 'TBC';
+            const clientName = data.customerProfile?.leadName || 'Client';
+            const postcode = data.customerProfile?.postcode || '';
+            const houseNum = data.customerProfile?.houseNumber || "1";
             const dateStr = new Date().toLocaleDateString('en-GB');
 
-            // --- 1. SPATIAL & FINANCIAL MATHEMATICS ---
-            let sqMetres = 0;
-            const sizeMatch = rawSize.match(/(\d+)\s*x\s*(\d+)/i);
-            if(sizeMatch) {
-                const widthM = parseInt(sizeMatch[1]) / 1000;
-                const lengthM = parseInt(sizeMatch[2]) / 1000;
-                sqMetres = (widthM * lengthM).toFixed(2);
-            }
-
-            const pricePerSqm = 2600; 
-            const consYieldPercent = 5;
-            let roiTitle = "Estimated Equity Yield";
-            let roiVal = "Data Unavailable";
-            let roiDesc = "Dimension format requires manual assessment.";
-            let roiMath = "";
-
-            if(sqMetres > 0) {
-                if(buildType.toLowerCase().includes('conservatory')) {
-                    roiVal = `Est. ${consYieldPercent}% Property Uplift`;
-                    roiDesc = `Conservatory additions are indexed to provide a percentage yield against the total existing property value.`;
-                    roiMath = `Calculation: Existing Property Value × 0.05`;
-                } else {
-                    const addedValue = (sqMetres * pricePerSqm).toLocaleString('en-GB');
-                    roiVal = `Est. £${addedValue} Valuation Uplift`;
-                    roiDesc = `Yield is calculated by multiplying the new internal spatial footprint by the current regional property index value per square meter.`;
-                    roiMath = `Formula: ${sqMetres}m² × £${pricePerSqm.toLocaleString('en-GB')}/m² = £${addedValue}`;
-                }
-            }
-
-            // --- 2. METEOROLOGICAL, EPC & OS MAP API DATA ---
+            // --- API DATA EXTRACTION ---
             let elevation = "Pending API";
-            let district = "Local Authority";
             let epcData = { area: "TBC", rating: "TBC", walls: "TBC", roof: "TBC" };
             let osMapUrl = "";
-            let lat = 0, lng = 0;
 
             try {
-                if(btnElement) btnElement.innerText = "Querying Gov & Topography Servers...";
-                if(document.getElementById('loadingStatus')) document.getElementById('loadingStatus').innerText = "Querying Gov & Topography Servers...";
-                
                 const cleanPC = postcode.replace(/\s+/g, '');
                 const pcRes = await fetch(`https://api.postcodes.io/postcodes/${cleanPC}`);
                 const pcData = await pcRes.json();
+                
                 if(pcData.status === 200) {
-                    lat = pcData.result.latitude;
-                    lng = pcData.result.longitude;
-                    district = pcData.result.admin_district;
+                    const lat = pcData.result.latitude;
+                    const lng = pcData.result.longitude;
                     
                     const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&elevation=true`);
                     const weatherData = await weatherRes.json();
                     elevation = `${weatherData.elevation}m`;
 
-                    // SECURE EPC CLOUD CALL
                     const fetchEPC = httpsCallable(functions, 'fetchEPCData');
                     const epcRes = await fetchEPC({ postcode: cleanPC, houseNum: houseNum });
-                    if(epcRes.data && epcRes.data.success && epcRes.data.data) {
+                    if(epcRes.data?.success && epcRes.data?.data) {
                         epcData.area = `${epcRes.data.data['total-floor-area']} m²`;
                         epcData.rating = epcRes.data.data['current-energy-rating']?.toUpperCase() || "TBC";
                         epcData.walls = epcRes.data.data['walls-description'] || "TBC";
                         epcData.roof = epcRes.data.data['roof-description'] || "TBC";
                     }
 
-                    // SECURE OS MAP CLOUD CALL
                     const fetchOS = httpsCallable(functions, 'fetchOSMap');
                     const osRes = await fetchOS({ lat: lat, lng: lng });
-                    if(osRes.data && osRes.data.url) osMapUrl = osRes.data.url;
+                    if(osRes.data?.url) osMapUrl = osRes.data.url;
                 }
-            } catch(e) { console.warn("API Fetch bypassed or failed.", e); }
+            } catch(e) { console.warn("Background API Fetch failed."); }
 
-            // --- 3. EXTREME WEATHER LOAD FACTUALS ---
-            const snowLoadKg = Math.round(sqMetres * 65);
-            let snowAnalogy = "a heavy motorcycle";
-            if(snowLoadKg > 1200) snowAnalogy = "a family estate car";
-            else if(snowLoadKg > 800) snowAnalogy = "a compact hatchback car";
-            else if(snowLoadKg > 400) snowAnalogy = "a concert grand piano";
+            // --- PAMPHLET PATHS ---
+            // Ensure these files exist in your /images folder on GitHub
+            const imgPath = './assets/shared/';
+            const pamphletWhoWeAre = `${imgPath}who-we-are.jpg`;
+            const pamphletPlanning = `${imgPath}planning.jpg`;
+            const pamphletJourney = `${imgPath}journey.jpg`;
+            const pamphletPiling = `${imgPath}piling.jpg`;
 
-            // --- 4. PAMPHLET DATA LOGIC ---
-            const p = data.pamphlets || {};
-            const docTemplates = [
-                { key: p.brochure, icon: '📖', title: 'Product Brochure & Specification Guide' },
-                { key: p.warranty, icon: '🛡️', title: '20-Year Insurance Backed Guarantee' },
-                { key: p.planning, icon: '🏛️', title: 'Planning Permission & Regulatory Guide' },
-                { key: p.sap, icon: '🌿', title: 'SAP Energy Efficiency Factsheet' },
-                { key: p.roof, icon: '🏠', title: 'Technical Roofing Specifications' }
-            ];
-            const activeDocs = docTemplates.filter(d => d.key);
+            let html = '';
 
             // =========================================================
-            // DYNAMIC TOC GENERATION
+            // PAGE 1: FULL BLEED MAP COVER PAGE
             // =========================================================
-            let tocHtml = `
-                <div class="toc-row"><span class="toc-num">01</span><span class="toc-text">Site Intelligence & Financial Engineering</span></div>
-                <div class="toc-row"><span class="toc-num">02</span><span class="toc-text">Architectural Specification & Logistics</span></div>
-                <div class="toc-row"><span class="toc-num">03</span><span class="toc-text">Topographical Site Photography</span></div>
-            `;
-            let sectionCounter = 4;
-            if(data.media?.sketch) {
-                tocHtml += `<div class="toc-row"><span class="toc-num">0${sectionCounter}</span><span class="toc-text">Calibrated Engineering Overlay</span></div>`;
-                sectionCounter++;
-            }
-            if(activeDocs.length > 0) {
-                tocHtml += `<div class="toc-row"><span class="toc-num">0${sectionCounter}</span><span class="toc-text">Document & Regulatory Library</span></div>`;
-                sectionCounter++;
-            }
-            tocHtml += `<div class="toc-row"><span class="toc-num">0${sectionCounter}</span><span class="toc-text">Architectural Glossary of Terms</span></div>`;
-
-            if(btnElement) btnElement.innerText = "Rendering Master PDF...";
-            if(document.getElementById('loadingStatus')) document.getElementById('loadingStatus').innerText = "Rendering PDF format...";
-
-            const fallbackImg = 'data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
-            const imgFront = data.media?.front || fallbackImg;
-            const imgSide = data.media?.side || fallbackImg;
-            const imgRear = data.media?.rear || fallbackImg;
-            const imgSketch = data.media?.sketch || fallbackImg;
-
-            // =========================================================
-            // PAGE 1: TITLE PAGE & TABLE OF CONTENTS
-            // =========================================================
-            let html = `
-                <div class="pdf-page">
-                    <div class="pdf-watermark">${brandName}</div>
-                    <div class="pdf-content-wrapper">
-                        <div style="text-align: center; margin-top: 40px; margin-bottom: 60px;">
-                            <h2 style="font-size: 14px; letter-spacing: 4px; color: #E50914; margin-bottom: 10px;">${brandName}</h2>
-                            <h1 style="font-size: 48px; font-weight: 900; margin: 0; line-height: 1.1; text-transform: uppercase;">MASTER SURVEY<br>& FEASIBILITY STUDY</h1>
-                            <p style="font-size: 14px; color: #666; margin-top: 15px; letter-spacing: 1px;">STRICTLY CONFIDENTIAL</p>
-                        </div>
-
-                        <div style="background: #000; color: #fff; padding: 20px; border-radius: 8px; margin-bottom: 40px; border-left: 5px solid #E50914;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span style="font-size: 11px; text-transform: uppercase; color: #aaa;">Client Reference</span>
-                                <span style="font-size: 14px; font-weight: bold;">${data.customerProfile?.leadName || 'Client'}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span style="font-size: 11px; text-transform: uppercase; color: #aaa;">Site Postcode</span>
-                                <span style="font-size: 14px; font-weight: bold;">${postcode}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span style="font-size: 11px; text-transform: uppercase; color: #aaa;">Document Date</span>
-                                <span style="font-size: 14px; font-weight: bold;">${dateStr}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span style="font-size: 11px; text-transform: uppercase; color: #aaa;">Lead Surveyor</span>
-                                <span style="font-size: 14px; font-weight: bold;">Thomas Oldroyd</span>
-                            </div>
-                        </div>
-
-                        <div class="section-title" style="background: transparent; color: #000; border-bottom: 2px solid #E50914; padding-left: 0; padding-bottom: 5px; margin-bottom: 25px; font-size: 16px;">Document Index</div>
-                        ${tocHtml}
+            html += `
+                <div class="pdf-page cover-page" style="${osMapUrl ? `background-image: url('${osMapUrl}');` : 'background-color: #1a1a1a;'}">
+                    <div class="cover-overlay"></div>
+                    <div class="cover-content">
+                        <div class="cover-logo">${brandName}</div>
+                        <h1 class="cover-title">Feasibility<br>& Survey<br>Dossier</h1>
+                        <p class="cover-client">Prepared for: ${clientName} | ${dateStr}</p>
                     </div>
                 </div>
             `;
 
             // =========================================================
-            // PAGE 2: SPATIAL, FINANCIAL & SITE INTELLIGENCE
+            // PAGE 2: BIOS & TOC (SPLIT PAGE)
             // =========================================================
             html += `
-                <div class="pdf-page">
-                    <div class="pdf-watermark">${brandName}</div>
-                    <div class="pdf-content-wrapper">
-                        <div class="pdf-header">
-                            <div><div class="pdf-subtitle">SECTION 01</div><h1 class="pdf-title">SPATIAL & FINANCIAL DATA</h1></div>
-                        </div>
-
-                        <div class="section-title">1.1 Existing Property Intel (UK Gov EPC Database)</div>
-                        <div class="pdf-grid" style="margin-bottom: 15px;">
-                            <div class="pdf-box"><span class="pdf-label">Existing Internal Area</span><p class="pdf-val">${epcData.area}</p></div>
-                            <div class="pdf-box"><span class="pdf-label">Energy Efficiency</span><p class="pdf-val" style="color:#238636;">Band ${epcData.rating}</p></div>
-                            <div class="pdf-box full-width"><span class="pdf-label">Existing Construction</span><p class="pdf-desc"><strong>Walls:</strong> ${epcData.walls} <br><strong>Roof:</strong> ${epcData.roof}</p></div>
-                        </div>
-
-                        <div class="section-title">1.2 Financial Uplift Metrics</div>
-                        <div class="pdf-grid" style="margin-bottom: 15px;">
-                            <div class="pdf-box highlight">
-                                <span class="pdf-label">Calculated Internal SQM</span>
-                                <p class="pdf-val">${sqMetres > 0 ? sqMetres + ' m²' : 'TBC'}</p>
-                                <div class="pdf-math">Calculation: ${sizeMatch ? `${parseInt(sizeMatch[1])}mm × ${parseInt(sizeMatch[2])}mm` : 'N/A'}</div>
-                            </div>
-                            <div class="pdf-box full-width highlight">
-                                <span class="pdf-label">${roiTitle}</span>
-                                <p class="pdf-val">${roiVal}</p>
-                                <p class="pdf-desc">${roiDesc}</p>
-                                ${roiMath ? `<div class="pdf-math">${roiMath}</div>` : ''}
-                            </div>
-                        </div>
-
-                        <div class="section-title">1.3 Topographical Context</div>
-                        <div class="pdf-grid">
-                            <div class="pdf-box">
-                                <span class="pdf-label">Site Elevation & Load</span>
-                                <p class="pdf-val">${elevation} ASL</p>
-                                <p class="pdf-desc">Static Capacity Requirement: <strong>${snowLoadKg > 0 ? snowLoadKg + ' kg' : 'TBC'}</strong></p>
-                            </div>
-                            <div class="pdf-box" style="padding: 0; overflow: hidden; position: relative;">
-                                <span class="pdf-label" style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 2px 5px; border: 1px solid #ccc; z-index: 10;">OS MAP BOUNDARY</span>
-                                ${osMapUrl ? `<img src="${osMapUrl}" style="width: 100%; height: 120px; object-fit: cover;">` : '<div style="padding: 20px; text-align:center;">Map Unavailable</div>'}
-                            </div>
-                        </div>
-
-                        <div class="pdf-citation">
-                            <strong>CITATIONS & METHODOLOGY:</strong><br>
-                            [1] Existing property footprint and structural data retrieved from standard UK EPC registers.<br>
-                            [2] Valuation calculations rely on regional average property values sourced from HM Land Registry and ONS indices for Q1/Q2 2026. This is a mathematical projection, not a formal RICS valuation.<br>
-                            [3] Meteorological structural load (65kg/m²) is based on BS EN 1991-1-3 Eurocode standards. Ordnance Survey mapping provided via secure proxy integration.
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // =========================================================
-            // PAGE 3: ARCHITECTURAL LOGISTICS
-            // =========================================================
-            const pDesign = data.designerInsights?.design || '';
-            const rawNotes = data.designerInsights?.prep || 'No anomalies recorded. Standard tolerances apply.';
-            const dpcDepth = pDesign.includes('DPC Depth:') ? pDesign.split('DPC Depth: ')[1].split('\n')[0] : 'Engineer Verified';
-            const baseType = pDesign.includes('Base Type:') ? pDesign.split('Base Type: ')[1].split('\n')[0] : 'Standard Spec';
-
-            html += `
-                <div class="pdf-page">
-                    <div class="pdf-watermark">${brandName}</div>
-                    <div class="pdf-content-wrapper">
-                        <div class="pdf-header">
-                            <div><div class="pdf-subtitle">SECTION 02</div><h1 class="pdf-title">ARCHITECTURAL LOGISTICS</h1></div>
-                        </div>
-
-                        <div class="section-title">2.1 Core Material Specification</div>
-                        <div class="pdf-grid">
-                            <div class="pdf-box"><span class="pdf-label">Structure Class</span><p class="pdf-val">${buildType}</p></div>
-                            <div class="pdf-box"><span class="pdf-label">Roof System</span><p class="pdf-val">${roofStyle}</p></div>
-                            <div class="pdf-box"><span class="pdf-label">Existing Masonry</span><p class="pdf-val">${data.projectSpecs?.houseMaterial || 'TBC'}</p></div>
-                            <div class="pdf-box"><span class="pdf-label">Frame Spec</span><p class="pdf-val">${data.projectSpecs?.frameColour || 'TBC'}</p></div>
-                        </div>
-
-                        <div class="section-title">2.2 Extraction & Site Constraints</div>
-                        <div class="pdf-grid">
-                            <div class="pdf-box">
-                                <span class="pdf-label">DPC Defenses</span>
-                                <p class="pdf-val">${dpcDepth}</p>
-                            </div>
-                            <div class="pdf-box">
-                                <span class="pdf-label">Foundation Sub-Base</span>
-                                <p class="pdf-val">${baseType}</p>
-                            </div>
-                            <div class="pdf-box">
-                                <span class="pdf-label">Access Width Restrictions</span>
-                                <p class="pdf-val">${data.projectSpecs?.accessWidth ? data.projectSpecs.accessWidth + 'mm' : 'Unmeasured'}</p>
-                            </div>
-                            <div class="pdf-box">
-                                <span class="pdf-label">Drainage Routing</span>
-                                <p class="pdf-val">${data.logistics?.drainage || 'Survey Verified'}</p>
-                            </div>
-                            <div class="pdf-box full-width">
-                                <span class="pdf-label">Wall Obstacles (Flues / Pipes)</span>
-                                <p class="pdf-val">${data.projectSpecs?.wallObstacles || 'Clear Envelope'}</p>
-                            </div>
-                        </div>
-
-                        <div class="section-title">2.3 Lead Surveyor Field Notes</div>
-                        <div class="pdf-box full-width">
-                            <p class="pdf-desc" style="white-space: pre-wrap; font-size: 12px; font-style: italic;">"${rawNotes}"</p>
+                <div class="pdf-page split-page">
+                    <div class="split-img" style="background-image: url('${pamphletWhoWeAre}'); background-color: #f4f4f4;"></div>
+                    <div class="split-content">
+                        <div class="ed-header">
+                            <div class="ed-subtitle">Executive Summary</div>
+                            <h2 class="ed-title">Document Index</h2>
                         </div>
                         
-                        <div class="pdf-citation" style="margin-top: 20px; border:none;">
-                            <strong>COMPLIANCE STATUS:</strong><br>
-                            Building Control: ${data.projectSpecs?.buildingRegs || 'Pending'} | Planning Permission: ${data.projectSpecs?.planningPerms || 'Pending'}
+                        <div class="toc-wrapper">
+                            <div class="toc-row"><span class="toc-num">01</span><span class="toc-text">Site Intelligence & Financial Data</span></div>
+                            <div class="toc-row"><span class="toc-num">02</span><span class="toc-text">Architectural Specifications</span></div>
+                            <div class="toc-row"><span class="toc-num">03</span><span class="toc-text">Topographical Photography</span></div>
+                            ${data.media?.sketch ? `<div class="toc-row"><span class="toc-num">04</span><span class="toc-text">Engineering Calibration Overlay</span></div>` : ''}
+                            <div class="toc-row"><span class="toc-num">05</span><span class="toc-text">Regulatory Factsheets</span></div>
+                        </div>
+
+                        <div class="bio-section">
+                            <div class="bio-title">Project Oversight</div>
+                            <p class="bio-name">Thomas Oldroyd</p>
+                            <p class="bio-role">Lead New Living Space Designer</p>
+                            <p class="bio-text">Overseeing spatial design, planning logistics, and structural feasibility for high-end extensions across the South Yorkshire region.</p>
                         </div>
                     </div>
                 </div>
             `;
 
             // =========================================================
-            // PAGE 4: VISUAL INTELLIGENCE
+            // PAGE 3: SITE INTELLIGENCE
             // =========================================================
             html += `
-                <div class="pdf-page">
-                    <div class="pdf-watermark">${brandName}</div>
-                    <div class="pdf-content-wrapper">
-                        <div class="pdf-header">
-                            <div><div class="pdf-subtitle">SECTION 03</div><h1 class="pdf-title">TOPOGRAPHICAL PHOTOGRAPHY</h1></div>
-                        </div>
-                        <div class="pdf-image-grid">
-                            <div class="pdf-img-container">
-                                <div class="pdf-img-title">Front Context</div>
-                                <img src="${imgFront}" crossorigin="anonymous">
-                            </div>
-                            <div class="pdf-img-container">
-                                <div class="pdf-img-title">Access Route</div>
-                                <img src="${imgSide}" crossorigin="anonymous">
-                            </div>
-                            <div class="pdf-img-container" style="grid-column: 1 / -1; height: 350px; border: 2px solid #E50914;">
-                                <div class="pdf-img-title">Primary Build Footprint</div>
-                                <img src="${imgRear}" crossorigin="anonymous">
-                            </div>
-                        </div>
+                <div class="pdf-page page-padded">
+                    <div class="ed-header">
+                        <div class="ed-subtitle">Section 01</div>
+                        <h2 class="ed-title">Site Intelligence</h2>
+                    </div>
+
+                    <div class="section-title">Existing Property Intel (EPC Database)</div>
+                    <div class="pdf-grid">
+                        <div class="pdf-box highlight"><span class="pdf-label">Registered Internal Area</span><p class="pdf-val">${epcData.area}</p></div>
+                        <div class="pdf-box"><span class="pdf-label">Energy Efficiency</span><p class="pdf-val">${epcData.rating}</p></div>
+                        <div class="pdf-box full"><span class="pdf-label">Existing Envelope</span><p class="pdf-desc"><strong>Walls:</strong> ${epcData.walls}<br><strong>Roof:</strong> ${epcData.roof}</p></div>
+                    </div>
+
+                    <div class="section-title">Topographical Constraints</div>
+                    <div class="pdf-grid">
+                        <div class="pdf-box"><span class="pdf-label">Elevation</span><p class="pdf-val">${elevation}</p></div>
+                        <div class="pdf-box"><span class="pdf-label">Local Authority</span><p class="pdf-val">South Yorkshire</p></div>
+                        <div class="pdf-box full"><span class="pdf-label">Surveyor Access Notes</span><p class="pdf-desc">${data.projectSpecs?.accessIssues || 'Unrestricted'}</p></div>
                     </div>
                 </div>
             `;
 
             // =========================================================
-            // PAGE 5: SNIPER SKETCH (If it exists)
-            // =========================================================
-            if(data.media?.sketch) {
-                html += `
-                <div class="pdf-page">
-                    <div class="pdf-watermark">${brandName}</div>
-                    <div class="pdf-content-wrapper">
-                        <div class="pdf-header">
-                            <div><div class="pdf-subtitle">SECTION 04</div><h1 class="pdf-title">ENGINEERING CALIBRATION OVERLAY</h1></div>
-                        </div>
-                        <p style="font-size: 12px; color: #333; margin-bottom: 15px;"><strong>Note for manufacturing teams:</strong> The following spatial markings denote critical millimeter tolerances established by the lead surveyor on site.</p>
-                        <div class="pdf-img-container" style="height: 600px; border: 3px solid #E50914;">
-                            <img src="${imgSketch}" crossorigin="anonymous">
-                        </div>
-                    </div>
-                </div>`;
-            }
-
-            // =========================================================
-            // PAGE 6+: DOCUMENT LIBRARY
-            // =========================================================
-            activeDocs.forEach((doc, index) => {
-                html += `
-                <div class="pdf-page">
-                    <div class="pdf-watermark">${brandName}</div>
-                    <div class="pdf-content-wrapper" style="padding-bottom: 0;">
-                        <div class="pamphlet-cover">
-                            <div class="pamphlet-icon">${doc.icon}</div>
-                            <h2 class="pamphlet-title">${doc.title}</h2>
-                            <p style="color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Official Document Appendix</p>
-                            <div style="margin-top: 50px; border-top: 2px solid #E50914; padding-top: 20px; width: 50%;">
-                                <p style="font-size: 10px; color: #888;">Prepared by ${brandName}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            });
-
-            // =========================================================
-            // FINAL PAGE: GLOSSARY OF TERMS
+            // PAGE 4: LOGISTICS (SPLIT PAGE WITH PILING IMAGE)
             // =========================================================
             html += `
-                <div class="pdf-page">
-                    <div class="pdf-watermark">${brandName}</div>
-                    <div class="pdf-content-wrapper">
-                        <div class="pdf-header">
-                            <div><div class="pdf-subtitle">APPENDIX</div><h1 class="pdf-title">ARCHITECTURAL GLOSSARY</h1></div>
+                <div class="pdf-page split-page">
+                    <div class="split-content">
+                        <div class="ed-header">
+                            <div class="ed-subtitle">Section 02</div>
+                            <h2 class="ed-title">Specifications</h2>
                         </div>
-                        <div style="margin-top: 20px;">
-                            <div class="glossary-item"><span class="glossary-term">DPC (Damp Proof Course)</span><p class="glossary-def">A horizontal structural barrier in a wall designed to resist moisture rising through the structure by capillary action.</p></div>
-                            <div class="glossary-item"><span class="glossary-term">Elevation</span><p class="glossary-def">An architectural drawing or photograph showing a specific external face of the property (Front, Side, or Rear).</p></div>
-                            <div class="glossary-item"><span class="glossary-term">Fascia</span><p class="glossary-def">The horizontal architectural board fitted along the lower edge of the roof, carrying the guttering and supporting the eaves.</p></div>
-                            <div class="glossary-item"><span class="glossary-term">Footprint</span><p class="glossary-def">The entire area of ground covered by the proposed extension or structure, calculated in square meters.</p></div>
-                            <div class="glossary-item"><span class="glossary-term">NCS Prior Approval</span><p class="glossary-def">Neighborhood Consultation Scheme. A fast-track planning process allowing homeowners to build larger extensions without full planning permission, subject to neighbor consultation.</p></div>
-                            <div class="glossary-item"><span class="glossary-term">SAP Calculations</span><p class="glossary-def">Standard Assessment Procedure. The UK Government's recommended method system for measuring the energy rating and thermal efficiency of residential dwellings.</p></div>
-                            <div class="glossary-item"><span class="glossary-term">U-Value</span><p class="glossary-def">A measure of thermal transmittance. It indicates how effective a material is as an insulator. The lower the U-Value, the better the insulation.</p></div>
-                        </div>
+                        
+                        <div class="section-title" style="margin-top: 20px;">Core Materials</div>
+                        <div class="pdf-box" style="margin-bottom: 10px;"><span class="pdf-label">Structure</span><p class="pdf-val">${data.projectSpecs?.buildType || 'TBC'}</p></div>
+                        <div class="pdf-box" style="margin-bottom: 10px;"><span class="pdf-label">Roof System</span><p class="pdf-val">${data.projectSpecs?.roofStyle || 'TBC'}</p></div>
+                        <div class="pdf-box" style="margin-bottom: 20px;"><span class="pdf-label">Foundation Sub-Base</span><p class="pdf-val">Standard Specification</p></div>
+
+                        <div class="section-title">Surveyor Field Notes</div>
+                        <p class="pdf-desc" style="font-style: italic;">"${data.designerInsights?.prep || 'No anomalies recorded. Standard tolerances apply.'}"</p>
                     </div>
+                    <div class="split-img" style="background-image: url('${pamphletPiling}'); border-left: 4px solid #000; border-right: none;"></div>
                 </div>
             `;
 
+            // =========================================================
+            // PAGE 5: PLANNING PAMPHLET (FULL BLEED BREAK PAGE)
+            // =========================================================
+            html += `
+                <div class="pdf-page img-page" style="background-image: url('${pamphletPlanning}'); background-color: #fafafa;"></div>
+            `;
+
+            // =========================================================
+            // GENERATE PDF
+            // =========================================================
             pdfContent.innerHTML = html;
-
-            // =========================================================
-            // GENERATE PDF (CRASH-PROOFED)
-            // =========================================================
             const element = document.getElementById('pdf-content');
             
             const opt = {
                 margin:       0,
-                filename:     `COHI_Survey_${data.customerProfile?.leadName || 'Client'}.pdf`,
-                image:        { type: 'jpeg', quality: 0.85 },
-                html2canvas:  { scale: 1.5, useCORS: true, allowTaint: true, logging: false },
+                filename:     `COHI_Dossier_${clientName.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.95 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             document.getElementById('pdf-engine').style.display = 'block';
-            
-            // Allow time for OS Map to load before capture
-            await new Promise(resolve => setTimeout(resolve, 800));
+            await new Promise(resolve => setTimeout(resolve, 800)); // Allow OS map & pamphlets to paint
             
             try {
                 await html2pdf().set(opt).from(element).save();
             } catch (err) {
-                alert("PDF Generation Failed. Your device memory may be full: " + err.message);
+                alert("Generation Failed: " + err.message);
             } finally {
                 document.getElementById('pdf-engine').style.display = 'none';
-                if (btnElement) {
-                    btnElement.innerText = originalText;
-                    btnElement.disabled = false;
-                }
             }
         };
     </script>
