@@ -30,7 +30,7 @@
     <div class="compiler-header">
         <div>
             <h1>COHI Dossier Compiler</h1>
-            <p style="margin: 5px 0 0 0; font-size: 12px; color: #0197d9;">PDFMonkey Enterprise API Active</p>
+            <p style="margin: 5px 0 0 0; font-size: 12px; color: #00E5FF; font-weight: bold;">PDFMonkey Enterprise API Active (Array Validated)</p>
         </div>
     </div>
 
@@ -75,6 +75,14 @@
             }
         }
 
+        // ARRAY VALIDATOR: Prevents the Liquid Engine from crashing by guaranteeing an array format
+        function getSafeArray(arr, fallbackImage) {
+            if (arr && Array.isArray(arr) && arr.length > 0) {
+                return arr;
+            }
+            return [fallbackImage];
+        }
+
         window.generateDossier = async function(docId, btnElement) {
             if (btnElement) {
                 btnElement.innerText = "Extracting & Rendering...";
@@ -100,15 +108,15 @@
             }
 
             // Parse legacy designer insights for granular data
-            const dpc = data.designerInsights?.design?.includes('DPC Depth:') ? data.designerInsights.design.split('DPC Depth: ')[1].split('\\n')[0] : '150mm';
-            const base = data.designerInsights?.design?.includes('Base Type:') ? data.designerInsights.design.split('Base Type: ')[1].split('\\n')[0] : 'Standard Concrete';
+            const dpc = data.designerInsights?.design?.includes('DPC Depth:') ? data.designerInsights.design.split('DPC Depth: ')[1].split('\n')[0] : '150mm';
+            const base = data.designerInsights?.design?.includes('Base Type:') ? data.designerInsights.design.split('Base Type: ')[1].split('\n')[0] : 'Standard Concrete';
 
             // API EXTRACTION (EPC & Map)
             let osMapUrl = "https://images.unsplash.com/photo-1524661135-423995f22d0b";
             let epcData = { area: "TBC", rating: "TBC", walls: "TBC", roof: "TBC" };
 
             try {
-                const cleanPC = (data.customerProfile?.postcode || '').replace(/\\s+/g, '');
+                const cleanPC = (data.customerProfile?.postcode || '').replace(/\s+/g, '');
                 const houseNum = data.customerProfile?.houseNumber || "1";
                 const pcRes = await fetch(`https://api.postcodes.io/postcodes/${cleanPC}`);
                 const pcData = await pcRes.json();
@@ -132,7 +140,7 @@
                 }
             } catch(e) { console.warn("API Fetch bypassed."); }
 
-            // Construct the PDFMonkey Payload
+            // Construct the PDFMonkey Payload with strictly validated arrays
             const payload = {
                 document: {
                     document_template_id: TEMPLATE_ID,
@@ -174,20 +182,20 @@
                         sap_calcs: data.compliance?.sapCalcs === "Yes" ? "Required" : "Exempt",
                         field_notes: data.designerInsights?.prep || "Standard structural engineering tolerances apply. Proceed to manufacturing.",
                         
-                        // Single Hero Images (Fallback to placeholders if Cloudinary arrays are empty)
+                        // Single Hero Images
                         sketch_image: data.rawAssets?.sniper?.[0] || "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
                         blueprint_image: data.rawAssets?.misc?.[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
                         feature_image_2: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
                         
-                        // Dynamic Photo Arrays
-                        photos_ground: data.rawAssets?.trees?.length ? data.rawAssets.trees : (data.rawAssets?.drainage?.length ? data.rawAssets.drainage : ["https://images.unsplash.com/photo-1592484042898-11f81b1db04f"]),
-                        photos_masonry: data.rawAssets?.brick?.length ? data.rawAssets.brick : ["https://images.unsplash.com/photo-1518640035035-7c08b50346c7"],
-                        photos_access: data.rawAssets?.access?.length ? data.rawAssets.access : ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f"],
+                        // Safely Validated Photo Arrays (CRASH FIX APPLIED)
+                        photos_ground: getSafeArray(data.rawAssets?.trees?.length ? data.rawAssets.trees : data.rawAssets?.drainage, "https://images.unsplash.com/photo-1592484042898-11f81b1db04f"),
+                        photos_masonry: getSafeArray(data.rawAssets?.brick, "https://images.unsplash.com/photo-1518640035035-7c08b50346c7"),
+                        photos_access: getSafeArray(data.rawAssets?.access, "https://images.unsplash.com/photo-1589939705384-5185137a7f0f"),
                         
                         // Pamphlet Logic
                         requires_piling: base === "Piled / Steel" ? "Yes" : "No",
                         
-                        // Pamphlet Graphics (Replace with your actual hosted marketing materials)
+                        // Pamphlet Graphics
                         pamphlet_who_we_are: "https://images.unsplash.com/photo-1497366216548-37526070297c",
                         pamphlet_why_choose_us: "https://images.unsplash.com/photo-1497366216548-37526070297c",
                         pamphlet_piling: "https://images.unsplash.com/photo-1497366216548-37526070297c",
@@ -196,7 +204,7 @@
                         pamphlet_journey: "https://images.unsplash.com/photo-1497366216548-37526070297c"
                     },
                     meta: {
-                        _filename: `COHI_Master_Dossier_${clientName.replace(/\\s+/g, '_')}.pdf`
+                        _filename: `COHI_Master_Dossier_${clientName.replace(/\s+/g, '_')}.pdf`
                     }
                 }
             };
