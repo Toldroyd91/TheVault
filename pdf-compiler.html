@@ -36,7 +36,7 @@
     <div class="compiler-header">
         <div>
             <h1>COHI Dossier Compiler</h1>
-            <p style="margin: 5px 0 0 0; font-size: 12px; color: #00E5FF; font-weight: bold;">PDFMonkey Enterprise API Active (Array Validated)</p>
+            <p style="margin: 5px 0 0 0; font-size: 12px; color: #00E5FF; font-weight: bold;">PDFMonkey Enterprise API Active (v2.0 Presentation Deck)</p>
         </div>
     </div>
 
@@ -52,7 +52,7 @@
 
         // PDFMonkey Credentials
         const API_KEY = "Nio_f_23RrL7cVQrtbx3";
-        const TEMPLATE_ID = "A4E984E9-096E-4015-8884-EB46AD51CDCE";
+        const TEMPLATE_ID = "A4E984E9-096E-4015-8884-EB46AD51CDCE"; // <--- UPDATE THIS BEFORE RUNNING
 
         onAuthStateChanged(auth, async (user) => {
             await loadCompiler();
@@ -81,7 +81,6 @@
                 
                 surveysArray.forEach((survey, index) => {
                     let ts = survey.data.timestamp || 0;
-                    // UK Date Parsing Fallback (DD/MM/YYYY)
                     if (!ts && survey.data.customerProfile?.apptDate) {
                         const parts = survey.data.customerProfile.apptDate.split('/');
                         if (parts.length === 3) {
@@ -96,7 +95,6 @@
                     }
                 });
 
-                // Extract the newest survey
                 const newestSurvey = surveysArray.splice(newestIndex, 1)[0];
 
                 // 2. Sort the remaining array alphabetically A-Z
@@ -107,11 +105,8 @@
                 });
 
                 list.innerHTML = '';
-
-                // 3. Render the Newest Survey First (Highlighted)
                 list.innerHTML += renderSurveyCard(newestSurvey, true);
 
-                // 4. Render the Rest underneath
                 if (surveysArray.length > 0) {
                     list.innerHTML += `
                         <div style="margin: 40px 0 15px 0; border-bottom: 1px solid #30363d; padding-bottom: 8px;">
@@ -127,13 +122,11 @@
             }
         }
 
-        // HTML Generator for the Survey Cards
         function renderSurveyCard(survey, isNewest) {
             const data = survey.data;
             const badge = isNewest ? `<span style="background: #00E5FF; color: #030b14; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-bottom: 8px; display: inline-block; text-transform: uppercase; letter-spacing: 1px;">Current Survey</span><br>` : '';
             const borderStyle = isNewest ? `border: 1px solid #00E5FF; box-shadow: 0 0 20px rgba(0,229,255,0.05);` : `border: 1px solid #30363d;`;
             
-            // NOTE: Change 'index.html' below to whatever your main edit page is named.
             return `
                 <div class="survey-card" style="${borderStyle}">
                     <div>
@@ -142,14 +135,13 @@
                         <p style="margin:4px 0 0 0; font-size: 12px; color: #8b949e;">${data.customerProfile?.postcode || 'No Postcode'} | ${data.projectSpecs?.buildType || 'TBC'}</p>
                     </div>
                     <div class="action-buttons">
-                        <a href="survey.html?id=${survey.id}" class="btn-edit">Edit</a>
+                        <a href="index.html?id=${survey.id}" class="btn-edit">Edit</a>
                         <button class="btn-pdf" onclick="generateDossier('${survey.id}', this)">Compile Master Dossier</button>
                     </div>
                 </div>
             `;
         }
 
-        // ARRAY VALIDATOR
         function getSafeArray(arr, fallbackImage) {
             if (arr && Array.isArray(arr) && arr.length > 0) {
                 return arr;
@@ -165,7 +157,21 @@
 
             const data = surveysData[docId];
             
-            // Format dynamic variables
+            // 1. BRAND MAPPING LOGIC
+            const brandFolderMap = {
+                "Yorkshire Windows": "yorkshirewindows",
+                "Clearview": "clearview",
+                "Orion": "orion",
+                "Planet": "planet",
+                "Trent Valley": "trentvalley",
+                "West Yorkshire": "westyorkshire"
+            };
+            const brandFolder = brandFolderMap[data.brand] || "shared";
+            
+            // ---> UPDATE GITHUB PATH HERE <---
+            const dynamicLogoUrl = `https://raw.githubusercontent.com/Toldroyd91/TheVault/main/assets/${brandFolder}/logo.png`;
+
+            // 2. VARIABLE FORMATTING
             const clientName = data.customerProfile?.leadName || 'Client';
             const dateStr = data.customerProfile?.apptDate || new Date().toLocaleDateString('en-GB');
             
@@ -205,23 +211,37 @@
                         epcData.roof = epcRes.data.data['roof-description'] || "Standard";
                     }
 
+                    // Force satellite view for the new front cover
                     const fetchOS = httpsCallable(functions, 'fetchOSMap');
-                    const osRes = await fetchOS({ lat: lat, lng: lng });
+                    const osRes = await fetchOS({ lat: lat, lng: lng, type: 'satellite' });
                     if(osRes.data?.url) osMapUrl = osRes.data.url;
                 }
             } catch(e) { console.warn("API Fetch bypassed."); }
 
+            // 3. THE V2 PRESENTATION PAYLOAD
             const payload = {
                 document: {
                     document_template_id: TEMPLATE_ID,
                     status: "pending",
                     payload: {
-                        brand_name: data.brand === "COHomeImprovements" ? "CO Home Improvements" : "Yorkshire Windows",
+                        // Cover Page Variables
+                        logo_url: dynamicLogoUrl,
                         client_name: clientName,
                         appt_date: dateStr,
                         map_url: osMapUrl,
                         
-                        // Specs
+                        // Designer Variables (Page 2)
+                        designer_name: data.designer?.name || "Thomas Oldroyd",
+                        designer_photo: data.designer?.photoUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a",
+                        designer_bio: data.designer?.bio || "As your dedicated structural design specialist for the region, my mandate is to ensure this proposed development exceeds both your spatial expectations and strict UK regulatory standards.",
+                        
+                        // Rilla Summary (Page 5)
+                        discussion_summary: data.discussionSummary || "Awaiting Rilla AI synthesis output for this consultation...",
+                        
+                        // Live Reviews
+                        trustpilot_score: data.trustpilotScore || "4.8 / 5.0 - Excellent",
+
+                        // Architectural Specs
                         build_type: data.projectSpecs?.buildType || "TBC",
                         roof_style: data.projectSpecs?.roofStyle || "TBC",
                         dimensions: data.projectSpecs?.proposedSize || "TBC",
@@ -252,29 +272,16 @@
                         sap_calcs: data.compliance?.sapCalcs === "Yes" ? "Required" : "Exempt",
                         field_notes: data.designerInsights?.prep || "Standard structural engineering tolerances apply. Proceed to manufacturing.",
                         
-                        // Single Hero Images
+                        // Images & Photo Arrays
                         sketch_image: data.rawAssets?.sniper?.[0] || "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
-                        blueprint_image: data.rawAssets?.misc?.[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
-                        feature_image_2: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
-                        
-                        // Safely Validated Photo Arrays
-                        photos_ground: getSafeArray(data.rawAssets?.trees?.length ? data.rawAssets.trees : data.rawAssets?.drainage, "https://images.unsplash.com/photo-1592484042898-11f81b1db04f"),
                         photos_masonry: getSafeArray(data.rawAssets?.brick, "https://images.unsplash.com/photo-1518640035035-7c08b50346c7"),
-                        photos_access: getSafeArray(data.rawAssets?.access, "https://images.unsplash.com/photo-1589939705384-5185137a7f0f"),
-                        
-                        // Pamphlet Logic
-                        requires_piling: base === "Piled / Steel" ? "Yes" : "No",
                         
                         // Pamphlet Graphics
                         pamphlet_who_we_are: "https://images.unsplash.com/photo-1497366216548-37526070297c",
-                        pamphlet_why_choose_us: "https://images.unsplash.com/photo-1497366216548-37526070297c",
-                        pamphlet_piling: "https://images.unsplash.com/photo-1497366216548-37526070297c",
-                        pamphlet_protecting: "https://images.unsplash.com/photo-1497366216548-37526070297c",
-                        pamphlet_planning: "https://images.unsplash.com/photo-1497366216548-37526070297c",
-                        pamphlet_journey: "https://images.unsplash.com/photo-1497366216548-37526070297c"
+                        pamphlet_why_choose_us: "https://images.unsplash.com/photo-1497366216548-37526070297c"
                     },
                     meta: {
-                        _filename: `COHI_Master_Dossier_${clientName.replace(/\s+/g, '_')}.pdf`
+                        _filename: `Pre_Design_Consultation_${clientName.replace(/\s+/g, '_')}.pdf`
                     }
                 }
             };
