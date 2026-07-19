@@ -56,17 +56,35 @@
             const list = document.getElementById('surveyList');
             try {
                 const querySnapshot = await getDocs(collection(db, "surveys"));
-                list.innerHTML = '';
+                
+                // 1. Extract all surveys into an array
+                let surveysArray = [];
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    surveysData[docSnap.id] = data;
+                    surveysData[docSnap.id] = data; // Keep the global object populated
+                    surveysArray.push({ id: docSnap.id, data: data });
+                });
+
+                // 2. Sort the array alphabetically by Lead Name
+                surveysArray.sort((a, b) => {
+                    let nameA = (a.data.customerProfile?.leadName || 'Unnamed').toLowerCase();
+                    let nameB = (b.data.customerProfile?.leadName || 'Unnamed').toLowerCase();
+                    if (nameA < nameB) return -1;
+                    if (nameA > nameB) return 1;
+                    return 0;
+                });
+
+                // 3. Render the sorted list to the screen
+                list.innerHTML = '';
+                surveysArray.forEach((survey) => {
+                    const data = survey.data;
                     list.innerHTML += `
                         <div class="survey-card">
                             <div>
                                 <h3 style="margin:0; font-family: var(--font-heavy); color: #fff;">${data.customerProfile?.leadName || 'Unnamed Lead'}</h3>
                                 <p style="margin:0; font-size: 12px; color: #8b949e;">${data.customerProfile?.postcode || 'No Postcode'} | ${data.projectSpecs?.buildType || 'TBC'}</p>
                             </div>
-                            <button class="btn-pdf" onclick="generateDossier('${docSnap.id}', this)">Compile Master Dossier</button>
+                            <button class="btn-pdf" onclick="generateDossier('${survey.id}', this)">Compile Master Dossier</button>
                         </div>
                     `;
                 });
@@ -96,8 +114,8 @@
             const dateStr = data.customerProfile?.apptDate || new Date().toLocaleDateString('en-GB');
             
             // Calculate pseudo-yield based on proposed size
-            let sqMetres = "12.00 m²";
-            let valuationUplift = "£31,200";
+            let sqMetres = "TBC";
+            let valuationUplift = "TBC";
             if (data.projectSpecs?.proposedSize) {
                 const match = data.projectSpecs.proposedSize.match(/(\d+)\s*x\s*(\d+)/);
                 if (match) {
@@ -140,7 +158,7 @@
                 }
             } catch(e) { console.warn("API Fetch bypassed."); }
 
-            // Construct the PDFMonkey Payload with strictly validated arrays
+            // Construct the PDFMonkey Payload with strictly validated arrays & TBC fallbacks
             const payload = {
                 document: {
                     document_template_id: TEMPLATE_ID,
@@ -151,11 +169,11 @@
                         appt_date: dateStr,
                         map_url: osMapUrl,
                         
-                        // Specs
-                        build_type: data.projectSpecs?.buildType || "Orangery Extension",
-                        roof_style: data.projectSpecs?.roofStyle || "Edwardian Roof",
-                        dimensions: data.projectSpecs?.proposedSize || "4000 x 3000 mm",
-                        frame_colour: data.projectSpecs?.frameColour || "Anthracite Grey",
+                        // Specs (TBC Fallbacks Applied)
+                        build_type: data.projectSpecs?.buildType || "TBC",
+                        roof_style: data.projectSpecs?.roofStyle || "TBC",
+                        dimensions: data.projectSpecs?.proposedSize || "TBC",
+                        frame_colour: data.projectSpecs?.frameColour || "TBC",
                         sq_metres: sqMetres,
                         valuation_uplift: valuationUplift,
                         
@@ -167,14 +185,14 @@
                         elevation: "Calculated via Postcode API",
                         snow_load: "850 kg / Region Adjusted",
                         
-                        // Logistics & Masonry
-                        access_width: data.projectSpecs?.accessWidth ? `${data.projectSpecs.accessWidth}mm` : "Unrestricted",
-                        access_issues: data.projectSpecs?.accessIssues || "Clear route",
-                        base_type: base,
-                        drainage: data.logistics?.drainage || "Clear / No Action",
-                        house_material: data.projectSpecs?.houseMaterial || "Standard Brick",
-                        dpc_depth: dpc,
-                        wall_obstacles: data.projectSpecs?.wallObstacles || "Clear Envelope",
+                        // Logistics & Masonry (TBC Fallbacks Applied)
+                        access_width: data.projectSpecs?.accessWidth ? `${data.projectSpecs.accessWidth}mm` : "TBC",
+                        access_issues: data.projectSpecs?.accessIssues || "TBC",
+                        base_type: base !== 'Standard Concrete' ? base : "TBC",
+                        drainage: data.logistics?.drainage || "TBC",
+                        house_material: data.projectSpecs?.houseMaterial || "TBC",
+                        dpc_depth: dpc !== '150mm' ? dpc : "TBC",
+                        wall_obstacles: data.projectSpecs?.wallObstacles || "TBC",
                         
                         // Compliance
                         planning_perms: data.projectSpecs?.planningPerms || "Permitted Development",
