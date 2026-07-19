@@ -231,6 +231,7 @@
             }
         };
 
+        // THE FIX: Bypasses Safari popup blockers by replacing the loading button with a direct link
         async function pollPDFStatus(docId, btnElement) {
             const checkStatus = async () => {
                 try {
@@ -241,8 +242,9 @@
                     const doc = data.document;
 
                     if (doc.status === "success") {
-                        if(btnElement) { btnElement.innerText = "Compile Master Dossier"; btnElement.disabled = false; }
-                        window.open(doc.download_url, "_blank"); 
+                        if(btnElement) { 
+                            btnElement.outerHTML = `<a href="${doc.download_url}" target="_blank" class="btn-pdf" style="background-color: #00E5FF; color: #030b14; text-decoration: none; display: inline-block; text-align: center; border: 2px solid #00E5FF; padding: 12px 24px; font-weight: bold; font-family: var(--font-heavy); text-transform: uppercase; border-radius: 4px;">✅ DOSSIER READY: TAP TO OPEN</a>`;
+                        }
                     } else if (doc.status === "draft" || doc.status === "pending" || doc.status === "generating") {
                         setTimeout(checkStatus, 1500); 
                     } else {
