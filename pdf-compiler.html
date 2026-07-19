@@ -19,10 +19,16 @@
         /* UI OVERLAY STYLES */
         .compiler-header { border-bottom: 1px solid #30363d; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
         h1 { margin: 0; color: #fff; font-size: 20px; text-transform: uppercase; letter-spacing: 2px; font-family: var(--font-heavy); }
-        .survey-card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-pdf { background: var(--dark-blue); color: #fff; border: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: var(--font-heavy); text-transform: uppercase;}
+        .survey-card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        
+        /* BUTTONS & ACTIONS */
+        .action-buttons { display: flex; gap: 10px; align-items: center; }
+        .btn-pdf { background: var(--dark-blue); color: #fff; border: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: var(--font-heavy); text-transform: uppercase; font-size: 13px;}
         .btn-pdf:hover { background: #0b2842; }
         .btn-pdf:disabled { background: #30363d; color: #8b949e; cursor: not-allowed; }
+        
+        .btn-edit { background: transparent; color: #8b949e; border: 1px solid #30363d; padding: 11px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: var(--font-heavy); text-transform: uppercase; text-decoration: none; display: inline-block; text-align: center; font-size: 13px;}
+        .btn-edit:hover { background: #1f2428; color: #c9d1d9; border-color: #c9d1d9; }
     </style>
 </head>
 <body>
@@ -57,43 +63,93 @@
             try {
                 const querySnapshot = await getDocs(collection(db, "surveys"));
                 
-                // 1. Extract all surveys into an array
                 let surveysArray = [];
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    surveysData[docSnap.id] = data; // Keep the global object populated
+                    surveysData[docSnap.id] = data; 
                     surveysArray.push({ id: docSnap.id, data: data });
                 });
 
-                // 2. Sort the array alphabetically by Lead Name
+                if (surveysArray.length === 0) {
+                    list.innerHTML = '<p style="color:#8b949e;">No surveys found.</p>';
+                    return;
+                }
+
+                // 1. Identify the absolute newest survey
+                let newestIndex = 0;
+                let maxTs = 0;
+                
+                surveysArray.forEach((survey, index) => {
+                    let ts = survey.data.timestamp || 0;
+                    // UK Date Parsing Fallback (DD/MM/YYYY)
+                    if (!ts && survey.data.customerProfile?.apptDate) {
+                        const parts = survey.data.customerProfile.apptDate.split('/');
+                        if (parts.length === 3) {
+                            ts = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+                        } else if (survey.data.customerProfile.apptDate.includes('-')) {
+                            ts = new Date(survey.data.customerProfile.apptDate).getTime();
+                        }
+                    }
+                    if (ts >= maxTs) {
+                        maxTs = ts;
+                        newestIndex = index;
+                    }
+                });
+
+                // Extract the newest survey
+                const newestSurvey = surveysArray.splice(newestIndex, 1)[0];
+
+                // 2. Sort the remaining array alphabetically A-Z
                 surveysArray.sort((a, b) => {
                     let nameA = (a.data.customerProfile?.leadName || 'Unnamed').toLowerCase();
                     let nameB = (b.data.customerProfile?.leadName || 'Unnamed').toLowerCase();
-                    if (nameA < nameB) return -1;
-                    if (nameA > nameB) return 1;
-                    return 0;
+                    return nameA.localeCompare(nameB);
                 });
 
-                // 3. Render the sorted list to the screen
                 list.innerHTML = '';
-                surveysArray.forEach((survey) => {
-                    const data = survey.data;
+
+                // 3. Render the Newest Survey First (Highlighted)
+                list.innerHTML += renderSurveyCard(newestSurvey, true);
+
+                // 4. Render the Rest underneath
+                if (surveysArray.length > 0) {
                     list.innerHTML += `
-                        <div class="survey-card">
-                            <div>
-                                <h3 style="margin:0; font-family: var(--font-heavy); color: #fff;">${data.customerProfile?.leadName || 'Unnamed Lead'}</h3>
-                                <p style="margin:0; font-size: 12px; color: #8b949e;">${data.customerProfile?.postcode || 'No Postcode'} | ${data.projectSpecs?.buildType || 'TBC'}</p>
-                            </div>
-                            <button class="btn-pdf" onclick="generateDossier('${survey.id}', this)">Compile Master Dossier</button>
+                        <div style="margin: 40px 0 15px 0; border-bottom: 1px solid #30363d; padding-bottom: 8px;">
+                            <h3 style="color: #8b949e; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">All Projects (A-Z)</h3>
                         </div>
                     `;
-                });
+                    surveysArray.forEach((survey) => {
+                        list.innerHTML += renderSurveyCard(survey, false);
+                    });
+                }
             } catch (error) {
                 list.innerHTML = `<p style="color:red;">Database Connection Error: ${error.message}</p>`;
             }
         }
 
-        // ARRAY VALIDATOR: Prevents the Liquid Engine from crashing by guaranteeing an array format
+        // HTML Generator for the Survey Cards
+        function renderSurveyCard(survey, isNewest) {
+            const data = survey.data;
+            const badge = isNewest ? `<span style="background: #00E5FF; color: #030b14; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-bottom: 8px; display: inline-block; text-transform: uppercase; letter-spacing: 1px;">Current Survey</span><br>` : '';
+            const borderStyle = isNewest ? `border: 1px solid #00E5FF; box-shadow: 0 0 20px rgba(0,229,255,0.05);` : `border: 1px solid #30363d;`;
+            
+            // NOTE: Change 'index.html' below to whatever your main edit page is named.
+            return `
+                <div class="survey-card" style="${borderStyle}">
+                    <div>
+                        ${badge}
+                        <h3 style="margin:0; font-family: var(--font-heavy); color: #fff; font-size: 18px;">${data.customerProfile?.leadName || 'Unnamed Lead'}</h3>
+                        <p style="margin:4px 0 0 0; font-size: 12px; color: #8b949e;">${data.customerProfile?.postcode || 'No Postcode'} | ${data.projectSpecs?.buildType || 'TBC'}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="survey.html?id=${survey.id}" class="btn-edit">Edit</a>
+                        <button class="btn-pdf" onclick="generateDossier('${survey.id}', this)">Compile Master Dossier</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ARRAY VALIDATOR
         function getSafeArray(arr, fallbackImage) {
             if (arr && Array.isArray(arr) && arr.length > 0) {
                 return arr;
@@ -113,7 +169,6 @@
             const clientName = data.customerProfile?.leadName || 'Client';
             const dateStr = data.customerProfile?.apptDate || new Date().toLocaleDateString('en-GB');
             
-            // Calculate pseudo-yield based on proposed size
             let sqMetres = "TBC";
             let valuationUplift = "TBC";
             if (data.projectSpecs?.proposedSize) {
@@ -125,11 +180,9 @@
                 }
             }
 
-            // Parse legacy designer insights for granular data
             const dpc = data.designerInsights?.design?.includes('DPC Depth:') ? data.designerInsights.design.split('DPC Depth: ')[1].split('\n')[0] : '150mm';
             const base = data.designerInsights?.design?.includes('Base Type:') ? data.designerInsights.design.split('Base Type: ')[1].split('\n')[0] : 'Standard Concrete';
 
-            // API EXTRACTION (EPC & Map)
             let osMapUrl = "https://images.unsplash.com/photo-1524661135-423995f22d0b";
             let epcData = { area: "TBC", rating: "TBC", walls: "TBC", roof: "TBC" };
 
@@ -158,7 +211,6 @@
                 }
             } catch(e) { console.warn("API Fetch bypassed."); }
 
-            // Construct the PDFMonkey Payload with strictly validated arrays & TBC fallbacks
             const payload = {
                 document: {
                     document_template_id: TEMPLATE_ID,
@@ -169,7 +221,7 @@
                         appt_date: dateStr,
                         map_url: osMapUrl,
                         
-                        // Specs (TBC Fallbacks Applied)
+                        // Specs
                         build_type: data.projectSpecs?.buildType || "TBC",
                         roof_style: data.projectSpecs?.roofStyle || "TBC",
                         dimensions: data.projectSpecs?.proposedSize || "TBC",
@@ -185,7 +237,7 @@
                         elevation: "Calculated via Postcode API",
                         snow_load: "850 kg / Region Adjusted",
                         
-                        // Logistics & Masonry (TBC Fallbacks Applied)
+                        // Logistics & Masonry
                         access_width: data.projectSpecs?.accessWidth ? `${data.projectSpecs.accessWidth}mm` : "TBC",
                         access_issues: data.projectSpecs?.accessIssues || "TBC",
                         base_type: base !== 'Standard Concrete' ? base : "TBC",
@@ -205,7 +257,7 @@
                         blueprint_image: data.rawAssets?.misc?.[0] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
                         feature_image_2: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
                         
-                        // Safely Validated Photo Arrays (CRASH FIX APPLIED)
+                        // Safely Validated Photo Arrays
                         photos_ground: getSafeArray(data.rawAssets?.trees?.length ? data.rawAssets.trees : data.rawAssets?.drainage, "https://images.unsplash.com/photo-1592484042898-11f81b1db04f"),
                         photos_masonry: getSafeArray(data.rawAssets?.brick, "https://images.unsplash.com/photo-1518640035035-7c08b50346c7"),
                         photos_access: getSafeArray(data.rawAssets?.access, "https://images.unsplash.com/photo-1589939705384-5185137a7f0f"),
@@ -249,7 +301,7 @@
             }
         };
 
-        // THE FIX: Bypasses Safari popup blockers by replacing the loading button with a direct link
+        // SAFARI BYPASS
         async function pollPDFStatus(docId, btnElement) {
             const checkStatus = async () => {
                 try {
