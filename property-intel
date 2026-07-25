@@ -2,127 +2,178 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Intelligence - COHI Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Site Intelligence | COHI Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --accent: #0dcaf0; --text: #c9d1d9; --border: #30363d; --success: #238636; --warn: #f59e0b; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 30px; }
-        
-        .header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
-        h1 { margin: 0; color: #fff; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-        p { color: #8b949e; margin: 5px 0 0 0; font-size: 13px; }
-
-        .search-box { display: flex; gap: 15px; background: var(--card); padding: 25px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 30px; }
-        .input-group { flex: 1; }
-        label { display: block; font-size: 11px; text-transform: uppercase; color: #8b949e; margin-bottom: 8px; font-weight: bold; letter-spacing: 1px;}
-        input { width: 100%; background: #090d13; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 4px; font-size: 16px; box-sizing: border-box; text-transform: uppercase;}
-        input:focus { outline: none; border-color: var(--accent); }
-        button { background: var(--accent); color: #000; border: none; padding: 0 30px; border-radius: 4px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
-        button:hover { background: #31d2f2; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(13, 202, 240, 0.3);}
-        
-        #loader { display: none; color: var(--accent); font-weight: bold; margin-bottom: 20px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
-        .results-grid { display: none; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        
-        .data-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; position: relative; overflow: hidden; }
-        .data-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
-        
-        .card-title { font-size: 12px; text-transform: uppercase; color: var(--accent); font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; display: flex; align-items: center; justify-content: space-between;}
-        
-        .data-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 10px 0; align-items: flex-start;}
-        .data-row:last-child { border-bottom: none; padding-bottom: 0;}
-        .data-label { font-size: 11px; color: #8b949e; text-transform: uppercase; flex: 1; padding-right: 15px;}
-        .data-value { font-size: 13px; font-weight: bold; color: #fff; text-align: right; flex: 1.5; line-height: 1.4;}
-        .data-sub { display: block; font-size: 9px; color: #8b949e; font-weight: normal; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px;}
-
-        .map-container { grid-column: 1 / -1; height: 500px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #000; display: flex; flex-direction: column;}
-        .map-header { padding: 12px 15px; background: #21262d; color: #fff; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);}
-        .map-container img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .badge { font-size: 9px; background: #21262d; padding: 3px 6px; border-radius: 4px; color: #c9d1d9; border: 1px solid var(--border);}
-        .badge.verified { background: rgba(35, 134, 54, 0.1); color: var(--success); border-color: var(--success); }
+        .badge { font-size: 9px; padding: 3px 6px; border-radius: 4px; border: 1px solid #30363d; text-transform: uppercase; font-weight: bold; }
+        .badge-verified { background: rgba(35, 134, 54, 0.1); color: #238636; border-color: #238636; }
+        #mobileNavOverlay { display: none; }
+        #mobileNavOverlay.active { display: block; }
     </style>
 </head>
-<body>
+<body class="bg-[#050505] text-white overflow-hidden flex h-screen w-full">
 
-    <div class="header">
-        <h1>Architectural Site Intelligence</h1>
-        <p>Pre-Consultation Remote Survey Engine</p>
+    <!-- Mobile Header -->
+    <div class="md:hidden flex items-center justify-between bg-[#161b22] p-4 border-b border-[#30363d] absolute top-0 w-full z-40 shadow-md">
+        <h2 class="text-white font-black uppercase text-lg m-0">COHI<span class="text-[#0dcaf0]">PRO</span></h2>
+        <button id="mobileMenuBtn" class="text-white text-2xl p-2">☰</button>
     </div>
 
-    <div class="search-box">
-        <div class="input-group">
-            <label>House Name / Number</label>
-            <input type="text" id="houseNum" placeholder="e.g. 14">
-        </div>
-        <div class="input-group">
-            <label>UK Postcode</label>
-            <input type="text" id="postcode" placeholder="e.g. S70 0PN">
-        </div>
-        <button onclick="runIntelScrape()">Extract Site Intel</button>
-    </div>
+    <!-- Mobile Overlay -->
+    <div id="mobileNavOverlay" class="fixed inset-0 bg-black/70 z-40 md:hidden backdrop-blur-sm transition-opacity"></div>
 
-    <div id="loader">Bypassing security protocols. Querying UK Gov & Ordnance Survey Databases...</div>
-
-    <div class="results-grid" id="resultsGrid">
+    <!-- GLOBAL SIDEBAR NAVIGATION -->
+    <nav id="appSidebar" class="w-64 md:w-72 bg-[#090d13] border-r border-[#30363d] h-full flex flex-col fixed md:relative z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+        <div class="p-6 border-b border-[#30363d] flex justify-between items-center bg-[#05080c]">
+            <h2 class="text-white font-black uppercase text-xl m-0 tracking-widest">COHI<span class="text-[#0dcaf0]">PRO</span></h2>
+            <button id="closeMenuBtn" class="md:hidden text-gray-400 hover:text-white text-xl">✕</button>
+        </div>
         
-        <div class="data-card" style="grid-column: span 2;">
-            <div class="card-title">Existing Architecture & Footprint <span class="badge verified">UK Gov EPC Verified</span></div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <div class="data-row"><span class="data-label">Internal Area</span><span class="data-value" id="val-area">--</span></div>
-                    <div class="data-row"><span class="data-label">Property Style</span><span class="data-value" id="val-type">--</span></div>
-                    <div class="data-row"><span class="data-label">Primary Heating</span><span class="data-value" id="val-heating">--</span></div>
+        <div class="flex-1 overflow-y-auto py-6 flex flex-col gap-2 px-4">
+            <a href="index.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">📊</span> Pipeline
+            </a>
+            <a href="property-intel.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-[#0dcaf0] bg-[#0dcaf0]/10 border border-[#0dcaf0]/30 shadow-[inset_4px_0_0_#0dcaf0] transition">
+                <span class="text-lg">🌍</span> Site Intel
+            </a>
+            <a href="survey.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">📝</span> Survey Engine
+            </a>
+            <a href="quotes.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">💷</span> Quote Scraper
+            </a>
+            <a href="admin-gatekeeper.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">🔒</span> Gatekeeper
+            </a>
+            <a href="pdf-compiler.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">🗂️</span> Dossiers
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN SCROLLABLE WORKSPACE -->
+    <main class="flex-1 h-full overflow-y-auto p-4 md:p-8 relative pt-20 md:pt-8 bg-[#0d1117]">
+        
+        <div class="max-w-6xl mx-auto">
+            <header class="border-b border-[#30363d] pb-6 mb-8">
+                <h1 class="text-2xl font-black text-white uppercase tracking-widest m-0">Architectural Site Intelligence</h1>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mt-2">Pre-Consultation Remote Survey Engine</p>
+            </header>
+
+            <div class="flex flex-col md:flex-row gap-4 bg-[#161b22] p-6 rounded-xl border border-[#30363d] mb-8">
+                <div class="flex-1">
+                    <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">House Name / Number</label>
+                    <input type="text" id="houseNum" placeholder="e.g. 14" class="w-full bg-[#090d13] border border-[#30363d] text-white p-3 rounded focus:border-[#0dcaf0] outline-none">
                 </div>
-                <div>
-                    <div class="data-row"><span class="data-label">Wall Composition</span><span class="data-value" id="val-walls">--</span></div>
-                    <div class="data-row"><span class="data-label">Roof System</span><span class="data-value" id="val-roof">--</span></div>
-                    <div class="data-row"><span class="data-label">Energy Rating</span><span class="data-value" id="val-rating">--</span></div>
+                <div class="flex-1">
+                    <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">UK Postcode</label>
+                    <input type="text" id="postcode" placeholder="e.g. S70 0PN" class="w-full bg-[#090d13] border border-[#30363d] text-white p-3 rounded uppercase focus:border-[#0dcaf0] outline-none">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="runIntelScrape()" class="w-full md:w-auto bg-[#0dcaf0] text-black px-8 py-3 rounded font-black uppercase tracking-widest hover:bg-cyan-400 transition shadow-[0_4px_15px_rgba(13,202,240,0.3)]">Extract Intel</button>
                 </div>
             </div>
-        </div>
 
-        <div class="data-card">
-            <div class="card-title">Financial & Equity Baseline <span class="badge">HMLR Algo</span></div>
-            <div class="data-row">
-                <span class="data-label">Est. Rebuild / Capital Value</span>
-                <span class="data-value" style="color: var(--success); font-size: 16px;" id="val-equity">--
-                    <span class="data-sub">Calculated via regional £/sqm averages</span>
-                </span>
+            <div id="loader" class="hidden text-[#0dcaf0] font-bold text-sm uppercase tracking-widest mb-6 animate-pulse">Bypassing security protocols. Querying UK Gov & Ordnance Survey Databases...</div>
+
+            <div class="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="resultsGrid">
+                
+                <!-- Architecture -->
+                <div class="bg-[#161b22] border border-[#30363d] rounded-xl p-6 relative overflow-hidden lg:col-span-2 shadow-lg">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#0dcaf0]"></div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xs uppercase text-[#0dcaf0] font-bold tracking-widest m-0">Existing Architecture <span class="badge badge-verified ml-2 bg-gray-900">UK Gov EPC Verified</span></h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="flex justify-between border-b border-[#30363d] pb-2"><span class="text-[11px] text-gray-400 uppercase">Internal Area</span><span class="text-[13px] font-bold text-white text-right" id="val-area">--</span></div>
+                            <div class="flex justify-between border-b border-[#30363d] pb-2"><span class="text-[11px] text-gray-400 uppercase">Property Style</span><span class="text-[13px] font-bold text-white text-right" id="val-type">--</span></div>
+                            <div class="flex justify-between"><span class="text-[11px] text-gray-400 uppercase">Primary Heating</span><span class="text-[13px] font-bold text-white text-right" id="val-heating">--</span></div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex justify-between border-b border-[#30363d] pb-2"><span class="text-[11px] text-gray-400 uppercase">Wall Composition</span><span class="text-[13px] font-bold text-white text-right" id="val-walls">--</span></div>
+                            <div class="flex justify-between border-b border-[#30363d] pb-2"><span class="text-[11px] text-gray-400 uppercase">Roof System</span><span class="text-[13px] font-bold text-white text-right" id="val-roof">--</span></div>
+                            <div class="flex justify-between"><span class="text-[11px] text-gray-400 uppercase">Energy Rating</span><span class="text-[13px] font-bold text-white text-right" id="val-rating">--</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial -->
+                <div class="bg-[#161b22] border border-[#30363d] rounded-xl p-6 relative overflow-hidden shadow-lg">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#0dcaf0]"></div>
+                    <h3 class="text-xs uppercase text-[#0dcaf0] font-bold tracking-widest mb-6">Financial Baseline <span class="badge ml-2 bg-gray-900 text-gray-400">HMLR Algo</span></h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between border-b border-[#30363d] pb-2 items-start">
+                            <span class="text-[11px] text-gray-400 uppercase w-1/2">Est. Capital Value</span>
+                            <div class="text-right w-1/2">
+                                <span class="text-lg font-black text-[#238636]" id="val-equity">--</span>
+                                <span class="block text-[9px] text-gray-500 uppercase mt-1">Calculated via regional £/sqm</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <span class="text-[11px] text-gray-400 uppercase w-1/2">Added Value Potential</span>
+                            <span class="text-[13px] font-bold text-white text-right w-1/2" id="val-potential">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Matrix -->
+                <div class="bg-[#161b22] border border-[#30363d] rounded-xl p-6 relative overflow-hidden shadow-lg">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#0dcaf0]"></div>
+                    <h3 class="text-xs uppercase text-[#0dcaf0] font-bold tracking-widest mb-6">Structural Risk <span class="badge ml-2 bg-gray-900 text-gray-400">Open-Meteo</span></h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between border-b border-[#30363d] pb-2"><span class="text-[11px] text-gray-400 uppercase">Elevation (ASL)</span><span class="text-[13px] font-bold text-white text-right" id="val-elevation">--</span></div>
+                        <div class="flex justify-between border-b border-[#30363d] pb-2"><span class="text-[11px] text-gray-400 uppercase">Wind Exposure</span><span class="text-[13px] font-bold text-white text-right" id="val-exposure">--</span></div>
+                        <div class="flex justify-between items-start">
+                            <span class="text-[11px] text-gray-400 uppercase w-1/2">Load Rating</span>
+                            <div class="text-right w-1/2">
+                                <span class="text-[13px] font-bold text-white">0.6 kN/m²</span>
+                                <span class="block text-[9px] text-gray-500 uppercase mt-1">UK Snow Load Standard</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solar -->
+                <div class="bg-[#161b22] border border-[#30363d] rounded-xl p-6 relative overflow-hidden shadow-lg">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#0dcaf0]"></div>
+                    <h3 class="text-xs uppercase text-[#0dcaf0] font-bold tracking-widest mb-6">Solar Analytics <span class="badge ml-2 bg-gray-900 text-gray-400">SunCalc</span></h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between border-b border-[#30363d] pb-2"><span class="text-[11px] text-gray-400 uppercase">Peak Sunlight</span><span class="text-[13px] font-bold text-white text-right" id="val-daylight">--</span></div>
+                        <div class="flex justify-between items-start">
+                            <span class="text-[11px] text-gray-400 uppercase w-1/2">Glass Recommendation</span>
+                            <span class="text-[13px] font-bold text-[#f59e0b] text-right w-1/2" id="val-glass-rec">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Box -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-3 h-[500px] border border-[#30363d] rounded-xl overflow-hidden bg-black flex flex-col shadow-lg" id="mapContainer">
+                    <div class="p-3 bg-[#21262d] text-white text-xs font-bold flex justify-between items-center border-b border-[#30363d]">
+                        <span>Topographical Property Boundaries</span>
+                        <span class="badge badge-verified bg-gray-900">Ordnance Survey Raster</span>
+                    </div>
+                    <div class="flex items-center justify-center h-full text-[#30363d]">Map Data Pending...</div>
+                </div>
+
             </div>
-            <div class="data-row">
-                <span class="data-label">Added Value Potential</span>
-                <span class="data-value" id="val-potential">--</span>
-            </div>
         </div>
+    </main>
 
-        <div class="data-card">
-            <div class="card-title">Structural Risk Matrix <span class="badge">Open-Meteo</span></div>
-            <div class="data-row"><span class="data-label">Elevation (ASL)</span><span class="data-value" id="val-elevation">--</span></div>
-            <div class="data-row"><span class="data-label">Wind Exposure</span><span class="data-value" id="val-exposure">--</span></div>
-            <div class="data-row"><span class="data-label">Load Rating</span><span class="data-value">0.6 kN/m² <span class="data-sub">UK Snow Load Standard</span></span></div>
-        </div>
-
-        <div class="data-card">
-            <div class="card-title">Solar & Glare Analytics <span class="badge">SunCalc</span></div>
-            <div class="data-row"><span class="data-label">Peak Sunlight</span><span class="data-value" id="val-daylight">--</span></div>
-            <div class="data-row">
-                <span class="data-label">Glass Recommendation</span>
-                <span class="data-value" id="val-glass-rec" style="color: var(--warn);">--</span>
-            </div>
-        </div>
-
-        <div class="map-container" id="mapContainer">
-            <div class="map-header">
-                <span>Topographical Property Boundaries</span>
-                <span class="badge verified">Ordnance Survey Raster Data</span>
-            </div>
-            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #30363d;">Map Data Pending...</div>
-        </div>
-
-    </div>
-
+    <script>
+        const toggleMenu = () => {
+            document.getElementById('appSidebar').classList.toggle('-translate-x-full');
+            document.getElementById('mobileNavOverlay').classList.toggle('active');
+        };
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', toggleMenu);
+        document.getElementById('closeMenuBtn')?.addEventListener('click', toggleMenu);
+        document.getElementById('mobileNavOverlay')?.addEventListener('click', toggleMenu);
+    </script>
     <script type="module">
         import { functions } from './js/core-firebase.js'; 
         import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
@@ -136,8 +187,9 @@
             const loader = document.getElementById('loader');
             const grid = document.getElementById('resultsGrid');
             
-            grid.style.display = 'none';
-            loader.style.display = 'block';
+            grid.classList.remove('grid');
+            grid.classList.add('hidden');
+            loader.classList.remove('hidden');
 
             try {
                 // 1. POSTCODES.IO
@@ -186,10 +238,9 @@
                     document.getElementById('val-roof').innerText = epc['roof-description'];
                     document.getElementById('val-rating').innerText = `Band ${epc['current-energy-rating'].toUpperCase()}`;
                     
-                    // FINANCIAL ALGO: Assuming average regional value of £2,600 per sqm
                     const valSqm = 2600; 
                     const baselineValue = Math.round(area * valSqm);
-                    document.getElementById('val-equity').innerHTML = `£${baselineValue.toLocaleString('en-GB')}<span class="data-sub">Calculated via regional £/sqm averages</span>`;
+                    document.getElementById('val-equity').innerText = `£${baselineValue.toLocaleString('en-GB')}`;
                     document.getElementById('val-potential').innerText = `Extension yields typically add 5-8% to baseline.`;
                 } else {
                     document.getElementById('val-area').innerText = "Unregistered Property";
@@ -201,19 +252,20 @@
                 const osResult = await getOSData({ lat: lat, lng: lng });
                 
                 document.getElementById('mapContainer').innerHTML = `
-                    <div class="map-header">
+                    <div class="p-3 bg-[#21262d] text-white text-xs font-bold flex justify-between items-center border-b border-[#30363d]">
                         <span>Topographical Property Boundaries</span>
-                        <span class="badge verified">Ordnance Survey Raster Data</span>
+                        <span class="badge badge-verified bg-gray-900">Ordnance Survey Raster Data</span>
                     </div>
-                    <img src="${osResult.data.url}" alt="Ordnance Survey Map" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'#000\\'/><text x=\\'50%\\' y=\\'50%\\' font-family=\\'Arial\\' font-size=\\'14\\' fill=\\'#888\\' text-anchor=\\'middle\\'>Map Data Unavailable</text></svg>'">
+                    <img src="${osResult.data.url}" class="w-full h-full object-cover" alt="Ordnance Survey Map" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'#000\\'/><text x=\\'50%\\' y=\\'50%\\' font-family=\\'Arial\\' font-size=\\'14\\' fill=\\'#888\\' text-anchor=\\'middle\\'>Map Data Unavailable</text></svg>'">
                 `;
 
                 // SHOW UI
-                loader.style.display = 'none';
-                grid.style.display = 'grid';
+                loader.classList.add('hidden');
+                grid.classList.remove('hidden');
+                grid.classList.add('grid');
 
             } catch (error) {
-                loader.style.display = 'none';
+                loader.classList.add('hidden');
                 alert("Intel Extraction Failed: " + error.message);
             }
         }
