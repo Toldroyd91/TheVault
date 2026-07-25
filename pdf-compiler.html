@@ -2,48 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COHI Dossier Compiler (Enterprise API)</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dossier Compiler | COHI Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* BRAND STANDARDS & COLORS */
-        :root { 
-            --dark-blue: #0f3759; 
-            --light-blue: rgba(1, 151, 217, 0.2);
-            --font-heavy: 'Alerion', 'Arial Black', sans-serif;
-            --font-light: 'Alerion', 'Arial', sans-serif;
-        }
-
-        body { background: #0d1117; color: #c9d1d9; font-family: var(--font-light); margin: 0; padding: 40px; }
-        
-        /* UI OVERLAY STYLES */
-        .compiler-header { border-bottom: 1px solid #30363d; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
-        h1 { margin: 0; color: #fff; font-size: 20px; text-transform: uppercase; letter-spacing: 2px; font-family: var(--font-heavy); }
-        .survey-card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-        
-        /* BUTTONS & ACTIONS */
-        .action-buttons { display: flex; gap: 10px; align-items: center; }
-        .btn-pdf { background: var(--dark-blue); color: #fff; border: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: var(--font-heavy); text-transform: uppercase; font-size: 13px;}
-        .btn-pdf:hover { background: #0b2842; }
-        .btn-pdf:disabled { background: #30363d; color: #8b949e; cursor: not-allowed; }
-        
-        .btn-edit { background: transparent; color: #8b949e; border: 1px solid #30363d; padding: 11px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: var(--font-heavy); text-transform: uppercase; text-decoration: none; display: inline-block; text-align: center; font-size: 13px;}
-        .btn-edit:hover { background: #1f2428; color: #c9d1d9; border-color: #c9d1d9; }
+        #mobileNavOverlay { display: none; }
+        #mobileNavOverlay.active { display: block; }
     </style>
 </head>
-<body>
+<body class="bg-[#050505] text-white overflow-hidden flex h-screen w-full">
 
-    <div class="compiler-header">
-        <div>
-            <h1>COHI Dossier Compiler</h1>
-            <p style="margin: 5px 0 0 0; font-size: 12px; color: #00E5FF; font-weight: bold;">PDFMonkey Enterprise API Active (v2.0 Presentation Deck)</p>
+    <!-- Mobile Header -->
+    <div class="md:hidden flex items-center justify-between bg-[#161b22] p-4 border-b border-[#30363d] absolute top-0 w-full z-40 shadow-md">
+        <h2 class="text-white font-black uppercase text-lg m-0">COHI<span class="text-[#0dcaf0]">PRO</span></h2>
+        <button id="mobileMenuBtn" class="text-white text-2xl p-2">☰</button>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobileNavOverlay" class="fixed inset-0 bg-black/70 z-40 md:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- GLOBAL SIDEBAR NAVIGATION -->
+    <nav id="appSidebar" class="w-64 md:w-72 bg-[#090d13] border-r border-[#30363d] h-full flex flex-col fixed md:relative z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+        <div class="p-6 border-b border-[#30363d] flex justify-between items-center bg-[#05080c]">
+            <h2 class="text-white font-black uppercase text-xl m-0 tracking-widest">COHI<span class="text-[#0dcaf0]">PRO</span></h2>
+            <button id="closeMenuBtn" class="md:hidden text-gray-400 hover:text-white text-xl">✕</button>
         </div>
-    </div>
+        
+        <div class="flex-1 overflow-y-auto py-6 flex flex-col gap-2 px-4">
+            <a href="index.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">📊</span> Pipeline
+            </a>
+            <a href="property-intel.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">🌍</span> Site Intel
+            </a>
+            <a href="survey.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">📝</span> Survey Engine
+            </a>
+            <a href="quotes.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">💷</span> Quote Scraper
+            </a>
+            <a href="admin-gatekeeper.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">🔒</span> Gatekeeper
+            </a>
+            <a href="pdf-compiler.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-[#0dcaf0] bg-[#0dcaf0]/10 border border-[#0dcaf0]/30 shadow-[inset_4px_0_0_#0dcaf0] transition">
+                <span class="text-lg">🗂️</span> Dossiers
+            </a>
+        </div>
+    </nav>
 
-    <div class="survey-list" id="surveyList">
-        <p style="color: var(--light-blue); font-weight: bold;">Authenticating secure connection...</p>
-    </div>
+    <!-- MAIN SCROLLABLE WORKSPACE -->
+    <main class="flex-1 h-full overflow-y-auto p-4 md:p-10 relative pt-20 md:pt-10 bg-[#0d1117]">
+        
+        <div class="max-w-5xl mx-auto">
+            <header class="border-b border-[#30363d] pb-6 mb-8 flex justify-between items-end">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-white uppercase tracking-widest m-0">Dossier Compiler</h1>
+                    <p class="text-xs text-[#0dcaf0] font-bold uppercase tracking-widest mt-2">Enterprise PDF Generation API (v2.0)</p>
+                </div>
+            </header>
 
+            <div class="flex flex-col gap-4" id="surveyList">
+                <div class="text-[#0dcaf0] font-bold text-sm uppercase tracking-widest animate-pulse p-6 bg-[#161b22] rounded-xl border border-[#30363d] text-center">
+                    Authenticating secure connection...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const toggleMenu = () => {
+            document.getElementById('appSidebar').classList.toggle('-translate-x-full');
+            document.getElementById('mobileNavOverlay').classList.toggle('active');
+        };
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', toggleMenu);
+        document.getElementById('closeMenuBtn')?.addEventListener('click', toggleMenu);
+        document.getElementById('mobileNavOverlay')?.addEventListener('click', toggleMenu);
+    </script>
     <script type="module">
         import { auth, db, collection, getDocs, onAuthStateChanged, functions } from './js/core-firebase.js';
         import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
@@ -52,7 +86,7 @@
 
         // PDFMonkey Credentials
         const API_KEY = "Nio_f_23RrL7cVQrtbx3";
-        const TEMPLATE_ID = "A4E984E9-096E-4015-8884-EB46AD51CDCE"; // <--- UPDATE THIS BEFORE RUNNING
+        const TEMPLATE_ID = "A4E984E9-096E-4015-8884-EB46AD51CDCE"; 
 
         onAuthStateChanged(auth, async (user) => {
             await loadCompiler();
@@ -71,7 +105,7 @@
                 });
 
                 if (surveysArray.length === 0) {
-                    list.innerHTML = '<p style="color:#8b949e;">No surveys found.</p>';
+                    list.innerHTML = '<div class="p-8 text-center text-gray-500 border border-[#30363d] rounded-xl bg-[#161b22]">No surveys found in database.</div>';
                     return;
                 }
 
@@ -109,8 +143,8 @@
 
                 if (surveysArray.length > 0) {
                     list.innerHTML += `
-                        <div style="margin: 40px 0 15px 0; border-bottom: 1px solid #30363d; padding-bottom: 8px;">
-                            <h3 style="color: #8b949e; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">All Projects (A-Z)</h3>
+                        <div class="mt-8 mb-4 border-b border-[#30363d] pb-2">
+                            <h3 class="text-xs text-gray-500 font-bold uppercase tracking-widest m-0">All Projects Archive (A-Z)</h3>
                         </div>
                     `;
                     surveysArray.forEach((survey) => {
@@ -118,46 +152,48 @@
                     });
                 }
             } catch (error) {
-                list.innerHTML = `<p style="color:red;">Database Connection Error: ${error.message}</p>`;
+                list.innerHTML = `<div class="p-6 bg-red-900/20 text-red-500 border border-red-900/50 rounded-xl">Database Connection Error: ${error.message}</div>`;
             }
         }
 
         function renderSurveyCard(survey, isNewest) {
             const data = survey.data;
-            const badge = isNewest ? `<span style="background: #00E5FF; color: #030b14; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-bottom: 8px; display: inline-block; text-transform: uppercase; letter-spacing: 1px;">Current Survey</span><br>` : '';
-            const borderStyle = isNewest ? `border: 1px solid #00E5FF; box-shadow: 0 0 20px rgba(0,229,255,0.05);` : `border: 1px solid #30363d;`;
+            const badge = isNewest ? `<span class="bg-[#0dcaf0]/20 text-[#0dcaf0] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-3 inline-block border border-[#0dcaf0]/50 shadow-[0_0_10px_rgba(13,202,240,0.2)]">Current Survey</span><br>` : '';
+            const borderStyle = isNewest ? `border-[#0dcaf0]/50 shadow-[0_0_20px_rgba(13,202,240,0.05)]` : `border-[#30363d]`;
             
             return `
-                <div class="survey-card" style="${borderStyle}">
+                <div class="bg-[#161b22] border ${borderStyle} p-5 md:p-6 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition hover:border-gray-500">
                     <div>
                         ${badge}
-                        <h3 style="margin:0; font-family: var(--font-heavy); color: #fff; font-size: 18px;">${data.customerProfile?.leadName || 'Unnamed Lead'}</h3>
-                        <p style="margin:4px 0 0 0; font-size: 12px; color: #8b949e;">${data.customerProfile?.postcode || 'No Postcode'} | ${data.projectSpecs?.buildType || 'TBC'}</p>
+                        <h3 class="m-0 font-black text-white text-xl md:text-2xl tracking-wide">${data.customerProfile?.leadName || 'Unnamed Lead'}</h3>
+                        <p class="m-0 mt-1 text-xs text-gray-400 font-bold uppercase tracking-widest">${data.customerProfile?.postcode || 'No Postcode'} <span class="mx-2 text-[#30363d]">|</span> ${data.projectSpecs?.buildType || 'TBC'}</p>
                     </div>
-                    <div class="action-buttons">
-                        <a href="index.html?id=${survey.id}" class="btn-edit">Edit</a>
-                        <button class="btn-pdf" onclick="generateDossier('${survey.id}', this)">Compile Master Dossier</button>
+                    <div class="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto">
+                        <a href="survey.html?id=${survey.id}" class="flex-1 md:flex-none text-center px-6 py-3 bg-transparent border border-[#30363d] text-gray-300 font-bold uppercase tracking-widest text-xs rounded hover:bg-[#21262d] hover:text-white transition">
+                            Edit Survey
+                        </a>
+                        <button onclick="generateDossier('${survey.id}', this)" class="flex-1 md:flex-none px-6 py-3 bg-[#0dcaf0] text-black font-black uppercase tracking-widest text-xs rounded hover:bg-cyan-400 transition shadow-[0_4px_15px_rgba(13,202,240,0.3)]">
+                            Compile Dossier
+                        </button>
                     </div>
                 </div>
             `;
         }
 
         function getSafeArray(arr, fallbackImage) {
-            if (arr && Array.isArray(arr) && arr.length > 0) {
-                return arr;
-            }
+            if (arr && Array.isArray(arr) && arr.length > 0) return arr;
             return [fallbackImage];
         }
 
         window.generateDossier = async function(docId, btnElement) {
             if (btnElement) {
-                btnElement.innerText = "Extracting & Rendering...";
+                btnElement.innerText = "Extracting...";
+                btnElement.classList.add('opacity-75', 'cursor-not-allowed');
                 btnElement.disabled = true;
             }
 
             const data = surveysData[docId];
             
-            // 1. BRAND MAPPING LOGIC
             const brandFolderMap = {
                 "Yorkshire Windows": "yorkshirewindows",
                 "Clearview": "clearview",
@@ -167,11 +203,8 @@
                 "West Yorkshire": "westyorkshire"
             };
             const brandFolder = brandFolderMap[data.brand] || "shared";
-            
-            // ---> UPDATE GITHUB PATH HERE <---
             const dynamicLogoUrl = `https://raw.githubusercontent.com/Toldroyd91/TheVault/main/assets/${brandFolder}/logo.png`;
 
-            // 2. VARIABLE FORMATTING
             const clientName = data.customerProfile?.leadName || 'Client';
             const dateStr = data.customerProfile?.apptDate || new Date().toLocaleDateString('en-GB');
             
@@ -211,53 +244,38 @@
                         epcData.roof = epcRes.data.data['roof-description'] || "Standard";
                     }
 
-                    // Force satellite view for the new front cover
                     const fetchOS = httpsCallable(functions, 'fetchOSMap');
                     const osRes = await fetchOS({ lat: lat, lng: lng, type: 'satellite' });
                     if(osRes.data?.url) osMapUrl = osRes.data.url;
                 }
             } catch(e) { console.warn("API Fetch bypassed."); }
 
-            // 3. THE V2 PRESENTATION PAYLOAD
             const payload = {
                 document: {
                     document_template_id: TEMPLATE_ID,
                     status: "pending",
                     payload: {
-                        // Cover Page Variables
                         logo_url: dynamicLogoUrl,
                         client_name: clientName,
                         appt_date: dateStr,
                         map_url: osMapUrl,
-                        
-                        // Designer Variables (Page 2)
                         designer_name: data.designer?.name || "Thomas Oldroyd",
                         designer_photo: data.designer?.photoUrl || "https://images.unsplash.com/photo-1560250097-0b93528c311a",
                         designer_bio: data.designer?.bio || "As your dedicated structural design specialist for the region, my mandate is to ensure this proposed development exceeds both your spatial expectations and strict UK regulatory standards.",
-                        
-                        // Rilla Summary (Page 5)
                         discussion_summary: data.discussionSummary || "Awaiting Rilla AI synthesis output for this consultation...",
-                        
-                        // Live Reviews
                         trustpilot_score: data.trustpilotScore || "4.8 / 5.0 - Excellent",
-
-                        // Architectural Specs
                         build_type: data.projectSpecs?.buildType || "TBC",
                         roof_style: data.projectSpecs?.roofStyle || "TBC",
                         dimensions: data.projectSpecs?.proposedSize || "TBC",
                         frame_colour: data.projectSpecs?.frameColour || "TBC",
                         sq_metres: sqMetres,
                         valuation_uplift: valuationUplift,
-                        
-                        // Topography & EPC
                         epc_area: epcData.area,
                         epc_rating: epcData.rating,
                         epc_walls: epcData.walls,
                         epc_roof: epcData.roof,
                         elevation: "Calculated via Postcode API",
                         snow_load: "850 kg / Region Adjusted",
-                        
-                        // Logistics & Masonry
                         access_width: data.projectSpecs?.accessWidth ? `${data.projectSpecs.accessWidth}mm` : "TBC",
                         access_issues: data.projectSpecs?.accessIssues || "TBC",
                         base_type: base !== 'Standard Concrete' ? base : "TBC",
@@ -265,18 +283,12 @@
                         house_material: data.projectSpecs?.houseMaterial || "TBC",
                         dpc_depth: dpc !== '150mm' ? dpc : "TBC",
                         wall_obstacles: data.projectSpecs?.wallObstacles || "TBC",
-                        
-                        // Compliance
                         planning_perms: data.projectSpecs?.planningPerms || "Permitted Development",
                         building_regs: data.projectSpecs?.buildingRegs || "Full Building Control Required",
                         sap_calcs: data.compliance?.sapCalcs === "Yes" ? "Required" : "Exempt",
                         field_notes: data.designerInsights?.prep || "Standard structural engineering tolerances apply. Proceed to manufacturing.",
-                        
-                        // Images & Photo Arrays
                         sketch_image: data.rawAssets?.sniper?.[0] || "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
                         photos_masonry: getSafeArray(data.rawAssets?.brick, "https://images.unsplash.com/photo-1518640035035-7c08b50346c7"),
-                        
-                        // Pamphlet Graphics
                         pamphlet_who_we_are: "https://images.unsplash.com/photo-1497366216548-37526070297c",
                         pamphlet_why_choose_us: "https://images.unsplash.com/photo-1497366216548-37526070297c"
                     },
@@ -300,15 +312,22 @@
                 } else {
                     alert("Document payload rejected. Check console for errors.");
                     console.error(result.errors);
-                    if(btnElement) { btnElement.innerText = "Compile Master Dossier"; btnElement.disabled = false; }
+                    resetButton(btnElement);
                 }
             } catch (err) {
                 alert("Server Connection Error: " + err.message);
-                if(btnElement) { btnElement.innerText = "Compile Master Dossier"; btnElement.disabled = false; }
+                resetButton(btnElement);
             }
         };
 
-        // SAFARI BYPASS
+        function resetButton(btnElement) {
+            if(btnElement) { 
+                btnElement.innerText = "Compile Dossier"; 
+                btnElement.classList.remove('opacity-75', 'cursor-not-allowed');
+                btnElement.disabled = false; 
+            }
+        }
+
         async function pollPDFStatus(docId, btnElement) {
             const checkStatus = async () => {
                 try {
@@ -320,17 +339,17 @@
 
                     if (doc.status === "success") {
                         if(btnElement) { 
-                            btnElement.outerHTML = `<a href="${doc.download_url}" target="_blank" class="btn-pdf" style="background-color: #00E5FF; color: #030b14; text-decoration: none; display: inline-block; text-align: center; border: 2px solid #00E5FF; padding: 12px 24px; font-weight: bold; font-family: var(--font-heavy); text-transform: uppercase; border-radius: 4px;">✅ DOSSIER READY: TAP TO OPEN</a>`;
+                            btnElement.outerHTML = `<a href="${doc.download_url}" target="_blank" class="flex-1 md:flex-none text-center px-6 py-3 bg-[#238636] text-white font-black uppercase tracking-widest text-xs rounded hover:bg-[#2ea043] transition shadow-[0_4px_15px_rgba(35,134,54,0.3)] animate-pulse">✅ OPEN PDF DOSSIER</a>`;
                         }
                     } else if (doc.status === "draft" || doc.status === "pending" || doc.status === "generating") {
                         setTimeout(checkStatus, 1500); 
                     } else {
                         alert("PDF generation failed on the server.");
-                        if(btnElement) { btnElement.innerText = "Compile Master Dossier"; btnElement.disabled = false; }
+                        resetButton(btnElement);
                     }
                 } catch (error) {
                     console.error("Polling error:", error);
-                    if(btnElement) { btnElement.innerText = "Compile Master Dossier"; btnElement.disabled = false; }
+                    resetButton(btnElement);
                 }
             };
             checkStatus();
