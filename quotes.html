@@ -2,59 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quote Engine | Command Center</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0d1117; color: #f0f6fc; font-family: -apple-system, sans-serif; padding: 20px; }
-        .header { margin-bottom: 20px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
-        .drop-zone { background: #090d13; border: 2px dashed #E50914; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
-        .drop-zone:hover { background: rgba(229, 9, 20, 0.1); }
-        .tier-card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-        .btn-sync { background: #E50914; color: white; padding: 15px; border: none; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; display: none; text-transform: uppercase; }
-        .success-box { display: none; background: #238636; padding: 20px; border-radius: 6px; text-align: center; margin-top: 20px; font-weight: bold; }
-        .success-box a { color: white; text-decoration: underline; font-size: 18px; }
+        #mobileNavOverlay { display: none; }
+        #mobileNavOverlay.active { display: block; }
     </style>
 </head>
-<body>
+<body class="bg-[#050505] text-white overflow-hidden flex h-screen w-full">
 
-    <div class="header">
-        <h2 style="margin:0;">U-Design Scraper</h2>
-        <p id="statusHeader" style="color: #8b949e; margin-top: 5px;">Checking connection to customer...</p>
-    </div>
-    
-    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-        <h3>Drop U-Design Scope of Works Here</h3>
-        <p style="color: #8b949e;">or tap to browse files</p>
-        <input type="file" id="fileInput" accept="application/pdf" style="display: none;">
+    <!-- Mobile Header -->
+    <div class="md:hidden flex items-center justify-between bg-[#161b22] p-4 border-b border-[#30363d] absolute top-0 w-full z-40 shadow-md">
+        <h2 class="text-white font-black uppercase text-lg m-0">COHI<span class="text-[#0dcaf0]">PRO</span></h2>
+        <button id="mobileMenuBtn" class="text-white text-2xl p-2">☰</button>
     </div>
 
-    <div id="tiersContainer"></div>
-    <button id="btnSaveQuotes" class="btn-sync">Save to Vault & Generate Link</button>
-    
-    <div id="successBox" class="success-box">
-        Quote Successfully Saved! <br><br>
-        <a href="#" id="portalLink" target="_blank">Open Customer Vault Presentation</a>
-    </div>
+    <!-- Mobile Overlay -->
+    <div id="mobileNavOverlay" class="fixed inset-0 bg-black/70 z-40 md:hidden backdrop-blur-sm transition-opacity"></div>
 
+    <!-- GLOBAL SIDEBAR NAVIGATION -->
+    <nav id="appSidebar" class="w-64 md:w-72 bg-[#090d13] border-r border-[#30363d] h-full flex flex-col fixed md:relative z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+        <div class="p-6 border-b border-[#30363d] flex justify-between items-center bg-[#05080c]">
+            <h2 class="text-white font-black uppercase text-xl m-0 tracking-widest">COHI<span class="text-[#0dcaf0]">PRO</span></h2>
+            <button id="closeMenuBtn" class="md:hidden text-gray-400 hover:text-white text-xl">✕</button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6 flex flex-col gap-2 px-4">
+            <a href="index.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">📊</span> Pipeline
+            </a>
+            <a href="property-intel.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">🌍</span> Site Intel
+            </a>
+            <a href="survey.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">📝</span> Survey Engine
+            </a>
+            <a href="quotes.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-[#0dcaf0] bg-[#0dcaf0]/10 border border-[#0dcaf0]/30 shadow-[inset_4px_0_0_#0dcaf0] transition">
+                <span class="text-lg">💷</span> Quote Scraper
+            </a>
+            <a href="admin-gatekeeper.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">🔒</span> Gatekeeper
+            </a>
+            <a href="pdf-compiler.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
+                <span class="text-lg">🗂️</span> Dossiers
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN SCROLLABLE WORKSPACE -->
+    <main class="flex-1 h-full overflow-y-auto p-4 md:p-10 relative pt-20 md:pt-10 bg-[#0d1117]">
+        
+        <div class="max-w-3xl mx-auto">
+            <header class="border-b border-[#30363d] pb-6 mb-8">
+                <h1 class="text-2xl font-black text-white uppercase tracking-widest m-0">U-Design Scraper</h1>
+                <p id="statusHeader" class="text-xs text-gray-400 uppercase tracking-widest mt-2">Checking connection to customer...</p>
+            </header>
+            
+            <div id="dropZone" class="border-2 border-dashed border-[#E50914] bg-[#090d13] p-12 text-center rounded-xl cursor-pointer hover:bg-[#E50914]/10 transition duration-300 mb-8" onclick="document.getElementById('fileInput').click()">
+                <h3 class="text-lg font-bold text-white mb-2">Drop U-Design Scope of Works Here</h3>
+                <p class="text-sm text-gray-500">or tap to browse files</p>
+                <input type="file" id="fileInput" accept="application/pdf" class="hidden">
+            </div>
+
+            <div id="tiersContainer"></div>
+            
+            <button id="btnSaveQuotes" class="hidden w-full bg-[#E50914] hover:bg-red-700 text-white font-bold py-4 rounded-lg uppercase tracking-widest transition shadow-[0_4px_15px_rgba(229,9,20,0.3)] mb-4">
+                Save to Vault & Generate Link
+            </button>
+            
+            <div id="successBox" class="hidden bg-[#238636] p-6 rounded-xl text-center shadow-lg border border-[#3ea34e]">
+                <h3 class="text-lg font-bold text-white mb-4">Quote Successfully Saved!</h3>
+                <a href="#" id="portalLink" target="_blank" class="inline-block bg-white text-[#238636] px-6 py-2 rounded font-bold hover:bg-gray-200 transition">Open Customer Vault Presentation</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const toggleMenu = () => {
+            document.getElementById('appSidebar').classList.toggle('-translate-x-full');
+            document.getElementById('mobileNavOverlay').classList.toggle('active');
+        };
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', toggleMenu);
+        document.getElementById('closeMenuBtn')?.addEventListener('click', toggleMenu);
+        document.getElementById('mobileNavOverlay')?.addEventListener('click', toggleMenu);
+    </script>
     <script type="module">
         import { db, doc, setDoc } from './js/core-firebase.js';
         
-        // Ensure we are attached to a specific customer via the URL
         const urlParams = new URLSearchParams(window.location.search);
         const currentLeadId = urlParams.get('leadId');
         
         if(!currentLeadId) {
             document.getElementById('statusHeader').innerText = "⚠️ Error: No Customer ID detected. Go back to Dashboard and click 'Build Quote'.";
-            document.getElementById('statusHeader').style.color = "#E50914";
-            document.getElementById('dropZone').style.display = "none";
+            document.getElementById('statusHeader').classList.add('text-[#E50914]');
+            document.getElementById('dropZone').classList.add('hidden');
         } else {
             document.getElementById('statusHeader').innerText = `Securely linked to Lead ID: ${currentLeadId}`;
         }
 
         let finalQuoteData = {};
-
-        // Setup PDF Engine
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
         
         document.getElementById('fileInput').addEventListener('change', async (e) => {
@@ -71,11 +119,8 @@
                 rawText += textContent.items.map(item => item.str).join(" ") + " ";
             }
 
-            // CLEAN THE U-DESIGN NIGHTMARE: Strip quotes and line breaks, turn into comma separated data
             const cleanText = rawText.replace(/[\n\r"]/g, ' ').replace(/\s+/g, ' ');
-            console.log("Cleaned U-Design Text:", cleanText);
 
-            // Precision Extraction Logic for U-Design format
             const getMatch = (regex, fallback) => {
                 const match = cleanText.match(regex);
                 return match ? match[1].trim() : fallback;
@@ -87,49 +132,44 @@
             const doors = getMatch(/Door Type\s*,\s*([^,]+)/i, "Standard");
             const frameColour = getMatch(/Frame Colour Out\s*,\s*([^,]+)/i, "White");
             
-            // Note: U-Design dimensions layout can vary, pulling safely.
             const width = getMatch(/Width\s*,\s*(\d+)/i, "Surveyed");
             const projection = getMatch(/Projection\s*,\s*(\d+)/i, "Surveyed");
 
             finalQuoteData = {
-                isUnlocked: false, // Starts locked as a Teaser
+                isUnlocked: false, 
                 totalPrice: `£${grandTotal}`,
                 dimensions: `${width}mm x ${projection}mm`,
                 roofType: roofSystem,
                 windowSpecs: `${frames} (${frameColour}) with ${doors}`
             };
 
-            // Display to the Designer before saving
             document.getElementById('tiersContainer').innerHTML = `
-                <div class="tier-card">
-                    <h4 style="margin-top:0; color: #8b949e; text-transform: uppercase;">Extracted Specification</h4>
-                    <h2 style="margin:10px 0; font-size: 32px; color: #fff;">£${grandTotal}</h2>
-                    <ul style="color: #c9d1d9; line-height: 1.8; font-size: 14px; padding-left: 0; list-style: none;">
-                        <li><b style="color:#fff;">Dimensions:</b> ${width}mm x ${projection}mm</li>
-                        <li><b style="color:#fff;">Roof System:</b> ${roofSystem}</li>
-                        <li><b style="color:#fff;">Frames & Glazing:</b> ${frames} / ${doors} / ${frameColour}</li>
+                <div class="bg-[#161b22] border border-[#30363d] p-6 rounded-xl shadow-xl mb-6">
+                    <h4 class="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-2">Extracted Specification</h4>
+                    <h2 class="text-4xl font-black text-white mb-6">£${grandTotal}</h2>
+                    <ul class="text-gray-300 space-y-3 text-sm">
+                        <li class="flex gap-2"><strong class="text-white">Dimensions:</strong> <span>${width}mm x ${projection}mm</span></li>
+                        <li class="flex gap-2"><strong class="text-white">Roof System:</strong> <span>${roofSystem}</span></li>
+                        <li class="flex gap-2"><strong class="text-white">Glazing:</strong> <span>${frames} / ${doors} / ${frameColour}</span></li>
                     </ul>
                 </div>
             `;
             
-            document.getElementById('btnSaveQuotes').style.display = "block";
+            document.getElementById('btnSaveQuotes').classList.remove('hidden');
         });
 
-        // The Fix: Save Button pushes securely into the existing Survey document
         document.getElementById('btnSaveQuotes').addEventListener('click', async () => {
             try {
-                document.getElementById('btnSaveQuotes').innerText = "Encrypting & Saving to Vault...";
+                const btn = document.getElementById('btnSaveQuotes');
+                btn.innerText = "Encrypting & Saving to Vault...";
                 
-                // IMPORTANT FIX: Save into "surveys" instead of "quotes" to respect Firebase rules
                 await setDoc(doc(db, "surveys", currentLeadId), {
                     uDesignQuote: finalQuoteData,
                     pipelineStatus: "2. Quote Sent"
                 }, { merge: true });
                 
-                document.getElementById('btnSaveQuotes').style.display = "none";
-                document.getElementById('successBox').style.display = "block";
-                
-                // Generates the final portal link
+                btn.classList.add('hidden');
+                document.getElementById('successBox').classList.remove('hidden');
                 document.getElementById('portalLink').href = `vault.html?id=${currentLeadId}`;
             } catch(e) {
                 alert("Database Save Error. Check Console.");
