@@ -38,10 +38,10 @@
             background: var(--bg-surface);
             border: 1px solid var(--border-subtle);
             border-radius: 12px;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* The Google Docs "Preview Square" */
+        /* The Google Docs "Preview Square" with Sniper Overlay */
         .doc-card {
             display: flex;
             flex-direction: column;
@@ -52,10 +52,11 @@
         }
         .doc-card:hover {
             background: var(--bg-surface-elevated);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
             border-color: var(--brand-border);
         }
+        
         .doc-preview-area {
             flex: 1;
             background: var(--bg-base);
@@ -63,10 +64,36 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
             color: var(--text-muted);
-            opacity: 0.3;
+            position: relative;
+            overflow: hidden;
         }
+
+        /* Technical Blueprint Grid Pattern */
+        .tech-grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Sniper Bracket Accents */
+        .sniper-bracket {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-color: var(--brand-primary);
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+        .doc-card:hover .sniper-bracket { opacity: 1; }
+        .bracket-tl { top: 8px; left: 8px; border-top: 2px solid; border-left: 2px solid; }
+        .bracket-br { bottom: 8px; right: 8px; border-bottom: 2px solid; border-right: 2px solid; }
 
         /* Inputs */
         .luxury-input {
@@ -88,7 +115,7 @@
         /* Buttons */
         .btn-primary {
             background: var(--brand-primary);
-            color: #000;
+            color: #fff; /* Switched to white for better contrast across all brand colors */
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -114,9 +141,9 @@
             right: 32px;
             width: 64px;
             height: 64px;
-            border-radius: 20px; /* Modern squircle */
+            border-radius: 20px; 
             background: var(--brand-primary);
-            color: #000;
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -144,7 +171,7 @@
             align-items: center;
             gap: 16px;
             padding: 14px 20px;
-            border-radius: 0 24px 24px 0; /* Google style pill */
+            border-radius: 0 24px 24px 0; 
             color: var(--text-main);
             font-weight: 600;
             font-size: 14px;
@@ -366,11 +393,10 @@
             if (isOpen) {
                 sidebar.classList.remove('open');
                 overlay.classList.remove('active');
-                setTimeout(() => { overlay.style.display = 'none'; }, 300); // Wait for fade out
+                setTimeout(() => { overlay.style.display = 'none'; }, 300);
             } else {
                 overlay.style.display = 'block';
-                // Trigger reflow to ensure transition works
-                void overlay.offsetWidth; 
+                void overlay.offsetWidth; // Reflow
                 sidebar.classList.add('open');
                 overlay.classList.add('active');
             }
@@ -378,30 +404,24 @@
 
         // SPA Router
         window.switchModule = (moduleId, clickedElement) => {
-            // Hide all modules
             document.querySelectorAll('.module-view').forEach(mod => {
                 mod.classList.remove('active');
             });
             
-            // Show target module
             document.getElementById(moduleId).classList.add('active');
 
-            // Update Sidebar Active State (if a nav link was passed)
             if (clickedElement && clickedElement.classList.contains('nav-link')) {
                 document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
                 clickedElement.classList.add('active');
                 
-                // Update Top Bar Title
                 const titleText = clickedElement.innerText.replace(/^[^\w]*/, '').trim();
                 document.getElementById('appBarTitle').innerText = titleText;
             } else if (moduleId === 'module-survey') {
-                // If triggered by FAB, set top bar manually
                 document.getElementById('appBarTitle').innerText = "Survey Engine";
             } else if (moduleId === 'module-projects') {
                 document.getElementById('appBarTitle').innerText = "Project Library";
             }
 
-            // Auto-close menu on mobile after selection
             if (window.innerWidth < 1024 && sidebar.classList.contains('open')) {
                 toggleMenu();
             }
@@ -413,11 +433,12 @@
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
             
             setTimeout(() => {
-                const mockDesignerBrand = "ClearView"; // Swap this to test brands!
+                // Hardcoded to Yorkshire Windows to match designer profile
+                const mockDesignerBrand = "Yorkshire Windows"; 
                 const mockDesignerName = "Thomas Oldroyd";
                 
                 applyBrandTheme(mockDesignerBrand);
-                generateMockProjects(); // Populate the Google Docs grid
+                generateMockProjects(); 
                 
                 document.getElementById('userName').innerText = mockDesignerName;
                 document.getElementById('userInitial').innerText = mockDesignerName.charAt(0);
@@ -450,31 +471,47 @@
             document.getElementById('sidebarBrand').innerHTML = brandHTML;
         }
 
-        // Generate the "Google Docs" Preview Squares
+        // Generate the "Google Docs" Preview Squares with Sniper Assets
         function generateMockProjects() {
             const grid = document.getElementById('projectsGrid');
+            
+            // Mock data containing architectural / blueprint style imagery to simulate the sniper tool output
             const mockData = [
-                { name: "Mr. Dall", pc: "S70 0PN", date: "Today", type: "Ultra380 Solid Roof" },
-                { name: "Mrs. Smith", pc: "DN1 2AB", date: "Yesterday", type: "Edwardian Roof" },
-                { name: "The Barn Project", pc: "HD8 1XZ", date: "Jul 24", type: "Hybrid Livin Roof" },
-                { name: "Mr. Johnson", pc: "WF1 9YY", date: "Jul 21", type: "Glass Conservatory" },
-                { name: "Oak House", pc: "S35 4QQ", date: "Jul 18", type: "Ultra380 Solid Roof" }
+                { name: "Mr. Dall", pc: "S70 0PN", date: "Today", type: "Ultra380 Solid Roof", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
+                { name: "Mrs. Smith", pc: "DN1 2AB", date: "Yesterday", type: "Edwardian Roof", img: "https://images.unsplash.com/photo-1518640035035-7c08b50346c7?auto=format&fit=crop&w=600&q=80" },
+                { name: "The Barn Project", pc: "HD8 1XZ", date: "Jul 24", type: "Hybrid Livin Roof", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80" },
+                { name: "Mr. Johnson", pc: "WF1 9YY", date: "Jul 21", type: "Glass Conservatory", img: null }, // Simulates a project without a sniper image yet
+                { name: "Oak House", pc: "S35 4QQ", date: "Jul 18", type: "Ultra380 Solid Roof", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80" }
             ];
 
-            grid.innerHTML = mockData.map(proj => `
-                <div class="md-surface doc-card" onclick="switchModule('module-survey')">
+            grid.innerHTML = mockData.map(proj => {
+                // If we have an image, apply the hover-zoom and technical sniper overlays
+                const previewContent = proj.img 
+                    ? `<img src="${proj.img}" class="w-full h-full object-cover opacity-50 transition duration-500 scale-100" style="filter: grayscale(20%) contrast(120%);" id="img-${proj.name.replace(/\s+/g, '')}">
+                       <div class="tech-grid-overlay"></div>
+                       <div class="sniper-bracket bracket-tl"></div>
+                       <div class="sniper-bracket bracket-br"></div>`
+                    : `<span class="material-icons-round text-5xl opacity-30">architecture</span>`;
+
+                return `
+                <div class="md-surface doc-card group" onclick="switchModule('module-survey')" 
+                     onmouseover="document.getElementById('img-${proj.name.replace(/\s+/g, '')}')?.classList.replace('scale-100', 'scale-110'); document.getElementById('img-${proj.name.replace(/\s+/g, '')}')?.classList.replace('opacity-50', 'opacity-90')"
+                     onmouseout="document.getElementById('img-${proj.name.replace(/\s+/g, '')}')?.classList.replace('scale-110', 'scale-100'); document.getElementById('img-${proj.name.replace(/\s+/g, '')}')?.classList.replace('opacity-90', 'opacity-50')">
+                    
                     <div class="doc-preview-area">
-                        <span class="material-icons-round">architecture</span>
+                        ${previewContent}
                     </div>
-                    <div class="p-3 border-t border-[#2c2c30]">
-                        <h4 class="text-sm font-bold text-white truncate">${proj.name}</h4>
+                    
+                    <div class="p-3 border-t border-[#2c2c30] bg-[#1a1a1e] relative z-20">
+                        <h4 class="text-sm font-bold text-white truncate group-hover:text-[color:var(--brand-primary)] transition-colors">${proj.name}</h4>
                         <div class="flex justify-between items-center mt-1">
                             <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">${proj.pc}</span>
                             <span class="text-[10px] px-2 py-0.5 rounded bg-[#2c2c30] text-gray-300 font-bold">${proj.date}</span>
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
     </script>
 </body>
