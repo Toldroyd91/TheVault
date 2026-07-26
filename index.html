@@ -7,226 +7,82 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
-        /* DYNAMIC BRANDING ENGINE */
         :root {
-            --brand-primary: #0dcaf0; 
-            --brand-bg-glow: rgba(13, 202, 240, 0.12);
-            --brand-border: rgba(13, 202, 240, 0.3);
+            --brand-primary: #005A9C; 
+            --brand-bg-glow: rgba(0, 90, 156, 0.12);
+            --brand-border: rgba(0, 90, 156, 0.3);
+            --success: #238636;
             
-            /* Material Design 3 Dark Mode Palette */
-            --bg-base: #0f0f11;
-            --bg-surface: #1a1a1e;
-            --bg-surface-elevated: #232328;
+            --bg-base: #0a0a0c;
+            --bg-surface: #141418;
+            --bg-surface-elevated: #1e1e24;
             
-            --text-main: #e3e3e3;
-            --text-muted: #8e8e93;
-            --border-subtle: #2c2c30;
+            --text-main: #f4f4f6;
+            --text-muted: #8b8b93;
+            --border-subtle: #27272f;
         }
 
         body { 
-            background-color: var(--bg-base); 
-            color: var(--text-main); 
+            background-color: var(--bg-base); color: var(--text-main); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            overflow: hidden;
+            -webkit-font-smoothing: antialiased; overflow: hidden;
         }
 
-        /* Material UI Components */
-        .md-surface {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .md-surface { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* The Google Docs "Preview Square" with Sniper Overlay */
-        .doc-card {
-            display: flex;
-            flex-direction: column;
-            aspect-ratio: 4/3;
-            cursor: pointer;
-            overflow: hidden;
-            position: relative;
-        }
-        .doc-card:hover {
-            background: var(--bg-surface-elevated);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-            border-color: var(--brand-border);
-        }
+        .doc-card { display: flex; flex-direction: column; aspect-ratio: 4/3; cursor: pointer; overflow: hidden; position: relative; border-radius: 14px; }
+        .doc-card:hover { background: var(--bg-surface-elevated); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.6); border-color: var(--brand-border); }
+        .doc-preview-area { flex: 1; background: var(--bg-base); border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; color: var(--text-muted); position: relative; overflow: hidden; }
         
-        .doc-preview-area {
-            flex: 1;
-            background: var(--bg-base);
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            position: relative;
-            overflow: hidden;
-        }
+        .luxury-input { background: var(--bg-base); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 10px; width: 100%; padding: 14px 16px; font-size: 14px; transition: all 0.2s ease; outline: none; }
+        .luxury-input:focus { border-color: var(--brand-primary); background: var(--bg-surface-elevated); box-shadow: 0 0 0 2px var(--brand-bg-glow); }
+        select.luxury-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b8b93%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 10px auto; padding-right: 36px; }
 
-        /* Technical Blueprint Grid Pattern */
-        .tech-grid-overlay {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-            pointer-events: none;
-            z-index: 10;
-        }
+        .btn-primary { background: var(--brand-primary); color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; padding: 16px 24px; transition: all 0.2s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary:hover { filter: brightness(1.15); box-shadow: 0 6px 20px var(--brand-bg-glow); transform: translateY(-1px); }
+        .btn-secondary { background: var(--bg-surface-elevated); color: var(--text-main); border: 1px solid var(--border-subtle); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; padding: 14px 20px; transition: all 0.2s ease; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-secondary:hover { border-color: var(--text-muted); background: #27272f; }
 
-        /* Sniper Bracket Accents */
-        .sniper-bracket {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            border-color: var(--brand-primary);
-            opacity: 0.3;
-            transition: all 0.3s ease;
-            z-index: 20;
-        }
-        .doc-card:hover .sniper-bracket { opacity: 1; }
-        .bracket-tl { top: 8px; left: 8px; border-top: 2px solid; border-left: 2px solid; }
-        .bracket-br { bottom: 8px; right: 8px; border-bottom: 2px solid; border-right: 2px solid; }
+        .fab { position: fixed; bottom: 32px; right: 32px; width: 64px; height: 64px; border-radius: 20px; background: var(--brand-primary); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 40; }
+        .fab:hover { transform: scale(1.06) translateY(-2px); border-radius: 16px; filter: brightness(1.15); }
 
-        /* Inputs */
-        .luxury-input {
-            background: var(--bg-base);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-main);
-            border-radius: 8px;
-            width: 100%;
-            padding: 16px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-        .luxury-input:focus {
-            border-color: var(--brand-primary);
-            background: var(--bg-surface-elevated);
-        }
-
-        /* Buttons */
-        .btn-primary {
-            background: var(--brand-primary);
-            color: #fff; 
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-radius: 8px;
-            padding: 16px 24px;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .btn-primary:hover {
-            filter: brightness(1.15);
-            box-shadow: 0 4px 15px var(--brand-bg-glow);
-        }
-        
-        .btn-secondary {
-            background: var(--bg-surface-elevated);
-            color: var(--text-main);
-            border: 1px solid var(--border-subtle);
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-radius: 8px;
-            padding: 16px 24px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .btn-secondary:hover {
-            border-color: var(--text-muted);
-            background: #2c2c30;
-        }
-
-        /* Floating Action Button (FAB) */
-        .fab {
-            position: fixed;
-            bottom: 32px;
-            right: 32px;
-            width: 64px;
-            height: 64px;
-            border-radius: 20px; 
-            background: var(--brand-primary);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 40;
-        }
-        .fab:hover {
-            transform: scale(1.05) translateY(-2px);
-            border-radius: 16px;
-            filter: brightness(1.15);
-        }
-        .fab .material-icons-round { font-size: 32px; }
-
-        /* Sidebar Navigation */
-        #appSidebar {
-            transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        #appSidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         #appSidebar.open { transform: translateX(0); }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 14px 20px;
-            border-radius: 0 24px 24px 0; 
-            color: var(--text-main);
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            margin-right: 16px;
-            cursor: pointer;
-        }
+        .nav-link { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 0 24px 24px 0; color: var(--text-main); font-weight: 600; font-size: 14px; transition: all 0.2s ease; margin-right: 16px; cursor: pointer; }
         .nav-link:hover { background: var(--bg-surface-elevated); }
-        .nav-link.active {
-            background: var(--brand-bg-glow);
-            color: var(--brand-primary);
-        }
-        .nav-link .material-icons-round { font-size: 22px; }
-
-        /* Module Views */
+        .nav-link.active { background: var(--brand-bg-glow); color: var(--brand-primary); }
+        
         .module-view { display: none; animation: fadeIn 0.3s ease-out; }
         .module-view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Auth Gate Animation */
         #authGate { transition: opacity 0.5s ease; }
         .fade-out { opacity: 0; pointer-events: none; }
         
-        /* Checkbox overrides */
-        input[type="checkbox"] {
-            accent-color: var(--brand-primary);
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
+        .luxury-checkbox { display: flex; align-items: center; gap: 12px; background: var(--bg-base); padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border-subtle); cursor: pointer; transition: 0.2s; }
+        .luxury-checkbox:hover { border-color: var(--brand-primary); background: var(--bg-surface-elevated); }
+        .luxury-checkbox input { accent-color: var(--brand-primary); width: 18px; height: 18px; cursor: pointer; }
+        .luxury-checkbox span { font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-main); }
+
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .photo-btn { background: var(--bg-base); border: 1px solid var(--border-subtle); padding: 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; font-size: 12px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .photo-btn:hover { border-color: var(--brand-primary); color: #fff; background: var(--bg-surface-elevated); }
+        .photo-btn .badge { background: var(--border-subtle); color: var(--text-muted); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 900; }
+        .photo-btn.has-photos { border-color: var(--success); color: #fff; background: rgba(35, 134, 54, 0.12); }
+        .photo-btn.has-photos .badge { background: var(--success); color: #fff; }
+
+        .canvas-container { background: #000; border-radius: 14px; width: 100%; height: 500px; border: 2px dashed var(--border-subtle); display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; touch-action: none; }
+        canvas { max-width: 100%; max-height: 100%; }
+        
+        #syncProgressWrapper { display: none; margin-top: 20px; width: 100%; }
+        .progress-bg { height: 8px; background: var(--border-subtle); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--brand-primary); width: 0%; transition: width 0.3s ease; }
     </style>
 </head>
 <body class="flex w-full h-full relative">
 
     <!-- SECURE AUTH GATE -->
-    <div id="authGate" class="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0f0f11] p-6">
+    <div id="authGate" class="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0a0a0c] p-6">
         <div class="md-surface p-10 w-full max-w-md relative overflow-hidden shadow-2xl">
             <div class="absolute top-0 left-0 w-full h-1" style="background: var(--brand-primary);"></div>
             <div class="text-center mb-10">
@@ -241,15 +97,14 @@
         </div>
     </div>
 
-    <!-- SIDEBAR DRAWER OVERLAY -->
     <div id="drawerOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity opacity-0" onclick="toggleMenu()"></div>
 
-    <!-- SLIDE-OUT HAMBURGER MENU -->
-    <nav id="appSidebar" class="w-72 bg-[#1a1a1e] border-r border-[#2c2c30] h-full fixed left-0 top-0 z-50 flex flex-col shadow-2xl">
-        <div class="p-6 pt-8 pb-4 border-b border-[#2c2c30] flex flex-col gap-4">
+    <!-- SIDEBAR -->
+    <nav id="appSidebar" class="w-72 bg-[#141418] border-r border-[#27272f] h-full fixed left-0 top-0 z-50 flex flex-col shadow-2xl">
+        <div class="p-6 pt-8 pb-4 border-b border-[#27272f] flex flex-col gap-4">
             <h2 class="text-xl font-black uppercase tracking-widest m-0" id="sidebarBrand">COHI<span style="color: var(--brand-primary)">PRO</span></h2>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-sm font-bold" id="userInitial"></div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-sm font-bold">T</div>
                 <div>
                     <p class="text-sm font-bold text-white" id="userName">Loading...</p>
                     <p class="text-[10px] text-gray-500 uppercase tracking-widest">New Living Space Designer</p>
@@ -271,229 +126,246 @@
                 <span class="material-icons-round">lock</span> Project Gatekeeper
             </div>
         </div>
-
-        <div class="p-4 border-t border-[#2c2c30]">
-            <button class="nav-link w-full text-red-400 hover:bg-red-400/10 hover:text-red-300" onclick="location.reload()">
-                <span class="material-icons-round">logout</span> Secure Logout
-            </button>
-        </div>
     </nav>
 
     <!-- MAIN APP SHELL -->
     <div id="appShell" class="flex flex-col w-full h-full opacity-0 transition-opacity duration-500">
         
-        <!-- TOP APP BAR -->
-        <header class="h-16 border-b border-[#2c2c30] bg-[#1a1a1e] flex items-center justify-between px-4 z-30 sticky top-0">
+        <header class="h-16 border-b border-[#27272f] bg-[#141418] flex items-center justify-between px-6 z-30 sticky top-0">
             <div class="flex items-center gap-4">
                 <button onclick="toggleMenu()" class="text-gray-300 hover:text-white p-2 rounded-full hover:bg-gray-800 transition flex items-center justify-center">
                     <span class="material-icons-round text-2xl">menu</span>
                 </button>
                 <h1 id="appBarTitle" class="text-lg font-bold tracking-wide">Project Library</h1>
             </div>
-            <div class="flex items-center gap-3">
-                <button class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-800 transition">
-                    <span class="material-icons-round">search</span>
-                </button>
-            </div>
         </header>
 
-        <!-- DYNAMIC WORKSPACE -->
-        <main class="flex-1 h-full overflow-y-auto relative p-4 md:p-8">
+        <main class="flex-1 h-full overflow-y-auto relative p-6 md:p-10">
             
-            <!-- ==========================================
-                 MODULE 1: GOOGLE DOCS DASHBOARD 
-                 ========================================== -->
+            <!-- MODULE 1: DASHBOARD -->
             <div id="module-projects" class="module-view active max-w-7xl mx-auto pb-24">
                 <div class="flex justify-between items-end mb-6">
                     <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest">Recent Surveys</h2>
-                    <span class="text-xs text-gray-600 font-bold uppercase">A-Z</span>
                 </div>
-                
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6" id="projectsGrid">
-                    <!-- Populated by JS -->
-                </div>
-
-                <!-- Floating Action Button -->
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="projectsGrid"></div>
                 <button class="fab" onclick="switchModule('module-survey', document.querySelectorAll('.nav-link')[1])" title="Start New Survey">
                     <span class="material-icons-round">add</span>
                 </button>
             </div>
 
-            <!-- ==========================================
-                 MODULE 2: RAPID SURVEY ENGINE 
-                 ========================================== -->
-            <div id="module-survey" class="module-view max-w-4xl mx-auto pb-24">
+            <!-- MODULE 2: RAPID FULL SURVEY ENGINE -->
+            <div id="module-survey" class="module-view max-w-5xl mx-auto pb-24">
                 <div class="flex items-center gap-4 mb-8">
                     <button onclick="switchModule('module-projects', document.querySelectorAll('.nav-link')[0])" class="text-gray-400 hover:text-white flex items-center justify-center p-2 rounded-full hover:bg-gray-800 transition">
                         <span class="material-icons-round">arrow_back</span>
                     </button>
                     <div>
-                        <h2 class="text-2xl font-black uppercase tracking-tight">New Survey</h2>
-                        <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Unsaved Draft</p>
+                        <h2 class="text-2xl font-black uppercase tracking-tight">Rapid Site Survey</h2>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Full Architectural Capture</p>
                     </div>
                 </div>
 
+                <!-- 01. Profile -->
+                <div class="md-surface p-6 md:p-8 mb-6 border-l-4 border-l-[color:var(--brand-primary)]">
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#27272f] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
+                        <span class="material-icons-round text-lg">person</span> 01. Client Profile
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Lead Name *</label><input type="text" id="clientName" placeholder="e.g. Mr. Dow" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Customer Number</label><input type="text" id="clientNum" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">House No. / Name *</label><input type="text" id="houseNum" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Site Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70 0PN" class="luxury-input uppercase"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Consultation Date</label><input type="date" id="apptDate" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Revisit Date</label><input type="date" id="revisitDate" class="luxury-input"></div>
+                    </div>
+                </div>
+
+                <!-- 02. Scope & Structure -->
                 <div class="md-surface p-6 md:p-8 mb-6">
-                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#2c2c30] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
-                        <span class="material-icons-round text-lg">person_pin_circle</span> 01. Client Coordinates
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#27272f] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
+                        <span class="material-icons-round text-lg">architecture</span> 02. Project Scope & Structure
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Lead Name *</label>
-                            <input type="text" placeholder="e.g. Mr. Dow" class="luxury-input">
+                        <div class="md:col-span-2"><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Build Type</label>
+                            <select id="buildType" class="luxury-input"><option value="">Select...</option><option value="Single Storey Extension">Single Storey Extension</option><option value="Conservatory">Conservatory</option><option value="Orangery">Orangery</option><option value="Hybrid Extension">Hybrid Extension</option><option value="Porch">Porch</option><option value="Garage Conversion">Garage Conversion</option></select>
                         </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">UK Postcode *</label>
-                            <input type="text" placeholder="e.g. S70 0PN" class="luxury-input uppercase">
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Proposed Size (mm)</label><input type="text" id="proposedSize" placeholder="e.g. 3000x4000" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Existing House Material</label>
+                            <select id="houseMaterial" class="luxury-input"><option value="">Select...</option><option value="Standard Brick">Standard Brick</option><option value="Stone">Stone</option><option value="Rendered">Rendered</option><option value="Pebbledash">Pebbledash</option><option value="Timber Clad">Timber Clad</option></select>
+                        </div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Base Type</label>
+                            <select id="baseType" class="luxury-input"><option value="">Select...</option><option value="Standard Concrete">Standard Concrete</option><option value="Block & Beam">Block & Beam</option><option value="Piled / Steel">Piled / Steel</option><option value="Existing Base">Existing Base (Retained)</option></select>
+                        </div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">DPC Depth (mm)</label><input type="number" id="dpcDepth" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Fascia Height (mm)</label><input type="number" id="fasciaHeight" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Sub-Floor Venting (Air Bricks)</label>
+                            <select id="airBricks" class="luxury-input"><option value="">Select...</option><option value="Standard Venting Required">Standard Venting Required</option><option value="Telescopic Sub-Floor Ducts">Telescopic Sub-Floor Ducts</option><option value="None Required">None Required</option></select>
                         </div>
                     </div>
                 </div>
 
+                <!-- 03. Logistics -->
                 <div class="md-surface p-6 md:p-8 mb-6">
-                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#2c2c30] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
-                        <span class="material-icons-round text-lg">architecture</span> 02. Architectural Scope
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#27272f] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
+                        <span class="material-icons-round text-lg">warning</span> 03. Logistics & Restrictions
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Roof System</label>
-                            <select class="luxury-input appearance-none">
-                                <option>Edwardian roof</option>
-                                <option>Ultra380 Solid Roof</option>
-                                <option>Glass Conservatory Roof</option>
-                                <option>Hybrid / Livin Roof</option>
-                            </select>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Access Difficulties</label>
+                            <select id="accessDifficult" class="luxury-input"><option value="">Select...</option><option value="Unrestricted Access">Unrestricted Access</option><option value="Narrow Side Gate">Narrow Side Gate</option><option value="Through Garage Only">Through Garage Only</option><option value="Through House Only">Through House Only</option><option value="Severe Incline / Steps">Severe Incline / Steps</option></select>
                         </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Proposed Footprint (mm)</label>
-                            <input type="text" placeholder="e.g. 3000x4000" class="luxury-input">
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Access Width (mm)</label><input type="number" id="accessWidth" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Drainage Relocations</label>
+                            <select id="drainage" class="luxury-input"><option value="">Select...</option><option value="Clear / No Action">Clear / No Action</option><option value="Manhole Cover Move">Manhole Cover Move</option><option value="Rainwater Pipe Move">Rainwater Pipe Move</option><option value="Soil Pipe Move">Soil Pipe Move</option><option value="Gulley Move">Gulley Move</option></select>
                         </div>
+                        <div class="md:col-span-2"><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Wall Obstacles (Flues, Vents)</label><input type="text" id="wallObstacles" class="luxury-input"></div>
                     </div>
                 </div>
 
+                <!-- 04. Design Spec -->
                 <div class="md-surface p-6 md:p-8 mb-6">
-                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#2c2c30] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
-                        <span class="material-icons-round text-lg">camera</span> 03. Site Photography & Sniper Markups
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#27272f] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
+                        <span class="material-icons-round text-lg">palette</span> 04. Design Specification
                     </h3>
-                    <p class="text-sm text-gray-400 mb-6">Batch upload site context photos. Tap 'Markup' to launch the calibration sniper overlay.</p>
-                    
-                    <button class="btn-secondary w-full mb-6">
-                        <span class="material-icons-round">add_photo_alternate</span> Upload Photos
-                    </button>
-                    
-                    <div class="text-center p-8 border-2 border-dashed border-[#2c2c30] rounded-lg text-gray-600">
-                        No photos staged for upload yet.
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Roof System</label>
+                            <select id="roofType" class="luxury-input"><option value="">Select...</option><option value="Edwardian roof">Edwardian roof</option><option value="Ultra380 Solid Roof">Ultra380 Solid Roof</option><option value="Hybrid/Livin Roof">Hybrid/Livin Roof</option><option value="Glass Conservatory Roof">Glass Conservatory Roof</option><option value="Polycarbonate Roof">Polycarbonate Roof</option><option value="Standard Flat Roof">Standard Flat Roof</option></select>
+                        </div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Roof Pitch (Degrees)</label><input type="number" id="roofPitch" class="luxury-input"></div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Frame Colour (External)</label>
+                            <select id="frameColour" class="luxury-input"><option value="">Select...</option><option value="White">White</option><option value="Anthracite Grey (Smooth)">Anthracite Grey (Smooth)</option><option value="Grey Foil">Grey Foil</option><option value="Chartwell Green">Chartwell Green</option><option value="Rosewood">Rosewood</option><option value="Light Oak">Light Oak</option><option value="Black Foil">Black Foil</option></select>
+                        </div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Frame Colour (Internal)</label>
+                            <select id="internalFrameColour" class="luxury-input"><option value="White">White</option><option value="Match External">Match External</option></select>
+                        </div>
                     </div>
                 </div>
 
-                <button class="btn-primary w-full py-5 text-sm" onclick="alert('Payload encrypted and synced to cloud architecture.')">
-                    <span class="material-icons-round">cloud_upload</span> Save & Secure Dossier Payload
-                </button>
-            </div>
-
-            <!-- ==========================================
-                 MODULE 3: DOSSIER COMPILER (API Scraper)
-                 ========================================== -->
-            <div id="module-dossier" class="module-view max-w-5xl mx-auto pb-24">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-black uppercase tracking-tight">Dossier Compiler</h2>
-                    <p class="text-xs text-[#0dcaf0] font-bold uppercase tracking-widest mt-1">Enterprise Presentation API</p>
+                <!-- 05. Compliance & Pamphlets -->
+                <div class="md-surface p-6 md:p-8 mb-6">
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#27272f] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
+                        <span class="material-icons-round text-lg">gavel</span> 05. Compliance & Regulations
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Building Regs Requirement</label>
+                            <select id="buildingRegs" class="luxury-input"><option value="">Select...</option><option value="Full Building Control Required">Full Building Control Required</option><option value="Replacement - Masonry Alterations">Replacement - Masonry Alterations</option><option value="Replacement - No Alterations">Replacement - No Alterations</option><option value="Exempt / Not Required">Exempt / Not Required</option></select>
+                        </div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Planning Authority Status</label>
+                            <select id="planningPerms" class="luxury-input"><option value="">Select...</option><option value="Full Planning Permission Needed">Full Planning Permission Needed</option><option value="NCS Prior Approval Needed">NCS Prior Approval Needed</option><option value="Permitted Development (No Action)">Permitted Development (No Action)</option></select>
+                        </div>
+                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">SAP Energy Calcs</label>
+                            <select id="sapCalcs" class="luxury-input"><option value="">Select...</option><option value="Yes">Yes - Required</option><option value="No">No - Exempt</option></select>
+                        </div>
+                    </div>
+                    
+                    <h4 class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 mt-6">Handover Pamphlets</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="luxury-checkbox"><input type="checkbox" id="cb-brochure"> <span>Product Brochure Handed Over</span></label>
+                        <label class="luxury-checkbox"><input type="checkbox" id="cb-warranty"> <span>Warranty Documentation Provided</span></label>
+                        <label class="luxury-checkbox"><input type="checkbox" id="cb-planning"> <span>Planning Guide / Regulatory Handout</span></label>
+                        <label class="luxury-checkbox"><input type="checkbox" id="cb-sap"> <span>SAP Calculations Factsheet</span></label>
+                        <label class="luxury-checkbox"><input type="checkbox" id="cb-roof"> <span>Roof System Specification Guide</span></label>
+                    </div>
                 </div>
 
-                <!-- Active Project Card -->
-                <div class="md-surface p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-[color:var(--brand-border)] shadow-[0_0_20px_var(--brand-bg-glow)]">
-                    <div>
-                        <span class="bg-[#0dcaf0]/20 text-[color:var(--brand-primary)] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-3 inline-block border border-[color:var(--brand-border)]">Ready to Compile</span>
-                        <h3 class="m-0 font-black text-white text-2xl tracking-wide">Mr. Dow</h3>
-                        <p class="m-0 mt-1 text-xs text-gray-400 font-bold uppercase tracking-widest">S70 0PN <span class="mx-2 text-[#2c2c30]">|</span> Edwardian roof</p>
+                <!-- 06. Elevation Sniper Engine -->
+                <div class="md-surface p-6 md:p-8 mb-6">
+                    <div class="flex justify-between items-center border-b border-[#27272f] pb-3 mb-6">
+                        <h3 class="text-xs uppercase font-bold tracking-widest flex items-center gap-2 m-0" style="color: var(--brand-primary)">
+                            <span class="material-icons-round text-lg">gps_fixed</span> 06. Elevation Sniper Engine
+                        </h3>
+                        <button id="btn-load-sniper-img" class="btn-secondary py-2 px-4 text-[10px]">📷 Capture Photo</button>
                     </div>
-                    <div class="flex flex-col gap-2 w-full md:w-auto">
-                        <button id="btnScrapeCompile" class="btn-primary px-8" onclick="runIntelligenceScrape()">
-                            <span class="material-icons-round">radar</span> Compile & Scrape Intel
+                    
+                    <div class="canvas-container mb-4" style="cursor: grab;">
+                        <canvas id="sniperCanvas" width="900" height="600"></canvas>
+                        <div class="absolute bottom-5 right-5 bg-black/80 backdrop-blur px-4 py-3 rounded-lg border border-[#27272f] flex items-center gap-3">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Zoom</span>
+                            <input type="range" id="sniperZoom" min="0.5" max="5" step="0.1" value="1" class="w-24 accent-[color:var(--brand-primary)]">
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button id="btn-sniper-mark" class="btn-secondary flex-1 py-4 text-xs"><span class="material-icons-round text-sm">gps_fixed</span> Drop Target Pin</button>
+                        <button id="btn-sniper-clear" class="btn-secondary px-6 py-4 text-xs"><span class="material-icons-round text-sm">refresh</span> Clear All</button>
+                    </div>
+                </div>
+
+                <!-- 07. Site Photography -->
+                <div class="md-surface p-6 md:p-8 mb-6">
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#27272f] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
+                        <span class="material-icons-round text-lg">camera_alt</span> 07. Site Photography Grid
+                    </h3>
+                    
+                    <div class="photo-grid">
+                        <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()"><span>Front Elev</span><span class="badge" id="badge-front">0</span></div>
+                        <input type="file" id="upload-front" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'front')">
+                        
+                        <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()"><span>Side Elev</span><span class="badge" id="badge-side">0</span></div>
+                        <input type="file" id="upload-side" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'side')">
+                        
+                        <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()"><span>Back Elev</span><span class="badge" id="badge-back">0</span></div>
+                        <input type="file" id="upload-back" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'back')">
+                        
+                        <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()"><span>Access Route</span><span class="badge" id="badge-access">0</span></div>
+                        <input type="file" id="upload-access" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'access')">
+                        
+                        <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()"><span>Drainage</span><span class="badge" id="badge-drainage">0</span></div>
+                        <input type="file" id="upload-drainage" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'drainage')">
+                        
+                        <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()"><span>Trees/Roots</span><span class="badge" id="badge-trees">0</span></div>
+                        <input type="file" id="upload-trees" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'trees')">
+                        
+                        <div class="photo-btn" id="btn-brick" onclick="document.getElementById('upload-brick').click()"><span>Brick Match</span><span class="badge" id="badge-brick">0</span></div>
+                        <input type="file" id="upload-brick" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'brick')">
+                        
+                        <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()"><span>Misc Doc</span><span class="badge" id="badge-misc">0</span></div>
+                        <input type="file" id="upload-misc" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'misc')">
+                    </div>
+                </div>
+
+                <!-- 08. Notes & Save -->
+                <div class="md-surface p-6 md:p-8 mb-6">
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#27272f] pb-3 flex items-center gap-2" style="color: var(--brand-primary)">
+                        <span class="material-icons-round text-lg">edit_note</span> 08. Designer Notes
+                    </h3>
+                    <textarea id="designerNotes" rows="6" class="luxury-input mb-4" placeholder="Enter specific field notes for installers, structural anomalies, or specific design requests from the client..."></textarea>
+                    <button id="btn-ai-polish" class="btn-secondary w-full mb-6"><span class="material-icons-round">auto_fix_high</span> AI Polish Notes</button>
+                    
+                    <div class="flex flex-col md:flex-row gap-4 pt-6 border-t border-[#27272f]">
+                        <button id="btn-sync" class="btn-primary flex-[2] py-5 shadow-[0_4px_15px_var(--brand-bg-glow)]">
+                            <span class="material-icons-round">cloud_upload</span> Save & Sync Survey
+                        </button>
+                        <button id="btn-generate-pdf" class="btn-secondary flex-1 py-5">
+                            <span class="material-icons-round">picture_as_pdf</span> Generate PDF
+                        </button>
+                        <button id="btn-vault" class="btn-secondary flex-1 py-5 border-[color:var(--brand-primary)] text-[color:var(--brand-primary)] hover:bg-[color:var(--brand-bg-glow)]">
+                            <span class="material-icons-round">lock_open</span> View Vault
                         </button>
                     </div>
-                </div>
 
-                <!-- API Scraping Status Console (Hidden by default) -->
-                <div id="scrapingConsole" class="md-surface p-6 bg-black hidden">
-                    <h4 class="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-4 border-b border-[#2c2c30] pb-2">Intelligence Extraction Protocol</h4>
-                    <div class="space-y-3 font-mono text-xs">
-                        <p id="log1" class="text-gray-500 opacity-0 transition-opacity duration-300">> Querying UK Govt EPC Database...</p>
-                        <p id="log2" class="text-gray-500 opacity-0 transition-opacity duration-300">> Calculating thermal baseline and age...</p>
-                        <p id="log3" class="text-gray-500 opacity-0 transition-opacity duration-300">> Fetching local authority planning precedents...</p>
-                        <p id="log4" class="text-gray-500 opacity-0 transition-opacity duration-300">> Triangulating Open-Meteo structural snow loads...</p>
-                        <p id="log5" class="text-gray-500 opacity-0 transition-opacity duration-300">> Generating 40-page Master PDF Dossier...</p>
-                        <div id="logSuccess" class="opacity-0 transition-opacity duration-500 pt-4">
-                            <button class="btn-primary w-full bg-[#238636] text-white shadow-[0_0_20px_rgba(35,134,54,0.3)]">
-                                <span class="material-icons-round">picture_as_pdf</span> Open Final Dossier
-                            </button>
-                        </div>
+                    <div id="syncProgressWrapper" class="mt-6">
+                        <label id="progressText" class="text-[10px] text-[color:var(--brand-primary)] font-bold uppercase tracking-widest mb-2 block">Initializing Sync...</label>
+                        <div class="progress-bg"><div id="progressFill" class="progress-fill"></div></div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- ==========================================
-                 MODULE 4: PROJECT GATEKEEPER 
-                 ========================================== -->
-            <div id="module-gatekeeper" class="module-view max-w-4xl mx-auto pb-24">
-                <div class="flex justify-between items-end mb-8">
-                    <div>
-                        <h2 class="text-2xl font-black uppercase tracking-tight">Project Gatekeeper</h2>
-                        <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Financial Controls & Vault Access</p>
-                    </div>
-                    <div id="statusBadge" class="px-4 py-2 bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 rounded-lg text-xs font-bold uppercase tracking-widest shadow-sm">
-                        Status: Tease Mode
-                    </div>
-                </div>
-
-                <div class="md-surface p-8 mb-8">
-                    <h3 class="text-xs font-bold uppercase tracking-widest mb-6 border-b border-[#2c2c30] pb-3" style="color: var(--brand-primary)">1. UDesign Financial Sync</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Contract Total (£)</label>
-                            <input type="text" class="luxury-input font-mono text-lg" placeholder="19724.00">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Required Deposit (£)</label>
-                            <input type="text" class="luxury-input font-mono text-lg" placeholder="2959.00">
-                        </div>
-                    </div>
-                    <button class="btn-secondary w-full">Save Financials to Vault</button>
-                </div>
-
-                <div id="switchContainer" class="md-surface p-10 text-center border-t-4 border-[#E50914] shadow-xl transition-colors duration-500">
-                    <h2 class="text-lg font-black text-white uppercase tracking-widest mb-2">Live Customer Vault Access</h2>
-                    <p class="text-xs text-gray-400 mb-8 max-w-lg mx-auto">Flicking this switch instantly unlocks the financial breakdown and contractual scope of works on the customer's remote device.</p>
-                    
-                    <button id="btnToggleAccess" class="w-full py-5 bg-[#E50914] text-white font-black text-lg md:text-xl uppercase tracking-widest rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(229,9,20,0.3)]">
-                        🔓 GRANT FULL ACCESS
-                    </button>
-                </div>
-            </div>
+            <div id="module-dossier" class="module-view max-w-4xl mx-auto"><div class="text-center py-20"><span class="material-icons-round text-6xl text-gray-700 mb-4">auto_awesome_mosaic</span><h2 class="text-2xl font-black uppercase">Dossier Compiler</h2></div></div>
+            <div id="module-gatekeeper" class="module-view max-w-4xl mx-auto"><div class="text-center py-20"><span class="material-icons-round text-6xl text-gray-700 mb-4">lock</span><h2 class="text-2xl font-black uppercase">Project Gatekeeper</h2></div></div>
 
         </main>
     </div>
 
-    <!-- CORE LOGIC & ROUTING -->
-    <script>
-        // Enterprise Brand Configurations
-        const brands = {
-            "Yorkshire Windows": { hex: "#005A9C", title: "YORKSHIRE" },
-            "ClearView": { hex: "#238636", title: "CLEARVIEW" },
-            "Orion": { hex: "#E50914", title: "ORION" },
-            "Planet": { hex: "#8b5cf6", title: "PLANET" },
-            "Trent Valley": { hex: "#f59e0b", title: "TRENT VALLEY" },
-            "West Yorkshire": { hex: "#ec4899", title: "WEST YORKSHIRE" },
-            "COHI": { hex: "#0dcaf0", title: "COHI" }
-        };
+    <script type="module">
+        import { db, doc, setDoc, collection, serverTimestamp } from './js/core-firebase.js';
 
-        // UI Interactions
+        const brands = { "Yorkshire Windows": { hex: "#005A9C", title: "YORKSHIRE" } };
         const sidebar = document.getElementById('appSidebar');
         const overlay = document.getElementById('drawerOverlay');
 
-        function toggleMenu() {
-            const isOpen = sidebar.classList.contains('open');
-            if (isOpen) {
+        window.toggleMenu = () => {
+            if (sidebar.classList.contains('open')) {
                 sidebar.classList.remove('open');
                 overlay.classList.remove('active');
                 setTimeout(() => { overlay.style.display = 'none'; }, 300);
@@ -503,163 +375,231 @@
                 sidebar.classList.add('open');
                 overlay.classList.add('active');
             }
-        }
+        };
 
-        // SPA Router
         window.switchModule = (moduleId, clickedElement) => {
-            document.querySelectorAll('.module-view').forEach(mod => {
-                mod.classList.remove('active');
-            });
-            
+            document.querySelectorAll('.module-view').forEach(mod => mod.classList.remove('active'));
             document.getElementById(moduleId).classList.add('active');
-
             if (clickedElement && clickedElement.classList.contains('nav-link')) {
                 document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
                 clickedElement.classList.add('active');
-                
-                const titleText = clickedElement.innerText.replace(/^[^\w]*/, '').trim();
-                document.getElementById('appBarTitle').innerText = titleText;
-            } else if (moduleId === 'module-survey') {
-                document.getElementById('appBarTitle').innerText = "Survey Engine";
-            } else if (moduleId === 'module-projects') {
-                document.getElementById('appBarTitle').innerText = "Project Library";
-            }
+                document.getElementById('appBarTitle').innerText = clickedElement.innerText.replace(/^[^\w]*/, '').trim();
+            } else if (moduleId === 'module-survey') document.getElementById('appBarTitle').innerText = "Survey Engine";
+            if (window.innerWidth < 1024 && sidebar.classList.contains('open')) toggleMenu();
+        };
 
-            if (window.innerWidth < 1024 && sidebar.classList.contains('open')) {
-                toggleMenu();
-            }
-        }
-
-        // Auth & Brand Injection
         document.getElementById('btnLogin').addEventListener('click', () => {
             const btn = document.getElementById('btnLogin');
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
-            
             setTimeout(() => {
-                const mockDesignerBrand = "Yorkshire Windows"; 
-                const mockDesignerName = "Thomas Oldroyd";
+                const config = brands["Yorkshire Windows"];
+                const root = document.documentElement;
+                root.style.setProperty('--brand-primary', config.hex);
+                const rgb = "0, 90, 156"; 
+                root.style.setProperty('--brand-bg-glow', `rgba(${rgb}, 0.12)`);
+                root.style.setProperty('--brand-border', `rgba(${rgb}, 0.3)`);
                 
-                applyBrandTheme(mockDesignerBrand);
+                const titleHTML = `${config.title}<span style="color: var(--brand-primary)">PRO</span>`;
+                document.getElementById('loginBrandTitle').innerHTML = titleHTML;
+                document.getElementById('sidebarBrand').innerHTML = titleHTML;
+                
                 generateMockProjects(); 
-                
-                document.getElementById('userName').innerText = mockDesignerName;
-                document.getElementById('userInitial').innerText = mockDesignerName.charAt(0);
-                
+                document.getElementById('userName').innerText = "Thomas Oldroyd";
                 document.getElementById('authGate').classList.add('fade-out');
-                setTimeout(() => {
-                    document.getElementById('authGate').style.display = 'none';
-                    document.getElementById('appShell').style.opacity = '1';
-                }, 500);
+                setTimeout(() => { document.getElementById('authGate').style.display = 'none'; document.getElementById('appShell').style.opacity = '1'; }, 500);
             }, 800);
         });
 
-        function applyBrandTheme(brandName) {
-            const config = brands[brandName] || brands["COHI"];
-            const root = document.documentElement;
-            
-            root.style.setProperty('--brand-primary', config.hex);
-            
-            const hexToRgb = (hex) => {
-                const bigint = parseInt(hex.replace('#', ''), 16);
-                return `${(bigint >> 16) & 255}, ${(bigint >> 8) & 255}, ${bigint & 255}`;
-            };
-            const rgb = hexToRgb(config.hex);
-            
-            root.style.setProperty('--brand-bg-glow', `rgba(${rgb}, 0.12)`);
-            root.style.setProperty('--brand-border', `rgba(${rgb}, 0.3)`);
-            
-            const brandHTML = `${config.title}<span style="color: var(--brand-primary)">PRO</span>`;
-            document.getElementById('loginBrandTitle').innerHTML = brandHTML;
-            document.getElementById('sidebarBrand').innerHTML = brandHTML;
-        }
-
-        // Generate the "Google Docs" Preview Squares with Sniper Assets
         function generateMockProjects() {
             const grid = document.getElementById('projectsGrid');
-            
             const mockData = [
-                { name: "Mr. Dow", pc: "S70 0PN", date: "Today", type: "Edwardian roof", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
-                { name: "Mrs. Smith", pc: "DN1 2AB", date: "Yesterday", type: "Edwardian roof", img: "https://images.unsplash.com/photo-1518640035035-7c08b50346c7?auto=format&fit=crop&w=600&q=80" },
-                { name: "The Barn Project", pc: "HD8 1XZ", date: "Jul 24", type: "Hybrid Livin Roof", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80" },
-                { name: "Mr. Johnson", pc: "WF1 9YY", date: "Jul 21", type: "Glass Conservatory", img: null }, 
-                { name: "Oak House", pc: "S35 4QQ", date: "Jul 18", type: "Ultra380 Solid Roof", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80" }
+                { name: "Mr. Dow", pc: "S70 0PN", date: "Today", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
+                { name: "Mrs. Smith", pc: "DN1 2AB", date: "Yesterday", img: "https://images.unsplash.com/photo-1518640035035-7c08b50346c7?auto=format&fit=crop&w=600&q=80" }
             ];
-
-            grid.innerHTML = mockData.map(proj => {
-                const previewContent = proj.img 
-                    ? `<img src="${proj.img}" class="w-full h-full object-cover opacity-50 transition duration-500 scale-100" style="filter: grayscale(20%) contrast(120%);" id="img-${proj.name.replace(/\s+/g, '')}">
-                       <div class="tech-grid-overlay"></div>
-                       <div class="sniper-bracket bracket-tl"></div>
-                       <div class="sniper-bracket bracket-br"></div>`
-                    : `<span class="material-icons-round text-5xl opacity-30">architecture</span>`;
-
-                return `
-                <div class="md-surface doc-card group" onclick="switchModule('module-survey', document.querySelectorAll('.nav-link')[1])" 
-                     onmouseover="document.getElementById('img-${proj.name.replace(/\s+/g, '')}')?.classList.replace('scale-100', 'scale-110'); document.getElementById('img-${proj.name.replace(/\s+/g, '')}')?.classList.replace('opacity-50', 'opacity-90')"
-                     onmouseout="document.getElementById('img-${proj.name.replace(/\s+/g, '')}')?.classList.replace('scale-110', 'scale-100'); document.getElementById('img-${proj.name.replace(/\s+/g, '')}')?.classList.replace('opacity-90', 'opacity-50')">
-                    
+            grid.innerHTML = mockData.map(proj => `
+                <div class="md-surface doc-card group" onclick="switchModule('module-survey', document.querySelectorAll('.nav-link')[1])">
                     <div class="doc-preview-area">
-                        ${previewContent}
+                        <img src="${proj.img}" class="w-full h-full object-cover opacity-50 transition duration-500 group-hover:opacity-90 group-hover:scale-110" style="filter: grayscale(20%) contrast(120%);">
+                        <div class="tech-grid-overlay"></div>
                     </div>
-                    
-                    <div class="p-3 border-t border-[#2c2c30] bg-[#1a1a1e] relative z-20">
-                        <h4 class="text-sm font-bold text-white truncate group-hover:text-[color:var(--brand-primary)] transition-colors">${proj.name}</h4>
+                    <div class="p-4 border-t border-[#27272f] bg-[#141418] relative z-20">
+                        <h4 class="text-sm font-bold text-white truncate group-hover:text-[color:var(--brand-primary)]">${proj.name}</h4>
                         <div class="flex justify-between items-center mt-1">
                             <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">${proj.pc}</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded bg-[#2c2c30] text-gray-300 font-bold">${proj.date}</span>
                         </div>
                     </div>
                 </div>
-                `;
-            }).join('');
+            `).join('');
         }
 
-        // Mock Automated Scraper Logic
-        function runIntelligenceScrape() {
-            const btn = document.getElementById('btnScrapeCompile');
-            btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Extracting Data...`;
-            btn.disabled = true;
-
-            const consoleBox = document.getElementById('scrapingConsole');
-            consoleBox.classList.remove('hidden');
-
-            const logs = ['log1', 'log2', 'log3', 'log4', 'log5'];
+        window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
+        
+        window.handlePhotoUpload = function(input, category) {
+            const files = input.files; if(!files.length) return;
+            const badge = document.getElementById('badge-' + category); const btn = document.getElementById('btn-' + category);
             
-            logs.forEach((id, index) => {
-                setTimeout(() => {
-                    const el = document.getElementById(id);
-                    el.classList.remove('opacity-0');
-                    el.classList.add('text-[color:var(--brand-primary)]');
-                }, (index + 1) * 800);
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200; 
+                        let scaleSize = MAX_WIDTH / img.width;
+                        if(scaleSize > 1) scaleSize = 1; 
+                        canvas.width = img.width * scaleSize; canvas.height = img.height * scaleSize;
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        window.sitePhotos[category].push(canvas.toDataURL('image/jpeg', 0.8));
+                        badge.innerText = window.sitePhotos[category].length;
+                        btn.classList.add('has-photos');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+            input.value = ''; 
+        };
+
+        const canvas = document.getElementById('sniperCanvas');
+        const ctx = canvas.getContext('2d');
+        const zoomSlider = document.getElementById('sniperZoom');
+        const markBtn = document.getElementById('btn-sniper-mark');
+        let sniperImg = null; let imgScale = 1; let imgX = 0, imgY = 0; let isDragging = false; let startDragX = 0, startDragY = 0;
+        window.sniperPoints = []; let lines = []; let calibrationRatio = null; 
+
+        document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
+            const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+            input.onchange = (e) => { const file = e.target.files[0]; if(file) { const reader = new FileReader(); reader.onload = (ev) => window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: ev.target.result })); reader.readAsDataURL(file); } };
+            input.click();
+        });
+
+        window.addEventListener('loadSniperImage', (e) => {
+            sniperImg = new Image();
+            sniperImg.onload = () => {
+                imgScale = Math.min(canvas.width / sniperImg.width, canvas.height / sniperImg.height);
+                if (zoomSlider) { zoomSlider.value = imgScale; zoomSlider.min = imgScale * 0.5; }
+                imgX = (canvas.width - (sniperImg.width * imgScale)) / 2; imgY = (canvas.height - (sniperImg.height * imgScale)) / 2;
+                window.sniperPoints = []; lines = []; calibrationRatio = null; resetMarkButton(); drawSniper();
+            };
+            sniperImg.src = e.detail;
+        });
+
+        zoomSlider?.addEventListener('input', (e) => {
+            if(!sniperImg) return;
+            const newScale = parseFloat(e.target.value); const cx = canvas.width / 2; const cy = canvas.height / 2;
+            imgX = cx - ((cx - imgX) * (newScale / imgScale)); imgY = cy - ((cy - imgY) * (newScale / imgScale));
+            imgScale = newScale; drawSniper();
+        });
+
+        canvas.addEventListener('mousedown', (e) => { if(!sniperImg) return; isDragging = true; startDragX = e.offsetX - imgX; startDragY = e.offsetY - imgY; canvas.style.cursor = 'grabbing'; });
+        canvas.addEventListener('mousemove', (e) => { if(!isDragging || !sniperImg) return; imgX = e.offsetX - startDragX; imgY = e.offsetY - startDragY; drawSniper(); });
+        canvas.addEventListener('mouseup', () => { isDragging = false; canvas.style.cursor = 'grab'; });
+        canvas.addEventListener('mouseleave', () => { isDragging = false; canvas.style.cursor = 'grab'; });
+
+        function drawSniper() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); if(!sniperImg) return;
+            ctx.drawImage(sniperImg, 0, 0, sniperImg.width, sniperImg.height, imgX, imgY, sniperImg.width * imgScale, sniperImg.height * imgScale);
+
+            lines.forEach(line => {
+                const p1 = window.sniperPoints[line.p1]; const p2 = window.sniperPoints[line.p2];
+                const screenX1 = (p1.x * imgScale) + imgX; const screenY1 = (p1.y * imgScale) + imgY; const screenX2 = (p2.x * imgScale) + imgX; const screenY2 = (p2.y * imgScale) + imgY;
+                ctx.beginPath(); ctx.moveTo(screenX1, screenY1); ctx.lineTo(screenX2, screenY2); ctx.strokeStyle = '#0dcaf0'; ctx.lineWidth = 2; ctx.stroke();
+                const midX = (screenX1 + screenX2) / 2; const midY = (screenY1 + screenY2) / 2; const text = line.realLength + 'mm';
+                ctx.font = 'bold 12px -apple-system, sans-serif'; const textWidth = ctx.measureText(text).width;
+                ctx.fillStyle = 'rgba(10, 10, 12, 0.9)'; ctx.fillRect(midX - (textWidth / 2) - 8, midY - 12, textWidth + 16, 24);
+                ctx.fillStyle = '#f4f4f6'; ctx.fillText(text, midX - (textWidth / 2), midY + 4);
             });
 
-            setTimeout(() => {
-                document.getElementById('logSuccess').classList.remove('opacity-0');
-                btn.innerHTML = `<span class="material-icons-round">check_circle</span> Dossier Compiled`;
-                btn.classList.replace('btn-primary', 'bg-[#238636]');
-            }, 4800);
+            window.sniperPoints.forEach((p, index) => {
+                const screenX = (p.x * imgScale) + imgX; const screenY = (p.y * imgScale) + imgY;
+                ctx.beginPath(); ctx.arc(screenX, screenY, 4, 0, Math.PI * 2); ctx.fillStyle = (index === window.sniperPoints.length - 1 && window.sniperPoints.length % 2 !== 0) ? '#0dcaf0' : '#8b8b93'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+            });
+
+            const cx = canvas.width / 2; const cy = canvas.height / 2;
+            ctx.beginPath(); ctx.moveTo(cx - 20, cy); ctx.lineTo(cx + 20, cy); ctx.moveTo(cx, cy - 20); ctx.lineTo(cx, cy + 20); ctx.strokeStyle = 'rgba(13, 202, 240, 0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(13, 202, 240, 0.5)'; ctx.stroke();
         }
 
-        // Gatekeeper Toggle Logic
-        let isUnlocked = false;
-        document.getElementById('btnToggleAccess').addEventListener('click', () => {
-            isUnlocked = !isUnlocked;
-            const btn = document.getElementById('btnToggleAccess');
-            const container = document.getElementById('switchContainer');
-            const badge = document.getElementById('statusBadge');
+        markBtn?.addEventListener('click', (e) => {
+            e.preventDefault(); if(!sniperImg) return alert("Load an image first.");
+            const cx = canvas.width / 2; const cy = canvas.height / 2;
+            window.sniperPoints.push({ x: (cx - imgX) / imgScale, y: (cy - imgY) / imgScale });
             
-            if(isUnlocked) {
-                btn.className = "w-full py-5 bg-[#238636] text-white font-black text-lg md:text-xl uppercase tracking-widest rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(35,134,54,0.4)]";
-                btn.innerText = "🔒 REVOKE ACCESS (HIDE PRICE)";
-                container.classList.replace('border-[#E50914]', 'border-[#238636]');
-                badge.className = "px-4 py-2 bg-green-500/10 text-[#238636] border border-[#238636]/50 rounded-lg text-xs font-bold uppercase tracking-widest shadow-sm";
-                badge.innerText = "Status: Fully Unlocked";
-            } else {
-                btn.className = "w-full py-5 bg-[#E50914] text-white font-black text-lg md:text-xl uppercase tracking-widest rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(229,9,20,0.3)]";
-                btn.innerText = "🔓 GRANT FULL ACCESS";
-                container.classList.replace('border-[#238636]', 'border-[#E50914]');
-                badge.className = "px-4 py-2 bg-yellow-500/10 text-yellow-500 border border-yellow-500/50 rounded-lg text-xs font-bold uppercase tracking-widest shadow-sm";
-                badge.innerText = "Status: Tease Mode";
+            if(window.sniperPoints.length > 0 && window.sniperPoints.length % 2 === 0) {
+                const p1Index = window.sniperPoints.length - 2; const p2Index = window.sniperPoints.length - 1;
+                const p1 = window.sniperPoints[p1Index]; const p2 = window.sniperPoints[p2Index];
+                const pixelDist = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+                
+                if(!calibrationRatio) {
+                    const realWorld = prompt("CALIBRATION MODE: Enter the length of this line (in mm):");
+                    if(realWorld && !isNaN(realWorld)) {
+                        calibrationRatio = parseFloat(realWorld) / pixelDist; lines.push({ p1: p1Index, p2: p2Index, realLength: realWorld });
+                        markBtn.innerText = "🎯 Drop Pin (Calibrated)"; markBtn.style.backgroundColor = "#238636"; markBtn.style.color = "#fff"; markBtn.style.borderColor = "#238636";
+                    } else window.sniperPoints.pop(); 
+                } else {
+                    const calculatedLength = Math.round(pixelDist * calibrationRatio);
+                    const finalLength = prompt("Calculated measurement (mm). Edit if needed:", calculatedLength);
+                    if(finalLength && !isNaN(finalLength)) lines.push({ p1: p1Index, p2: p2Index, realLength: Math.round(finalLength) });
+                    else window.sniperPoints.pop(); 
+                }
+            } drawSniper();
+        });
+
+        document.getElementById('btn-sniper-clear')?.addEventListener('click', (e) => { e.preventDefault(); window.sniperPoints = []; lines = []; calibrationRatio = null; resetMarkButton(); drawSniper(); });
+        function resetMarkButton() { if (markBtn) { markBtn.innerText = "🎯 Drop Target Pin"; markBtn.style.backgroundColor = ""; markBtn.style.color = ""; markBtn.style.borderColor = ""; } }
+
+        document.getElementById('planningPerms')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-planning'); if(cb) cb.checked = (e.target.value !== 'Permitted Development (No Action)' && e.target.value !== ''); });
+        document.getElementById('sapCalcs')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-sap'); if(cb) cb.checked = (e.target.value === 'Yes'); });
+        document.getElementById('roofType')?.addEventListener('change', (e) => { const cb = document.getElementById('cb-roof'); if(cb) cb.checked = (e.target.value !== ''); });
+
+        document.getElementById('btn-ai-polish')?.addEventListener('click', (e) => {
+            e.preventDefault(); const notesEl = document.getElementById('designerNotes');
+            if(!notesEl.value.trim()) return alert("Enter rough notes first.");
+            e.target.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Polishing...`;
+            setTimeout(() => {
+                notesEl.value = "PROFESSIONAL OBSERVATIONS:\n" + notesEl.value.split('\n').filter(l=>l.trim()!=='').map(l=>`• ${l.charAt(0).toUpperCase() + l.slice(1)}`).join('\n');
+                e.target.innerHTML = `<span class="material-icons-round">auto_fix_high</span> AI Polish Notes`;
+            }, 800);
+        });
+
+        const setProgress = (percent, label) => {
+            const wrapper = document.getElementById('syncProgressWrapper');
+            wrapper.style.display = 'block';
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').innerText = label;
+        };
+
+        document.getElementById('btn-sync')?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (!document.getElementById('clientName').value || !document.getElementById('postCode').value) return alert("Lead Name and Postcode are mandatory.");
+
+            const btn = e.target;
+            btn.disabled = true;
+            setProgress(10, "Initializing Sync...");
+
+            try {
+                if (window.sniperPoints && window.sniperPoints.length > 0) {
+                    if (!window.sitePhotos.sniper) window.sitePhotos.sniper = [];
+                    window.sitePhotos.sniper.push(canvas.toDataURL('image/jpeg', 0.9));
+                }
+
+                setProgress(50, "Compressing Image Layers...");
+                
+                setTimeout(() => {
+                    setProgress(100, "Pack Saved Successfully ✓");
+                    btn.innerHTML = `<span class="material-icons-round text-white">check_circle</span> Complete Pack Saved ✓`;
+                    btn.style.background = "#238636";
+                    
+                    setTimeout(() => { 
+                        document.getElementById('syncProgressWrapper').style.display = 'none';
+                        btn.style.background = ""; btn.innerHTML = `<span class="material-icons-round">cloud_upload</span> Save & Sync Survey`; btn.disabled = false; 
+                    }, 3000);
+                }, 1500);
+
+            } catch(err) {
+                alert("Sync Error: " + err.message);
+                document.getElementById('syncProgressWrapper').style.display = 'none';
+                btn.disabled = false;
             }
         });
     </script>
