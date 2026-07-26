@@ -2,269 +2,287 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COHI | Command Center</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>COHI Pro | Enterprise Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .luxury-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 8px; }
-        .luxury-input:focus { outline: none; border-color: #0dcaf0; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .metric-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5); }
-        .hot-lead { animation: pulseBorder 2s infinite; }
-        @keyframes pulseBorder { 0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(229, 9, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); } }
+        /* 
+           DYNAMIC BRANDING ENGINE
+           These variables are overwritten via JavaScript upon designer login, 
+           instantly reskinning the entire application to the correct brand.
+        */
+        :root {
+            --brand-primary: #0dcaf0; 
+            --brand-bg-glow: rgba(13, 202, 240, 0.1);
+            --brand-border: rgba(13, 202, 240, 0.3);
+            
+            --bg-base: #050505;
+            --bg-panel: #0a0a0a;
+            --bg-elevated: #111111;
+            
+            --text-main: #f5f5f7;
+            --text-muted: #86868b;
+            --border-subtle: #222222;
+        }
+
+        body { 
+            background-color: var(--bg-base); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+
+        /* £1M Aesthetic Utility Classes */
+        .glass-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transition: border-color 0.3s ease;
+        }
         
-        /* Mobile Overlay */
-        #mobileNavOverlay { display: none; }
-        #mobileNavOverlay.active { display: block; }
+        .luxury-input {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            border-radius: 8px;
+            width: 100%;
+            padding: 16px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .luxury-input:focus {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 1px var(--brand-primary);
+        }
+
+        .btn-primary {
+            background: var(--brand-primary);
+            color: #000;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 8px;
+            padding: 16px 24px;
+            width: 100%;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 8px 20px var(--brand-bg-glow);
+            transform: translateY(-1px);
+        }
+
+        /* Sidebar Navigation */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .nav-link:hover {
+            background: var(--bg-elevated);
+            color: var(--text-main);
+        }
+        .nav-link.active {
+            background: var(--brand-bg-glow);
+            color: var(--brand-primary);
+            border-color: var(--brand-border);
+        }
+
+        /* Auth Gate Animation */
+        #authGate { transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .fade-out { opacity: 0; pointer-events: none; }
     </style>
 </head>
-<body class="bg-gray-950 text-white overflow-hidden">
+<body class="flex h-screen w-full">
 
-    <!-- SECURE LOGIN GATE -->
-    <div id="authGate" class="flex items-center justify-center min-h-screen px-4 absolute inset-0 z-[9999] bg-gray-950">
-        <div class="glass-panel p-8 w-full max-w-md text-center">
-            <h2 class="text-2xl font-black mb-6 tracking-widest text-[#0dcaf0]">COHI<span class="text-white">COMMAND</span></h2>
-            <div class="space-y-4">
-                <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input w-full p-4 text-sm">
-                <input type="password" id="authPassword" placeholder="Password" class="luxury-input w-full p-4 text-sm text-center tracking-widest">
-                <button id="btnLogin" class="w-full py-4 bg-[#0dcaf0] text-black font-bold rounded-lg hover:bg-cyan-400 transition shadow-[0_0_15px_rgba(13,202,240,0.3)]">SECURE LOGIN</button>
+    <!-- SECURE AUTH GATE -->
+    <div id="authGate" class="fixed inset-0 z-[9999] flex items-center justify-center bg-[#050505] p-6 backdrop-blur-xl">
+        <div class="glass-panel p-10 w-full max-w-md relative overflow-hidden">
+            <!-- Dynamic Top Glow -->
+            <div class="absolute top-0 left-0 w-full h-1" style="background: var(--brand-primary);"></div>
+            
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-black tracking-widest mb-2" id="loginBrandTitle">COHI<span style="color: var(--brand-primary)">PRO</span></h1>
+                <p class="text-xs text-gray-500 uppercase tracking-widest">Enterprise Authentication</p>
+            </div>
+            
+            <div class="space-y-5">
+                <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input text-center">
+                <input type="password" id="authPassword" placeholder="••••••••" class="luxury-input text-center tracking-[0.5em]">
+                <button id="btnLogin" class="btn-primary mt-4">Initialize Session</button>
             </div>
         </div>
     </div>
 
     <!-- MAIN APP SHELL -->
-    <div id="dashboardApp" class="hidden flex h-screen w-full bg-[#0d1117]">
+    <div id="appShell" class="flex w-full h-full opacity-0 transition-opacity duration-700">
         
-        <!-- Mobile Header -->
-        <div class="md:hidden flex items-center justify-between bg-[#161b22] p-4 border-b border-[#30363d] absolute top-0 w-full z-40 shadow-md">
-            <h2 class="text-white font-black uppercase text-lg m-0">COHI<span class="text-[#0dcaf0]">PRO</span></h2>
-            <button id="mobileMenuBtn" class="text-white text-2xl p-2">☰</button>
-        </div>
-
-        <!-- Mobile Overlay -->
-        <div id="mobileNavOverlay" class="fixed inset-0 bg-black/70 z-40 md:hidden backdrop-blur-sm transition-opacity"></div>
-
         <!-- GLOBAL SIDEBAR NAVIGATION -->
-        <nav id="appSidebar" class="w-64 md:w-72 bg-[#090d13] border-r border-[#30363d] h-full flex flex-col fixed md:relative z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
-            <div class="p-6 border-b border-[#30363d] flex justify-between items-center bg-[#05080c]">
-                <h2 class="text-white font-black uppercase text-xl m-0 tracking-widest">COHI<span class="text-[#0dcaf0]">PRO</span></h2>
-                <button id="closeMenuBtn" class="md:hidden text-gray-400 hover:text-white text-xl">✕</button>
+        <nav class="w-72 bg-[#0a0a0a] border-r border-[#222222] h-full flex flex-col z-50 flex-shrink-0">
+            <div class="p-8 border-b border-[#222222]">
+                <h2 class="text-xl font-black uppercase tracking-widest m-0" id="sidebarBrand">COHI<span style="color: var(--brand-primary)">PRO</span></h2>
+                <div class="mt-4 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-xs font-bold" id="userInitial"></div>
+                    <div>
+                        <p class="text-sm font-bold text-white" id="userName">Loading...</p>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">Lead Designer</p>
+                    </div>
+                </div>
             </div>
             
-            <div class="flex-1 overflow-y-auto py-6 flex flex-col gap-2 px-4">
-                <a href="index.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-[#0dcaf0] bg-[#0dcaf0]/10 border border-[#0dcaf0]/30 shadow-[inset_4px_0_0_#0dcaf0] transition">
-                    <span class="text-lg">📊</span> Pipeline
-                </a>
-                <a href="property-intel.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
-                    <span class="text-lg">🌍</span> Site Intel
-                </a>
-                <a href="survey.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
-                    <span class="text-lg">📝</span> Survey Engine
-                </a>
-                <a href="quotes.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
-                    <span class="text-lg">💷</span> Quote Scraper
-                </a>
-                <a href="admin-gatekeeper.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
-                    <span class="text-lg">🔒</span> Gatekeeper
-                </a>
-                <a href="pdf-compiler.html" class="flex items-center gap-3 w-full text-left p-3 rounded-lg text-sm font-bold uppercase tracking-wide text-gray-400 hover:bg-white/5 hover:text-white transition">
-                    <span class="text-lg">🗂️</span> Dossiers
-                </a>
+            <div class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+                <button class="nav-link active w-full text-left" onclick="switchModule('module-survey')">
+                    <span class="text-lg">📐</span> Survey Engine
+                </button>
+                <button class="nav-link w-full text-left" onclick="switchModule('module-dossier')">
+                    <span class="text-lg">🗂️</span> Dossier Compiler
+                </button>
+                <button class="nav-link w-full text-left" onclick="switchModule('module-gatekeeper')">
+                    <span class="text-lg">🔒</span> Project Gatekeeper
+                </button>
             </div>
 
-            <div class="p-4 border-t border-[#30363d] bg-[#05080c]">
-                <button id="btnLogout" class="w-full py-3 bg-transparent border border-red-900/50 text-red-500 hover:bg-red-900/30 rounded-lg text-xs font-bold uppercase tracking-widest transition">
+            <div class="p-6 border-t border-[#222222]">
+                <button id="btnLogout" class="w-full py-3 text-gray-500 hover:text-white text-xs font-bold uppercase tracking-widest transition">
                     Secure Logout
                 </button>
             </div>
         </nav>
 
-        <!-- MAIN SCROLLABLE WORKSPACE -->
-        <main class="flex-1 h-full overflow-y-auto p-4 md:p-8 relative pt-20 md:pt-8 bg-gray-950">
+        <!-- DYNAMIC WORKSPACE -->
+        <main class="flex-1 h-full overflow-y-auto bg-[#050505] relative">
             
-            <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
-                <div>
-                    <h1 id="designerWelcome" class="text-2xl md:text-3xl font-black mb-1">Welcome</h1>
-                    <p class="text-xs text-gray-500 uppercase tracking-widest">Pipeline Overview</p>
-                </div>
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    <button onclick="window.clearFilters()" class="text-xs text-gray-400 hover:text-white uppercase tracking-widest hidden" id="btnClearFilters">Clear Filters ✕</button>
-                    <input type="text" id="searchInput" placeholder="Search by name, postcode, or owner..." class="luxury-input p-3 w-full md:w-80 text-sm" onkeyup="window.filterLeads()">
-                </div>
-            </header>
-
-            <!-- 💰 FINANCIAL COMMAND CENTER -->
-            <div class="glass-panel p-5 border-t-4 border-t-[#0dcaf0] shadow-[0_0_20px_rgba(13,202,240,0.1)] relative mb-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">💰 Financial Command Center</h3>
-                    <button onclick="document.getElementById('finControls').classList.toggle('hidden')" class="text-[10px] bg-slate-800 px-3 py-1.5 rounded hover:bg-[#0dcaf0] hover:text-black text-gray-300 transition font-bold tracking-widest uppercase">⚙️ Target Settings</button>
-                </div>
+            <!-- MODULE 1: THE RAPID SURVEY ENGINE -->
+            <div id="module-survey" class="module-view p-10 max-w-5xl mx-auto h-full flex flex-col">
                 
-                <div id="finControls" class="grid grid-cols-2 md:grid-cols-5 gap-4 hidden bg-slate-900/50 p-4 rounded-lg border border-gray-700 mb-4">
-                    <div><label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Start Date</label><input type="date" id="finStartDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()"></div>
-                    <div><label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">End Date</label><input type="date" id="finEndDate" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()"></div>
-                    <div><label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Monthly Target (£)</label><input type="number" id="finMonthlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()"></div>
-                    <div><label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Yearly Target (£)</label><input type="number" id="finYearlyTarget" class="luxury-input w-full p-2 text-xs" onkeyup="window.calcFinances()"></div>
+                <header class="mb-10 flex justify-between items-end">
                     <div>
-                        <label class="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Commission Profile</label>
-                        <select id="finCommProfile" class="luxury-input w-full p-2 text-xs" onchange="window.calcFinances()">
-                            <option value="1">Employed (1% Net)</option>
-                            <option value="4">Self-Employed (4% Net)</option>
-                        </select>
+                        <h1 class="text-4xl font-black uppercase tracking-tight mb-2">Rapid Site Survey</h1>
+                        <p class="text-sm text-gray-500">Zero-friction data capture for advanced dossier generation.</p>
                     </div>
-                </div>
+                    <button class="btn-primary w-auto text-xs px-6 py-3 shadow-[0_0_15px_var(--brand-bg-glow)]">
+                        + New Project
+                    </button>
+                </header>
 
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700">
-                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Live Pipeline Value</p>
-                        <p id="hudPipeline" class="text-xl font-black text-amber-500">£0</p>
-                    </div>
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-emerald-500/30">
-                        <p class="text-[9px] text-emerald-500 uppercase tracking-widest mb-1 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sold In Period</p>
-                        <p id="hudSoldPeriod" class="text-xl font-black text-emerald-400">£0</p>
-                    </div>
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700 relative overflow-hidden">
-                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Vs Monthly Target</p>
-                        <p id="hudMonthlyVs" class="text-xl font-black text-white z-10 relative">0%</p>
-                        <div id="barMonthly" class="absolute bottom-0 left-0 h-1 bg-[#0dcaf0] transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                    <div class="bg-slate-900/50 p-3 rounded-lg border border-gray-700 relative overflow-hidden">
-                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-1">Vs Yearly Target (YTD)</p>
-                        <p id="hudYearlyVs" class="text-xl font-black text-white z-10 relative">0%</p>
-                        <div id="barYearly" class="absolute bottom-0 left-0 h-1 bg-[#0dcaf0] transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                    <div class="bg-purple-900/20 p-3 rounded-lg border border-purple-500/30">
-                        <p class="text-[9px] text-purple-400 uppercase tracking-widest mb-1 flex justify-between"><span>Est. Comm</span><span class="text-gray-500 text-[8px]">(Net)</span></p>
-                        <p id="hudCommPeriod" class="text-xl font-black text-purple-400">£0</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- INTERACTIVE HUD METRICS -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="glass-panel p-4 text-center metric-card border-b-2 border-gray-700" onclick="window.filterByMetric('all')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Total Active Deals</p>
-                    <p id="hudActiveLeads" class="text-2xl font-black text-white">0</p>
-                </div>
-                <div class="glass-panel p-4 text-center border-b-2 border-amber-500 metric-card" onclick="window.filterByMetric('survey')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Pending Surveys</p>
-                    <p id="hudSurveys" class="text-2xl font-black text-amber-500">0</p>
-                </div>
-                <div class="glass-panel p-4 text-center border-b-2 border-rose-500 metric-card" onclick="window.filterByMetric('action')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Action Required</p>
-                    <p id="hudAction" class="text-2xl font-black text-rose-500">0</p>
-                </div>
-                <div class="glass-panel p-4 text-center border-b-2 border-emerald-500 metric-card" onclick="window.filterByMetric('won')">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Total Won (All Time)</p>
-                    <p id="hudTotalWon" class="text-2xl font-black text-emerald-500">0</p>
-                </div>
-            </div>
-
-            <!-- KANBAN BOARD -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-12">
-                <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-gray-400 mb-3 tracking-widest uppercase border-b border-gray-700 pb-2">1. Survey Phase (<span id="count-stage1">0</span>)</h2>
-                    <div id="col-stage1" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="survey"></div>
-                </div>
-                <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-[#E50914] mb-3 tracking-widest uppercase border-b border-[#E50914]/30 pb-2">2. Design Tease (<span id="count-stage2">0</span>)</h2>
-                    <div id="col-stage2" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="tease"></div>
-                </div>
-                <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-[#0dcaf0] mb-3 tracking-widest uppercase border-b border-[#0dcaf0]/30 pb-2">3. Price Unlocked (<span id="count-stage3">0</span>)</h2>
-                    <div id="col-stage3" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="unlocked"></div>
-                </div>
-                <div class="glass-panel p-4 flex flex-col h-[60vh]">
-                    <h2 class="text-xs font-bold text-emerald-500 mb-3 tracking-widest uppercase border-b border-emerald-500/30 pb-2">4. Closed Won (<span id="count-stage4">0</span>)</h2>
-                    <div id="col-stage4" class="kanban-dropzone flex-1 overflow-y-auto hide-scrollbar space-y-3 p-1 rounded-lg transition-colors" data-stage="closed"></div>
-                </div>
-            </div>
-        </main>
-        
-        <!-- TECHNICAL SLIDE-OUT DRAWER -->
-        <div id="drawerOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity" onclick="window.closeDrawer()"></div>
-        <div id="techDrawer" class="fixed top-0 right-0 h-full w-full md:w-[600px] bg-gray-900 border-l border-gray-700 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
-            <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-950">
-                <div>
-                    <h2 id="drawerLeadName" class="text-xl font-black">Lead Name</h2>
-                    <span id="drawerBrand" class="text-xs font-bold uppercase tracking-widest">Brand</span>
-                </div>
-                <button onclick="window.closeDrawer()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
-            </div>
-            
-            <div class="p-6 overflow-y-auto flex-grow space-y-8">
-                <div class="space-y-4">
-                    <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Pipeline Management</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="text-[10px] text-gray-500 uppercase tracking-widest">Project Owner</label><input type="text" id="ownerInput" class="luxury-input w-full p-2 text-sm mt-1"></div>
-                        <div><label class="text-[10px] text-gray-500 uppercase tracking-widest">Follow Up Date</label><input type="date" id="followUpInput" class="luxury-input w-full p-2 text-sm mt-1"></div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="window.saveDrawerData('management')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SAVE MGMT DETAILS</button>
-                        <button id="btnOpenGatekeeper" class="flex-1 py-2 bg-[#E50914] hover:bg-red-700 text-white text-xs font-bold rounded transition shadow-[0_0_10px_rgba(229,9,20,0.3)]">OPEN GATEKEEPER ↗</button>
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Financials</h3>
-                    <div class="grid grid-cols-2 gap-4">
+                <!-- Step 1: The Core Data (Preview of the new £1m layout) -->
+                <div class="glass-panel p-8 mb-8">
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#222222] pb-4" style="color: var(--brand-primary)">01. Project Coordinates</h3>
+                    
+                    <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <label class="text-[10px] text-gray-500 uppercase tracking-widest">Contract Value (£)</label>
-                            <input type="number" id="financeValueInput" class="luxury-input w-full p-2 text-sm mt-1" onkeyup="window.calculateVAT()">
-                            <div class="text-[10px] text-gray-400 mt-2 font-mono flex justify-between"><span>NET: <span id="netCalc">£0.00</span></span><span>VAT: <span id="vatCalc">£0.00</span></span></div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Lead Name *</label>
+                            <input type="text" placeholder="e.g. Mr. Dall" class="luxury-input">
                         </div>
                         <div>
-                            <label class="text-[10px] text-gray-500 uppercase tracking-widest">Finance Status</label>
-                            <select id="financeStatusInput" class="luxury-input w-full p-2 text-sm mt-1">
-                                <option value="TBC">TBC</option><option value="Cash/Self-Funded">Cash / Self-Funded</option><option value="Application Pending">Application Pending</option><option value="Approved">Approved</option>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">UK Postcode *</label>
+                            <input type="text" placeholder="e.g. S70 0PN" class="luxury-input uppercase">
+                            <p class="text-[9px] text-gray-500 mt-2">Required for automated Land Registry & EPC API scraping.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8">
+                    <h3 class="text-xs uppercase font-bold tracking-widest mb-6 border-b border-[#222222] pb-4" style="color: var(--brand-primary)">02. Architectural Scope</h3>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Roof System</label>
+                            <select class="luxury-input appearance-none">
+                                <option>Ultra380 Solid Roof</option>
+                                <option>Edwardian Roof</option>
+                                <option>Glass Conservatory Roof</option>
+                                <option>Hybrid / Livin Roof</option>
                             </select>
                         </div>
-                    </div>
-                    <button onclick="window.saveDrawerData('finance')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SAVE FINANCIALS</button>
-                </div>
-
-                <div class="space-y-4">
-                    <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Survey Markups & Tech</h3>
-                    <div id="sniperGallery" class="grid grid-cols-2 gap-3 mb-2"></div>
-                    <textarea id="techNotesInput" class="luxury-input w-full p-3 h-24 text-sm" placeholder="Enter structural/technical limitations here..."></textarea>
-                    <button onclick="window.saveDrawerData('notes')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SAVE TECH NOTES</button>
-                </div>
-
-                <div class="space-y-4">
-                    <h3 class="text-xs font-bold text-[#0dcaf0] uppercase tracking-widest border-b border-gray-700 pb-2">Rilla Voice Sync</h3>
-                    <input type="text" id="rillaInput" class="luxury-input w-full p-2 text-sm" placeholder="Paste Rilla.com URL here">
-                    <div class="flex gap-2">
-                        <button onclick="window.saveDrawerData('rilla')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded transition">SYNC RILLA</button>
-                        <a id="rillaOpenBtn" href="#" target="_blank" class="flex-1 py-2 bg-purple-600/20 text-purple-400 border border-purple-600/50 text-center text-xs font-bold rounded hidden hover:bg-purple-600 hover:text-white transition">LISTEN</a>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Proposed Footprint (mm)</label>
+                            <input type="text" placeholder="e.g. 3000x4000" class="luxury-input">
+                        </div>
                     </div>
                 </div>
+
             </div>
             
-            <div class="p-6 border-t border-gray-800 bg-gray-950 flex gap-4">
-                <button onclick="window.closeDeal('Closed Lost')" class="flex-1 py-3 border border-red-900 text-red-500 hover:bg-red-900/30 rounded font-bold text-sm transition">Mark Dead</button>
-                <button onclick="window.closeDeal('Closed Won')" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-sm transition shadow-[0_0_15px_rgba(16,185,129,0.3)]">Deal Won</button>
-            </div>
-        </div>
-
+        </main>
     </div>
 
+    <!-- MOCK AUTH & BRANDING LOGIC FOR DEMONSTRATION -->
     <script>
-        const toggleMenu = () => {
-            document.getElementById('appSidebar').classList.toggle('-translate-x-full');
-            document.getElementById('mobileNavOverlay').classList.toggle('active');
+        // Enterprise Brand Configurations
+        const brands = {
+            "Yorkshire Windows": { hex: "#005A9C", title: "YORKSHIRE" },
+            "ClearView": { hex: "#238636", title: "CLEARVIEW" },
+            "Orion": { hex: "#E50914", title: "ORION" },
+            "Planet": { hex: "#8b5cf6", title: "PLANET" },
+            "Trent Valley": { hex: "#f59e0b", title: "TRENT VALLEY" },
+            "West Yorkshire": { hex: "#ec4899", title: "WEST YORKSHIRE" },
+            "COHI": { hex: "#0dcaf0", title: "COHI" } // Default
         };
-        document.getElementById('mobileMenuBtn')?.addEventListener('click', toggleMenu);
-        document.getElementById('closeMenuBtn')?.addEventListener('click', toggleMenu);
-        document.getElementById('mobileNavOverlay')?.addEventListener('click', toggleMenu);
+
+        // Simulate a Designer Login
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            const btn = document.getElementById('btnLogin');
+            btn.innerText = "Authenticating...";
+            
+            // In the real app, this waits for Firebase Auth to resolve, then reads the user's assigned brand from Firestore.
+            setTimeout(() => {
+                const mockDesignerBrand = "ClearView"; // Change this to test the dynamic theming!
+                const mockDesignerName = "Thomas Oldroyd";
+                
+                applyBrandTheme(mockDesignerBrand);
+                
+                document.getElementById('userName').innerText = mockDesignerName;
+                document.getElementById('userInitial').innerText = mockDesignerName.charAt(0);
+                
+                document.getElementById('authGate').classList.add('fade-out');
+                setTimeout(() => {
+                    document.getElementById('authGate').style.display = 'none';
+                    document.getElementById('appShell').style.opacity = '1';
+                }, 600);
+            }, 800);
+        });
+
+        function applyBrandTheme(brandName) {
+            const config = brands[brandName] || brands["COHI"];
+            const root = document.documentElement;
+            
+            // Inject CSS Variables globally
+            root.style.setProperty('--brand-primary', config.hex);
+            
+            // Calculate a subtle glow based on the hex
+            const hexToRgb = (hex) => {
+                const bigint = parseInt(hex.replace('#', ''), 16);
+                return `${(bigint >> 16) & 255}, ${(bigint >> 8) & 255}, ${bigint & 255}`;
+            };
+            const rgb = hexToRgb(config.hex);
+            
+            root.style.setProperty('--brand-bg-glow', `rgba(${rgb}, 0.1)`);
+            root.style.setProperty('--brand-border', `rgba(${rgb}, 0.3)`);
+            
+            // Update Text Logos
+            document.getElementById('loginBrandTitle').innerHTML = `${config.title}<span style="color: var(--brand-primary)">PRO</span>`;
+            document.getElementById('sidebarBrand').innerHTML = `${config.title}<span style="color: var(--brand-primary)">PRO</span>`;
+        }
+
+        window.switchModule = (moduleId) => {
+            // Logic to handle transitioning between Survey, Dossier Compiler, etc.
+            console.log("Switching to", moduleId);
+        }
     </script>
-    <script type="module" src="js/ui-dashboard.js"></script>
 </body>
 </html>
