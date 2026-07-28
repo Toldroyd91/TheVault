@@ -6,8 +6,8 @@ import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebase
 // 2. Firebase Authentication
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// 3. Firebase Firestore
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// 3. Firebase Firestore (Added 'where' for Vault PIN querying)
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // 4. Firebase Cloud Functions
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
@@ -87,6 +87,7 @@ export {
     addDoc, 
     onSnapshot, 
     query, 
+    where,
     orderBy, 
     serverTimestamp, 
     arrayUnion,
