@@ -1,9 +1,20 @@
+// js/core-firebase.js
+
+// 1. Core Firebase App Initialization
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+// 2. Firebase Authentication
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-// ADDED getDocs TO THIS IMPORT LIST
+
+// 3. Firebase Firestore
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, addDoc, onSnapshot, query, orderBy, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// 4. Firebase Cloud Functions
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
+// ==========================================
+// FIREBASE CONFIGURATION
+// ==========================================
 const appConfig = {
     apiKey: "AIzaSyD-QrqKxjes9f1TgyJOffiQzSMRncf84L0",
     authDomain: "cohi-survey-engine.firebaseapp.com",
@@ -11,19 +22,22 @@ const appConfig = {
     storageBucket: "cohi-survey-engine.appspot.com"
 };
 
+// ==========================================
+// INITIALIZE SERVICES
+// ==========================================
 export const app = !getApps().length ? initializeApp(appConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
-// --- THE COHI GROUP MULTI-TENANT IDENTITY ENGINE ---
-// Ensure you have exactly one folder in your /assets directory for each assetPath listed below.
-
+// ==========================================
+// THE COHI GROUP MULTI-TENANT IDENTITY ENGINE
+// ==========================================
 export const BRAND_CONFIG = {
     "COHI": { 
         name: "CO Home Improvements", 
         assetPath: "assets/cohi/", 
-        theme: "#ffffff" // Parent company theme
+        theme: "#ffffff" 
     },
     "YorkshireWindows": { 
         name: "Yorkshire Windows", 
@@ -57,8 +71,9 @@ export const BRAND_CONFIG = {
     }
 };
 
-// Export all modules for the rest of the application to use securely
-// ADDED getDocs TO THIS EXPORT LIST
+// ==========================================
+// EXPORT ALL MODULES FOR GLOBAL APP USAGE
+// ==========================================
 export { 
     onAuthStateChanged, 
     signInWithEmailAndPassword, 
@@ -75,5 +90,6 @@ export {
     orderBy, 
     serverTimestamp, 
     arrayUnion,
+    getFunctions,
     httpsCallable 
 };
