@@ -37,9 +37,6 @@
         .btn-primary:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 6px 20px var(--brand-bg-glow); transform: translateY(-1px); }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .btn-secondary { background: var(--bg-surface-elevated); color: var(--text-main); border: 1px solid var(--border-subtle); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 8px; padding: 12px 20px; transition: all 0.2s ease; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); background: #27272f; }
-
         /* A4 PDF Printing Styles (Hidden from App UI, Used only for PDF Export) */
         #pdfExportWrapper {
             display: none; 
@@ -104,7 +101,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Summary Cards -->
             <div class="md-surface p-6 border-t-2 border-t-[color:var(--brand-primary)]">
                 <span class="material-icons-round text-3xl text-[color:var(--brand-primary)] mb-3 opacity-80">architecture</span>
                 <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Proposed Structure</p>
@@ -183,11 +179,11 @@
 
             <div class="pdf-footer">
                 <span>© Yorkshire Windows Architectural Division</span>
-                <span>Page 1 of 2</span>
+                <span>Page 1 of Document</span>
             </div>
         </div>
 
-        <!-- PAGE 2: LOGISTICS & PHOTOGRAPHY -->
+        <!-- PAGE 2: LOGISTICS & PHOTOGRAPHY SUMMARY -->
         <div class="pdf-page">
             <div class="pdf-header">
                 <div>
@@ -209,16 +205,18 @@
 
             <div class="pdf-section-title">05. Primary Staged Photography</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" id="pdfPhotoGrid">
-                <!-- Injected via JS -->
                 <div style="height: 200px; background: #eee; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; text-transform: uppercase;">Image Not Captured</div>
                 <div style="height: 200px; background: #eee; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; text-transform: uppercase;">Image Not Captured</div>
             </div>
 
             <div class="pdf-footer">
                 <span>© Yorkshire Windows Architectural Division</span>
-                <span>Page 2 of 2</span>
+                <span>Page 2 of Document</span>
             </div>
         </div>
+
+        <!-- DYNAMIC APPENDAGE CONTAINER (Photos & Pamphlets generate here) -->
+        <div id="dynamicPagesContainer"></div>
 
     </div>
 
@@ -226,7 +224,7 @@
     <script type="module">
         import { db, doc, getDoc } from './js/core-firebase.js';
 
-        // 1. Parse URL to get the Active Project ID
+        // Parse URL to get the Active Project ID
         const urlParams = new URLSearchParams(window.location.search);
         const projectId = urlParams.get('id');
 
@@ -236,7 +234,6 @@
             logs.innerHTML += `<p class="${color}">> ${msg}</p>`;
         };
 
-        // 2. Fetch Data & Populate Templates
         async function loadDossierData() {
             if (!projectId) {
                 addLog("ERROR: No Project ID provided in URL.", false);
@@ -254,9 +251,7 @@
                     addLog("Payload extracted successfully.");
                     addLog("Mapping JSON structures to UI...");
 
-                    // Remove Skeletons & Map to UI
                     const el = (id, val) => { const e = document.getElementById(id); if (e) e.innerHTML = val || 'N/A'; };
-                    
                     const cp = data.customerProfile || {};
                     const ps = data.projectSpecs || {};
                     const intel = data.dossierIntel || null;
@@ -268,7 +263,6 @@
                     el('uiRegs', ps.buildingRegs || 'TBC');
                     el('uiPlanning', ps.planningPerms || 'TBC');
 
-                    // If intel API scraping was run on the survey page, map it. Otherwise show defaults.
                     if(intel) {
                         el('uiEnergyRating', intel.property.currentEnergyRating);
                         el('uiThermalRec', `Area: ${intel.property.floorAreaSqM} sqm`);
@@ -277,9 +271,7 @@
                         el('uiThermalRec', 'Run API on Survey Page to fetch data.');
                     }
 
-                    // Map to Hidden PDF Canvas
                     const pel = (id, val) => { const e = document.getElementById(id); if (e) e.innerText = val || 'N/A'; };
-                    
                     pel('pdfName', cp.leadName || 'Mr. Dow');
                     pel('pdfPostcode', cp.postcode || 'S70 0PN');
                     pel('pdfDate', cp.apptDate);
@@ -303,20 +295,89 @@
                         pel('pdfIntelSummary', `INTELLIGENCE SUMMARY: ${intel.property.thermalEfficiency} Security protocol set to: ${intel.security.recommendation}. Wind exposure rated as ${intel.environment.windExposure}.`);
                     }
 
-                    // Map Primary Photos to PDF
+                    // Map Primary 4 Photos to Page 2 Grid
+                    const grid = document.getElementById('pdfPhotoGrid');
+                    grid.innerHTML = '';
+                    const photos = [];
                     if (data.media) {
-                        const grid = document.getElementById('pdfPhotoGrid');
-                        grid.innerHTML = '';
-                        const photos = [data.media.front, data.media.rear, data.media.sketch, data.media.side].filter(Boolean);
+                        if (data.media.front) photos.push(data.media.front);
+                        if (data.media.rear) photos.push(data.media.rear);
+                        if (data.media.sketch) photos.push(data.media.sketch);
+                        if (data.media.side) photos.push(data.media.side);
                         
-                        if(photos.length > 0) {
-                            photos.slice(0, 4).forEach(url => {
-                                grid.innerHTML += `<div style="height: 240px; background-image: url('${url}'); background-size: cover; background-position: center; border: 1px solid #ccc; border-radius: 4px;"></div>`;
-                            });
-                        } else {
-                            grid.innerHTML = `<div style="height: 200px; background: #eee; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; text-transform: uppercase;">No Staged Photos</div>`;
-                        }
+                        if(data.media.surveyGallery) photos.push(...data.media.surveyGallery);
+                        if(data.media.accessGallery) photos.push(...data.media.accessGallery);
+                        if(data.media.miscGallery) photos.push(...data.media.miscGallery);
                     }
+
+                    if(photos.length > 0) {
+                        photos.slice(0, 4).forEach(url => {
+                            grid.innerHTML += `<div style="height: 240px; background-image: url('${url}'); background-size: cover; background-position: center; border: 1px solid #ccc; border-radius: 4px;"></div>`;
+                        });
+                    } else {
+                        grid.innerHTML = `<div style="height: 200px; background: #eee; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; text-transform: uppercase;">No Staged Photos</div>`;
+                    }
+
+                    addLog("Generating dynamic media appendices...");
+                    const dynamicContainer = document.getElementById('dynamicPagesContainer');
+                    dynamicContainer.innerHTML = ''; // Reset container
+
+                    // Loop through ALL remaining photos beyond the primary 4 to generate dedicated A4 pages
+                    if(photos.length > 4) {
+                        const overflowPhotos = photos.slice(4);
+                        overflowPhotos.forEach((photoUrl, index) => {
+                            const newPage = document.createElement('div');
+                            newPage.className = 'pdf-page';
+                            newPage.innerHTML = `
+                                <div class="pdf-header">
+                                    <div>
+                                        <h1 class="pdf-title">Site Documentation</h1>
+                                        <h2 class="pdf-subtitle">Detailed Context Photography - Image ${index + 1}</h2>
+                                    </div>
+                                </div>
+                                <div style="height: 800px; width: 100%; background-image: url('${photoUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; margin-top: 40px;"></div>
+                                <div class="pdf-footer">
+                                    <span>© Yorkshire Windows Architectural Division</span>
+                                    <span>Appendix Media</span>
+                                </div>
+                            `;
+                            dynamicContainer.appendChild(newPage);
+                        });
+                        addLog(`${overflowPhotos.length} auxiliary media pages generated.`);
+                    }
+
+                    // Dynamically append compliance pamphlets based on the designer's checkboxes
+                    const pamphlets = data.pamphlets || {};
+                    const addBrochurePage = (title, subtitle, description) => {
+                        const newPage = document.createElement('div');
+                        newPage.className = 'pdf-page';
+                        newPage.innerHTML = `
+                            <div class="pdf-header">
+                                <div>
+                                    <h1 class="pdf-title">${title}</h1>
+                                    <h2 class="pdf-subtitle">${subtitle}</h2>
+                                </div>
+                            </div>
+                            <div style="height: 800px; width: 100%; display: flex; align-items: center; justify-content: center; background: #f4f6f8; border: 2px dashed #ccc; margin-top: 40px; flex-direction: column; text-align: center; padding: 40px;">
+                                <span class="material-icons-round" style="font-size: 64px; color: var(--brand-primary); margin-bottom: 20px;">description</span>
+                                <h3 style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 10px;">[ Attached Document Placeholder ]</h3>
+                                <p style="font-size: 14px; color: #666; max-width: 400px;">${description}</p>
+                                <p style="font-size: 12px; color: #999; margin-top: 20px;">In a production environment, this placeholder renders the actual multi-page vector PDF assets stored on the secure server.</p>
+                            </div>
+                            <div class="pdf-footer">
+                                <span>© Yorkshire Windows Architectural Division</span>
+                                <span>Compliance & Handover Document</span>
+                            </div>
+                        `;
+                        dynamicContainer.appendChild(newPage);
+                    };
+
+                    addLog("Compiling mandated compliance documentation...");
+                    if(pamphlets.brochure) addBrochurePage("Product Brochure", "Master Specifications", "The full Ultra380/Extension product brochure has been appended to this dossier.");
+                    if(pamphlets.warranty) addBrochurePage("Warranty Documentation", "10-Year Guarantee", "The standard insurance-backed guarantee and warranty terms are attached.");
+                    if(pamphlets.planning) addBrochurePage("Planning Guide", "Local Authority Regulations", "Documentation outlining Permitted Development and Planning constraints.");
+                    if(pamphlets.sap) addBrochurePage("SAP Calculations", "Energy Efficiency Factsheet", "Standard SAP calculation methodology and thermal performance data.");
+                    if(pamphlets.roof) addBrochurePage("Roof System Specs", "Engineering Details", "Structural engineering parameters for the selected roof architecture.");
 
                     document.getElementById('statusBadge').innerText = "Vetted & Ready";
                     document.getElementById('statusBadge').classList.replace('bg-[color:var(--brand-primary)]', 'bg-[#238636]');
@@ -338,7 +399,7 @@
         // Initialize Fetch
         loadDossierData();
 
-        // 3. Trigger PDF Generation Engine
+        // Trigger PDF Generation Engine
         document.getElementById('btnGeneratePDF').addEventListener('click', () => {
             const btn = document.getElementById('btnGeneratePDF');
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Compiling Vector PDF...`;
