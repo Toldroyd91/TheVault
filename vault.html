@@ -1,312 +1,363 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Your Project Vault | COHI</title>
+    <title>Client Vault | COHI Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
-        /* DYNAMIC BRANDING ENGINE (Client Facing) */
         :root {
-            --brand-primary: #005A9C; /* Defaults to Yorkshire Windows */
-            --brand-bg-glow: rgba(0, 90, 156, 0.15);
+            --brand-primary: #005A9C; 
+            --brand-bg-glow: rgba(0, 90, 156, 0.2);
             --brand-border: rgba(0, 90, 156, 0.4);
             
-            --bg-base: #0a0a0a;
-            --bg-surface: #111111;
-            --bg-surface-elevated: #1a1a1a;
+            --bg-base: #050505; /* Deeper black for the luxury feel */
+            --bg-glass: rgba(20, 20, 24, 0.6);
             
-            --text-main: #ffffff;
-            --text-muted: #8e8e93;
-            --border-subtle: #222222;
+            --text-main: #f4f4f6;
+            --text-muted: #8b8b93;
+            --border-glass: rgba(255, 255, 255, 0.08);
         }
 
+        html { height: 100%; height: -webkit-fill-available; }
+        
         body { 
+            height: 100%; min-height: -webkit-fill-available;
             background-color: var(--bg-base); 
+            background-image: radial-gradient(circle at 50% 0%, var(--brand-bg-glow), transparent 50%);
             color: var(--text-main); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
+            -webkit-font-smoothing: antialiased; 
+            overflow-x: hidden;
         }
 
-        /* Luxury Glass Panels */
-        .luxury-panel {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            overflow: hidden;
-            position: relative;
+        /* Glassmorphism Panels */
+        .glass-panel { 
+            background: var(--bg-glass); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass); 
+            border-radius: 16px; 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
 
-        /* The Price Wall (Blurred Overlay) */
-        .locked-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            transition: opacity 0.5s ease;
+        .luxury-input { 
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border-glass); 
+            color: #fff; border-radius: 10px; width: 100%; padding: 16px; 
+            font-size: 16px; transition: all 0.2s ease; outline: none; 
+            text-align: center; letter-spacing: 2px; font-weight: bold;
         }
+        .luxury-input:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 2px var(--brand-bg-glow); }
+        .pin-input { font-size: 24px; letter-spacing: 12px; }
+
+        .btn-primary { 
+            background: var(--brand-primary); color: #fff; font-weight: 800; 
+            text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; 
+            padding: 16px 24px; transition: all 0.2s ease; border: none; 
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; 
+        }
+        .btn-primary:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 6px 20px var(--brand-bg-glow); transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Pipeline Tracker */
+        .pipeline-track { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-top: 10px; }
+        .pipeline-track::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: var(--border-glass); transform: translateY(-50%); z-index: 0; border-radius: 2px; }
+        .pipeline-progress { position: absolute; top: 50%; left: 0; height: 4px; background: var(--brand-primary); transform: translateY(-50%); z-index: 1; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 2px; box-shadow: 0 0 10px var(--brand-primary); }
         
-        .locked-content {
-            filter: blur(8px);
-            opacity: 0.4;
-            pointer-events: none;
-            user-select: none;
-            transition: all 0.5s ease;
-        }
-
-        .unlocked .locked-overlay {
-            opacity: 0;
-            pointer-events: none;
-        }
+        .pipeline-node { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .node-circle { width: 24px; height: 24px; border-radius: 50%; background: #141418; border: 3px solid var(--border-glass); transition: all 0.5s ease; }
+        .node-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); text-align: center; }
         
-        .unlocked .locked-content {
-            filter: blur(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .pipeline-node.active .node-circle { background: var(--brand-primary); border-color: var(--brand-primary); box-shadow: 0 0 15px var(--brand-primary); }
+        .pipeline-node.active .node-label { color: #fff; }
+        .pipeline-node.completed .node-circle { background: var(--brand-primary); border-color: var(--brand-primary); }
+        .pipeline-node.completed .node-label { color: var(--text-muted); }
 
-        /* Secure PIN Entry Gate */
-        #pinGate { transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        .pin-input {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid var(--border-subtle);
-            color: var(--text-main);
-            font-size: 2.5rem;
-            text-align: center;
-            letter-spacing: 1rem;
-            outline: none;
-            width: 200px;
-            transition: border-color 0.3s ease;
-        }
-        .pin-input:focus { border-color: var(--brand-primary); }
-        .fade-out { opacity: 0; pointer-events: none; }
-
-        /* Timeline Tracker */
-        .timeline-step { position: relative; flex: 1; text-align: center; }
-        .timeline-step::after {
-            content: ''; position: absolute; top: 12px; left: 50%; width: 100%; height: 2px;
-            background: var(--border-subtle); z-index: 0;
-        }
-        .timeline-step:last-child::after { display: none; }
-        .timeline-dot {
-            width: 24px; height: 24px; border-radius: 50%; background: var(--bg-surface);
-            border: 2px solid var(--border-subtle); margin: 0 auto 8px auto;
-            position: relative; z-index: 10; display: flex; align-items: center; justify-content: center;
-        }
-        .timeline-step.active .timeline-dot {
-            background: var(--brand-primary); border-color: var(--brand-primary);
-            box-shadow: 0 0 15px var(--brand-bg-glow);
-        }
-        .timeline-step.active .step-label { color: var(--text-main); font-weight: 700; }
-        .step-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        /* Transitions */
+        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .hidden-screen { display: none !important; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col w-full h-full relative items-center justify-center p-4">
 
-    <!-- SECURE PIN GATE -->
-    <div id="pinGate" class="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0a0a0a] p-6 backdrop-blur-3xl">
-        <div class="text-center">
-            <h2 class="text-xs text-gray-500 uppercase tracking-widest mb-4">Secure Client Portal</h2>
-            <h1 class="text-3xl font-black uppercase tracking-widest mb-8" id="gateBrandTitle">YORKSHIRE<span style="color: var(--brand-primary)">WINDOWS</span></h1>
-            <p class="text-sm text-gray-400 mb-8 max-w-sm mx-auto">Please enter the 4-digit security PIN provided by your lead designer.</p>
-            <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" autocomplete="off">
-            <p id="pinError" class="text-red-500 text-xs mt-4 uppercase tracking-widest font-bold opacity-0 transition-opacity">Incorrect PIN</p>
+    <!-- SCREEN 1: SECURE AUTH GATE -->
+    <div id="authScreen" class="w-full max-w-md w-full z-10 fade-in">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-black tracking-widest mb-2 text-white">YORKSHIRE<span style="color: var(--brand-primary)">WINDOWS</span></h1>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest">Secure Client Vault</p>
+        </div>
+
+        <div class="glass-panel p-8">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 text-center">Project Postcode</label>
+                    <input type="text" id="vaultPostcode" placeholder="e.g. S70 0PN" class="luxury-input uppercase">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 text-center">4-Digit Security PIN</label>
+                    <input type="password" id="vaultPIN" placeholder="••••" maxlength="4" class="luxury-input pin-input" inputmode="numeric">
+                </div>
+                <button id="btnUnlock" class="btn-primary w-full mt-4 py-5 text-sm">
+                    <span class="material-icons-round">lock_open</span> Unlock Vault
+                </button>
+                <div id="authError" class="text-red-400 text-xs font-bold text-center uppercase tracking-widest mt-4 opacity-0 transition-opacity">Invalid Postcode or PIN</div>
+            </div>
         </div>
     </div>
 
-    <!-- VAULT CONTENT SHELL -->
-    <div id="vaultContent" class="opacity-0 transition-opacity duration-700 flex-1 flex flex-col">
+    <!-- SCREEN 2: THE CLIENT DASHBOARD -->
+    <div id="dashboardScreen" class="w-full max-w-5xl h-full flex flex-col hidden-screen z-10 py-6 md:py-10">
         
-        <!-- Premium Header -->
-        <header class="border-b border-[#222] bg-[#0a0a0a] sticky top-0 z-40">
-            <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-                <h2 class="text-lg font-black uppercase tracking-widest m-0" id="headerBrandTitle">YORKSHIRE<span style="color: var(--brand-primary)">WINDOWS</span></h2>
-                <div class="flex items-center gap-3">
-                    <span class="text-xs text-gray-400 uppercase tracking-widest hidden md:inline">Lead Designer: Thomas Oldroyd</span>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center">
-                        <span class="material-icons-round text-sm">support_agent</span>
-                    </div>
-                </div>
+        <!-- Dashboard Header -->
+        <header class="flex justify-between items-end mb-8 md:mb-12">
+            <div>
+                <h1 class="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">Project <span style="color: var(--brand-primary)">Vault</span></h1>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2">Welcome back, <span id="clientNameDisplay" class="text-white">Client</span></p>
             </div>
+            <button onclick="location.reload()" class="text-[10px] text-gray-500 hover:text-white uppercase font-bold tracking-widest transition flex items-center gap-1">
+                <span class="material-icons-round text-sm">logout</span> Secure Exit
+            </button>
         </header>
 
-        <main class="flex-1 max-w-6xl mx-auto w-full p-4 md:p-8 space-y-8">
+        <!-- Pipeline Tracker -->
+        <div class="glass-panel p-6 md:p-8 mb-8 fade-in" style="animation-delay: 0.1s;">
+            <div class="flex justify-between items-center mb-4 border-b border-[color:var(--border-glass)] pb-4">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2">
+                    <span class="material-icons-round text-[color:var(--brand-primary)]">timeline</span> Live Project Status
+                </h2>
+                <span class="bg-[color:var(--brand-primary)]/20 text-[color:var(--brand-primary)] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest border border-[color:var(--brand-border)]">In Progress</span>
+            </div>
             
-            <!-- Hero Welcome -->
-            <div class="py-8">
-                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Welcome to your project, <span style="color: var(--brand-primary)">Mr. Dow</span>.</h1>
-                <p class="text-gray-400 max-w-2xl text-lg">Your property data has been securely processed. Below you will find your architectural intelligence dossier, 3D renders, and project specifications.</p>
-            </div>
-
-            <!-- Project Timeline -->
-            <div class="luxury-panel p-6 md:p-8">
-                <div class="flex justify-between items-start w-full">
-                    <div class="timeline-step active">
-                        <div class="timeline-dot"><span class="material-icons-round text-[12px] text-white">check</span></div>
-                        <div class="step-label">Surveyed</div>
-                    </div>
-                    <div class="timeline-step active">
-                        <div class="timeline-dot"><span class="material-icons-round text-[12px] text-white">check</span></div>
-                        <div class="step-label">Intel Scraped</div>
-                    </div>
-                    <div class="timeline-step active">
-                        <div class="timeline-dot"><span class="material-icons-round text-[12px] text-white">check</span></div>
-                        <div class="step-label">Quoted</div>
-                    </div>
-                    <div class="timeline-step">
-                        <div class="timeline-dot"></div>
-                        <div class="step-label">Presentation</div>
-                    </div>
-                    <div class="timeline-step">
-                        <div class="timeline-dot"></div>
-                        <div class="step-label">Sign-Off</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="pipeline-track px-4 md:px-12 mt-8 mb-4">
+                <div class="pipeline-progress" style="width: 25%;"></div> <!-- dynamically set by JS -->
                 
-                <!-- Left Column: Dossier & Render Gallery -->
-                <div class="lg:col-span-2 space-y-8">
+                <div class="pipeline-node completed">
+                    <div class="node-circle"></div>
+                    <div class="node-label mt-3 hidden md:block">Consultation</div>
+                </div>
+                <div class="pipeline-node active">
+                    <div class="node-circle"></div>
+                    <div class="node-label mt-3 hidden md:block">Engineering & Intel</div>
+                </div>
+                <div class="pipeline-node">
+                    <div class="node-circle"></div>
+                    <div class="node-label mt-3 hidden md:block">Manufacturing</div>
+                </div>
+                <div class="pipeline-node">
+                    <div class="node-circle"></div>
+                    <div class="node-label mt-3 hidden md:block">Installation</div>
+                </div>
+            </div>
+            <p class="text-center text-xs text-gray-400 md:hidden font-bold uppercase tracking-widest mt-6" id="mobileStatusLabel">Current: Engineering & Intel</p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Specs & Downloads -->
+            <div class="lg:col-span-1 flex flex-col gap-8">
+                
+                <!-- Architectural Spec -->
+                <div class="glass-panel p-6 fade-in" style="animation-delay: 0.2s;">
+                    <h3 class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-6 border-b border-[color:var(--border-glass)] pb-2">Proposed Architecture</h3>
                     
-                    <!-- Master Dossier Download -->
-                    <div class="luxury-panel p-8 bg-gradient-to-br from-[#111] to-[#1a1a1a] border-[color:var(--brand-border)]">
-                        <div class="flex items-start justify-between gap-4">
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Build Type</p>
+                            <p class="text-sm font-bold text-white" id="valBuildType">Loading...</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Roof System</p>
+                            <p class="text-sm font-bold text-[color:var(--brand-primary)]" id="valRoofType">Loading...</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <h2 class="text-xl font-black uppercase tracking-widest mb-2">Architectural Dossier</h2>
-                                <p class="text-sm text-gray-400 mb-6">Your comprehensive 40-page report, including land registry data, EPC thermal analysis, and structural engineering overlays.</p>
-                                <button class="bg-[color:var(--brand-primary)] text-white font-bold uppercase tracking-widest text-xs px-6 py-3 rounded hover:brightness-110 transition flex items-center gap-2 shadow-[0_4px_15px_var(--brand-bg-glow)]">
-                                    <span class="material-icons-round">download</span> Download Master PDF
-                                </button>
+                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Footprint</p>
+                                <p class="text-sm font-bold text-white" id="valSize">--</p>
                             </div>
-                            <span class="material-icons-round text-6xl text-[color:var(--brand-primary)] opacity-20">menu_book</span>
-                        </div>
-                    </div>
-
-                    <!-- 3D Renders (Staged from UDesign) -->
-                    <div class="luxury-panel p-8">
-                        <h3 class="text-xs font-bold uppercase tracking-widest mb-6 border-b border-[#222] pb-2 text-[color:var(--brand-primary)]">Proposed 3D Concepts</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="aspect-video bg-[#1a1a1a] rounded border border-[#222] overflow-hidden group cursor-pointer relative">
-                                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-500">
-                                <div class="absolute bottom-2 left-2 bg-black/70 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Exterior Elevation</div>
-                            </div>
-                            <div class="aspect-video bg-[#1a1a1a] rounded border border-[#222] overflow-hidden group cursor-pointer relative">
-                                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-500">
-                                <div class="absolute bottom-2 left-2 bg-black/70 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Interior Volume</div>
+                            <div>
+                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Frame</p>
+                                <p class="text-sm font-bold text-white" id="valFrame">--</p>
                             </div>
                         </div>
                     </div>
-
                 </div>
 
-                <!-- Right Column: The Secure Price Wall -->
-                <div class="lg:col-span-1">
-                    
-                    <!-- Financial & Specification Block -->
-                    <!-- Add the 'unlocked' class to #quoteContainer via JS when the designer clicks "Grant Access" -->
-                    <div id="quoteContainer" class="luxury-panel p-8 h-full flex flex-col border border-[#222]">
-                        
-                        <h3 class="text-xs font-bold uppercase tracking-widest mb-6 border-b border-[#222] pb-2 text-[color:var(--brand-primary)]">Financial & Specification</h3>
-                        
-                        <!-- THE LOCKED OVERLAY -->
-                        <div class="locked-overlay text-center p-6">
-                            <span class="material-icons-round text-5xl mb-4" style="color: var(--brand-primary)">lock</span>
-                            <h4 class="font-black uppercase tracking-widest text-lg mb-2">Vault Secured</h4>
-                            <p class="text-xs text-gray-400">Pricing and exact manufacturing specifications are currently locked pending your face-to-face design presentation.</p>
-                        </div>
+                <!-- Digital Dossier Download -->
+                <div class="glass-panel p-6 fade-in flex flex-col justify-center items-center text-center border border-[color:var(--brand-border)]" style="animation-delay: 0.3s; background: linear-gradient(180deg, var(--bg-glass) 0%, rgba(0, 90, 156, 0.1) 100%);">
+                    <span class="material-icons-round text-5xl text-[color:var(--brand-primary)] mb-4 drop-shadow-[0_0_15px_var(--brand-bg-glow)]">picture_as_pdf</span>
+                    <h3 class="text-lg font-black uppercase text-white mb-2">Master Dossier</h3>
+                    <p class="text-xs text-gray-400 mb-6 px-4">Your complete 40-page architectural brief, structural intelligence, and product specifications.</p>
+                    <button id="btnDownloadPDF" class="btn-primary w-full shadow-[0_4px_15px_var(--brand-bg-glow)]">
+                        <span class="material-icons-round">file_download</span> Download PDF
+                    </button>
+                </div>
 
-                        <!-- THE CONTENT (Blurred until unlocked) -->
-                        <div class="locked-content flex-1 flex flex-col">
-                            <div class="mb-8">
-                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Total Investment</p>
-                                <h2 class="text-4xl font-black tracking-tight">£19,724<span class="text-sm text-gray-500 font-normal">.00</span></h2>
-                                <p class="text-[10px] text-gray-500 mt-1">Includes VAT, Installation, and Full Certification.</p>
-                            </div>
-                            
-                            <div class="space-y-4 flex-1">
-                                <div class="flex justify-between border-b border-[#222] pb-2">
-                                    <span class="text-xs text-gray-400 uppercase">Deposit Required</span>
-                                    <span class="text-xs font-bold">£2,959.00</span>
-                                </div>
-                                <div class="flex justify-between border-b border-[#222] pb-2">
-                                    <span class="text-xs text-gray-400 uppercase">Roof System</span>
-                                    <span class="text-xs font-bold">Edwardian Roof</span>
-                                </div>
-                                <div class="flex justify-between border-b border-[#222] pb-2">
-                                    <span class="text-xs text-gray-400 uppercase">Dimensions</span>
-                                    <span class="text-xs font-bold">3555mm x 4210mm</span>
-                                </div>
-                                <div class="flex justify-between border-b border-[#222] pb-2">
-                                    <span class="text-xs text-gray-400 uppercase">Frame Finish</span>
-                                    <span class="text-xs font-bold">Anthracite Grey</span>
-                                </div>
-                            </div>
+            </div>
 
-                            <button class="w-full mt-6 bg-white text-black font-black uppercase tracking-widest text-xs px-6 py-4 rounded hover:bg-gray-200 transition">
-                                Request Contract Sign-Off
-                            </button>
-                        </div>
+            <!-- Right Column: Site Media Gallery -->
+            <div class="lg:col-span-2 glass-panel p-6 md:p-8 fade-in" style="animation-delay: 0.4s;">
+                <div class="flex justify-between items-center mb-6 border-b border-[color:var(--border-glass)] pb-4">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2">
+                        <span class="material-icons-round text-[color:var(--brand-primary)]">collections</span> Site Survey Media
+                    </h3>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" id="photoCount">0 Files</span>
+                </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="vaultGallery">
+                    <!-- Javascript will inject photos here -->
+                    <div class="h-64 rounded-lg bg-[#141418] border border-[color:var(--border-glass)] flex items-center justify-center text-gray-600">
+                        <span class="material-icons-round text-4xl animate-pulse">image</span>
                     </div>
                 </div>
             </div>
-        </main>
-        
-        <footer class="border-t border-[#222] py-6 text-center mt-12 bg-[#050505]">
-            <p class="text-[10px] text-gray-600 uppercase tracking-widest">© 2026 CO Home Improvements. Secure Enterprise Vault.</p>
-        </footer>
+
+        </div>
     </div>
 
-    <!-- LOGIC -->
-    <script>
-        // Mock PIN Entry Logic
-        const pinInput = document.getElementById('pinInput');
-        const pinError = document.getElementById('pinError');
-        
-        pinInput.addEventListener('input', (e) => {
-            if (e.target.value.length === 4) {
-                // Mock validation (Accepts '1234' for demo)
-                if(e.target.value === '1234') {
-                    pinError.style.opacity = '0';
-                    document.getElementById('pinGate').classList.add('fade-out');
+    <!-- FIREBASE & LOGIC ENGINE -->
+    <script type="module">
+        import { db, collection, query, where, getDocs } from './js/core-firebase.js';
+
+        const authScreen = document.getElementById('authScreen');
+        const dashboardScreen = document.getElementById('dashboardScreen');
+        const btnUnlock = document.getElementById('btnUnlock');
+        const authError = document.getElementById('authError');
+
+        // Vault Unlock Logic
+        btnUnlock.addEventListener('click', async () => {
+            const postcode = document.getElementById('vaultPostcode').value.trim().toUpperCase();
+            const pin = document.getElementById('vaultPIN').value.trim();
+
+            if (!postcode || !pin) {
+                showError("Please enter Postcode and PIN");
+                return;
+            }
+
+            btnUnlock.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Decrypting...`;
+            btnUnlock.disabled = true;
+            authError.style.opacity = '0';
+
+            try {
+                // Query Firebase for a match
+                const q = query(
+                    collection(db, "surveys"), 
+                    where("customerProfile.postcode", "==", postcode),
+                    where("customerProfile.vaultPIN", "==", pin)
+                );
+                
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    // Match Found! Extract data
+                    const projectData = querySnapshot.docs[0].data();
+                    const projectId = querySnapshot.docs[0].id; // Keep ID for PDF generation link
+                    
+                    // Artificial delay for premium "loading" feel
                     setTimeout(() => {
-                        document.getElementById('pinGate').style.display = 'none';
-                        document.getElementById('vaultContent').style.opacity = '1';
-                    }, 600);
+                        buildVaultUI(projectData, projectId);
+                        
+                        // Transition Screens
+                        authScreen.classList.add('hidden-screen');
+                        dashboardScreen.classList.remove('hidden-screen');
+                    }, 800);
                 } else {
-                    pinError.style.opacity = '1';
-                    pinInput.value = '';
+                    // Invalid Credentials
+                    showError("Invalid Postcode or PIN sequence.");
                 }
+            } catch (err) {
+                console.error("Vault Access Error:", err);
+                showError("Secure connection failed. Check network.");
             }
         });
 
-        // Mock unlocking the Quote via the Designer's Gatekeeper
-        // In reality, this would listen to Firebase onSnapshot. 
-        // For the demo, press 'U' on your keyboard to toggle the lock/unlock state!
-        document.addEventListener('keydown', (e) => {
-            if(e.key.toLowerCase() === 'u') {
-                const quoteContainer = document.getElementById('quoteContainer');
-                quoteContainer.classList.toggle('unlocked');
-                
-                if(quoteContainer.classList.contains('unlocked')) {
-                    quoteContainer.style.borderColor = 'var(--brand-primary)';
-                    quoteContainer.style.boxShadow = '0 0 30px var(--brand-bg-glow)';
-                } else {
-                    quoteContainer.style.borderColor = '#222';
-                    quoteContainer.style.boxShadow = 'none';
-                }
+        function showError(msg) {
+            btnUnlock.innerHTML = `<span class="material-icons-round">lock_open</span> Unlock Vault`;
+            btnUnlock.disabled = false;
+            authError.innerText = msg;
+            authError.style.opacity = '1';
+        }
+
+        // Map Database to Vault Interface
+        function buildVaultUI(data, projectId) {
+            const cp = data.customerProfile || {};
+            const ps = data.projectSpecs || {};
+            
+            // Header
+            document.getElementById('clientNameDisplay').innerText = cp.leadName || 'Client';
+            
+            // Specs
+            document.getElementById('valBuildType').innerText = ps.buildType || 'Bespoke Extension';
+            document.getElementById('valRoofType').innerText = ps.roofStyle || 'Edwardian roof';
+            document.getElementById('valSize').innerText = ps.proposedSize || 'TBC';
+            
+            // Format Frame string (removes the internal color split for cleaner client UI)
+            let frame = ps.frameColour || 'TBC';
+            if(frame.includes(' / Int:')) frame = frame.split(' / Int:')[0];
+            document.getElementById('valFrame').innerText = frame;
+
+            // Media Gallery
+            const gallery = document.getElementById('vaultGallery');
+            gallery.innerHTML = '';
+            const photos = [];
+            
+            if (data.media) {
+                // Prioritize the elevation shot and the sniper sketch
+                if (data.media.front) photos.push({url: data.media.front, label: 'Front Elevation'});
+                if (data.media.sketch) photos.push({url: data.media.sketch, label: 'Architectural Markup'});
+                if (data.media.rear) photos.push({url: data.media.rear, label: 'Rear Elevation'});
+                if (data.media.side) photos.push({url: data.media.side, label: 'Side Elevation'});
             }
-        });
+
+            document.getElementById('photoCount').innerText = `${photos.length} Secure Files`;
+
+            if (photos.length > 0) {
+                photos.forEach((img, i) => {
+                    const delay = 0.5 + (i * 0.1);
+                    gallery.innerHTML += `
+                        <div class="h-64 rounded-xl border border-[color:var(--border-glass)] overflow-hidden relative group fade-in" style="animation-delay: ${delay}s;">
+                            <div style="width: 100%; height: 100%; background-image: url('${img.url}'); background-size: cover; background-position: center; transition: transform 0.5s ease;" class="group-hover:scale-110"></div>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 pt-10">
+                                <p class="text-xs font-bold uppercase tracking-widest text-white m-0">${img.label}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                gallery.innerHTML = `
+                    <div class="col-span-2 p-8 text-center border border-dashed border-[color:var(--border-glass)] rounded-xl">
+                        <span class="material-icons-round text-4xl text-gray-600 mb-2">image_search</span>
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Media syncing in progress...</p>
+                    </div>
+                `;
+            }
+
+            // PDF Download Action
+            document.getElementById('btnDownloadPDF').addEventListener('click', (e) => {
+                const btn = e.target;
+                btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Preparing Secure File...`;
+                btn.disabled = true;
+                
+                // Simulate generation delay, then redirect to the compiler tool running in client-view mode
+                setTimeout(() => {
+                    btn.innerHTML = `<span class="material-icons-round">check_circle</span> Download Complete`;
+                    btn.style.background = "#238636";
+                    
+                    // If you want to actually trigger the PDF compiler, you can route them here:
+                    // window.location.href = `pdf-compiler.html?id=${projectId}`;
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = `<span class="material-icons-round">file_download</span> Download PDF`;
+                        btn.style.background = "";
+                        btn.disabled = false;
+                    }, 4000);
+                }, 2500);
+            });
+        }
     </script>
 </body>
 </html>
