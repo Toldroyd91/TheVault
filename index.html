@@ -634,25 +634,73 @@
             document.getElementById('progressText').innerText = label;
         };
 
-        // Survey Database Sync
+        // ==========================================
+        // REAL FIREBASE DATABASE SYNC
+        // ==========================================
         document.getElementById('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
-            if (!document.getElementById('clientName').value || !document.getElementById('postCode').value) return alert("Lead Name and Postcode are mandatory.");
+            const clientNameVal = document.getElementById('clientName').value;
+            const postCodeVal = document.getElementById('postCode').value;
+
+            if (!clientNameVal || !postCodeVal) return alert("Lead Name and Site Postcode are mandatory.");
 
             const btn = e.target;
             btn.disabled = true;
-            setProgress(10, "Initializing Sync...");
+            setProgress(20, "Packaging Data Payload...");
 
             try {
+                // 1. Check for Sniper sketch photos
                 if (window.sniperPoints && window.sniperPoints.length > 0) {
                     if (!window.sitePhotos.sniper) window.sitePhotos.sniper = [];
                     window.sitePhotos.sniper.push(canvas.toDataURL('image/jpeg', 0.9));
                 }
 
-                setProgress(50, "Compressing Image Layers...");
+                setProgress(50, "Syncing to Secure Cloud...");
+
+                // 2. Build the JSON object to send to the database
+                const surveyData = {
+                    customerProfile: {
+                        leadName: clientNameVal,
+                        customerNum: document.getElementById('clientNum').value,
+                        postcode: postCodeVal,
+                        apptDate: document.getElementById('apptDate').value,
+                        vaultPIN: "1234" // Hardcoded PIN so we can test the Vault later
+                    },
+                    projectSpecs: {
+                        buildType: document.getElementById('buildType').value,
+                        proposedSize: document.getElementById('proposedSize').value,
+                        roofStyle: document.getElementById('roofType').value,
+                        frameColour: document.getElementById('frameColour').value,
+                        baseType: document.getElementById('baseType').value,
+                        buildingRegs: document.getElementById('buildingRegs').value,
+                        planningPerms: document.getElementById('planningPerms').value
+                    },
+                    media: {
+                        // Grabbing the first image of each section to keep the DB light for the demo
+                        front: window.sitePhotos.front[0] || null,
+                        side: window.sitePhotos.side[0] || null,
+                        rear: window.sitePhotos.back[0] || null,
+                        sketch: window.sitePhotos.sniper[0] || null
+                    },
+                    pamphlets: {
+                        brochure: document.getElementById('cb-brochure').checked,
+                        warranty: document.getElementById('cb-warranty').checked,
+                        planning: document.getElementById('cb-planning').checked,
+                        sap: document.getElementById('cb-sap').checked,
+                        roof: document.getElementById('cb-roof').checked
+                    },
+                    designerInsights: {
+                        prep: document.getElementById('designerNotes').value
+                    },
+                    timestamp: serverTimestamp()
+                };
+
+                // 3. Actually save it to Firebase under the specific ID 'DEMO_PROJECT_123'
+                await setDoc(doc(db, "surveys", "DEMO_PROJECT_123"), surveyData, { merge: true });
+                
+                setProgress(100, "Pack Saved Successfully ✓");
                 
                 setTimeout(() => {
-                    setProgress(100, "Pack Saved Successfully ✓");
                     btn.innerHTML = `<span class="material-icons-round text-white">check_circle</span> Complete Pack Saved ✓`;
                     btn.style.background = "#238636";
                     
@@ -660,10 +708,11 @@
                         document.getElementById('syncProgressWrapper').style.display = 'none';
                         btn.style.background = ""; btn.innerHTML = `<span class="material-icons-round">cloud_upload</span> Save & Sync Survey`; btn.disabled = false; 
                     }, 3000);
-                }, 1500);
+                }, 800);
 
             } catch(err) {
-                alert("Sync Error: " + err.message);
+                console.error("Firebase Sync Error:", err);
+                alert("Sync Error: Check your browser console for details.");
                 document.getElementById('syncProgressWrapper').style.display = 'none';
                 btn.disabled = false;
             }
