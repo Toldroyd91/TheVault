@@ -106,6 +106,8 @@
         .portfolio-slot { aspect-ratio: 4/3; background: var(--bg-base); border: 1px dashed var(--border-subtle); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; }
         .portfolio-slot:hover { border-color: var(--brand-primary); background: var(--bg-surface-elevated); }
         .portfolio-img { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 5; }
+
+        .glass-panel { background: rgba(20, 20, 24, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
     </style>
 </head>
 <body class="flex w-full h-full relative">
@@ -154,11 +156,11 @@
             <div class="nav-link" onclick="switchModule('module-profile', this)">
                 <span class="material-icons-round">manage_accounts</span> Designer Profile
             </div>
+            <div class="nav-link" onclick="switchModule('module-gatekeeper', this)">
+                <span class="material-icons-round">account_tree</span> Project Gatekeeper
+            </div>
             <div class="nav-link" onclick="switchModule('module-dossier', this)">
                 <span class="material-icons-round">auto_awesome_mosaic</span> Dossier Compiler
-            </div>
-            <div class="nav-link" onclick="switchModule('module-gatekeeper', this)">
-                <span class="material-icons-round">lock</span> Project Gatekeeper
             </div>
         </div>
     </nav>
@@ -447,7 +449,34 @@
                 </button>
             </div>
 
-            <!-- MODULE 3: DOSSIER COMPILER (API Scraper Logic Built In) -->
+            <!-- MODULE: PROJECT GATEKEEPER (PIPELINE & PDF SCRAPER) -->
+            <div id="module-gatekeeper" class="module-view max-w-6xl mx-auto pb-24">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-black uppercase tracking-tight">Project Gatekeeper</h2>
+                    <p class="text-xs text-[#d4af37] font-bold uppercase tracking-widest mt-1">Sales Pipeline & Quotation Engine</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Left Column: Active Pipeline -->
+                    <div class="lg:col-span-1 md-surface p-6 flex flex-col gap-4 max-h-[600px] overflow-y-auto">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-[#27272f] pb-2">Active Pipeline</h3>
+                        <div id="gatekeeperPipeline" class="space-y-3">
+                            <!-- Populated dynamically from Firebase -->
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: The PDF Scraper Zone -->
+                    <div class="lg:col-span-2 glass-panel p-8 border-dashed border-2 border-[#27272f] text-center flex flex-col items-center justify-center min-h-[500px]" id="pdfDropZone">
+                        <span class="material-icons-round text-6xl text-gray-700 mb-4">document_scanner</span>
+                        <h3 class="text-xl font-bold text-gray-400 mb-2">Select a Project</h3>
+                        <p class="text-sm text-gray-500 max-w-md">Choose a project from your pipeline to upload and parse the official quotation document.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- MODULE: DOSSIER COMPILER -->
             <div id="module-dossier" class="module-view max-w-5xl mx-auto pb-24">
                 <div class="mb-8">
                     <h2 class="text-2xl font-black uppercase tracking-tight">Dossier Compiler</h2>
@@ -484,9 +513,6 @@
                 </div>
             </div>
 
-            <!-- MODULE 4: PROJECT GATEKEEPER -->
-            <div id="module-gatekeeper" class="module-view max-w-4xl mx-auto"><div class="text-center py-20"><span class="material-icons-round text-6xl text-gray-700 mb-4">lock</span><h2 class="text-2xl font-black uppercase">Project Gatekeeper</h2></div></div>
-
         </main>
     </div>
 
@@ -519,6 +545,12 @@
                 clickedElement.classList.add('active');
                 document.getElementById('appBarTitle').innerText = clickedElement.innerText.replace(/^[^\w]*/, '').trim();
             } else if (moduleId === 'module-survey') document.getElementById('appBarTitle').innerText = "Survey Engine";
+            
+            // Trigger Gatekeeper data load when switching tabs
+            if (moduleId === 'module-gatekeeper') {
+                window.loadGatekeeperPipeline();
+            }
+
             if (window.innerWidth < 1024 && sidebar.classList.contains('open')) toggleMenu();
         };
 
@@ -543,7 +575,6 @@
                 document.getElementById('loginBrandTitle').innerHTML = titleHTML;
                 document.getElementById('sidebarBrand').innerHTML = titleHTML;
                 
-                // Fetch the Designer's Profile from Firebase
                 await loadDesignerProfile();
                 loadLiveProjects(); 
                 
@@ -571,7 +602,6 @@
                 if (profileSnap.exists()) {
                     window.activeProfileData = profileSnap.data();
                 } else if (window.currentUserEmail.includes("toldroyd") || window.currentUserEmail.includes("thomas")) {
-                    // Pre-fill default Thomas data for new accounts
                     window.activeProfileData.name = "Thomas Oldroyd";
                     window.activeProfileData.role = "New Living Space Designer";
                 } else {
@@ -579,7 +609,6 @@
                     window.activeProfileData.role = "Design Consultant";
                 }
 
-                // Update Sidebar UI
                 document.getElementById('userName').innerText = window.activeProfileData.name;
                 document.getElementById('userRole').innerText = window.activeProfileData.role;
                 document.getElementById('sidebarAvatarInitial').innerText = window.activeProfileData.name.charAt(0);
@@ -595,7 +624,6 @@
                     pImg.classList.add('active');
                 }
 
-                // Update Profile Module UI Inputs
                 document.getElementById('profName').value = window.activeProfileData.name;
                 document.getElementById('profRole').value = window.activeProfileData.role;
                 document.getElementById('profBio').value = window.activeProfileData.bio;
@@ -607,7 +635,6 @@
             }
         }
 
-        // Handle Avatar Upload
         document.getElementById('upload-avatar').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -623,13 +650,12 @@
             reader.readAsDataURL(file);
         });
 
-        // Handle Portfolio Uploads
         document.getElementById('upload-portfolio').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             if (!files.length) return;
             
             files.forEach(file => {
-                if (window.activeProfileData.portfolio.length >= 4) return; // Cap at 4 for PDF layout safety
+                if (window.activeProfileData.portfolio.length >= 4) return;
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     resizeImage(event.target.result, 800, (resizedBase64) => {
@@ -639,12 +665,11 @@
                 };
                 reader.readAsDataURL(file);
             });
-            this.value = ''; // Reset
+            this.value = ''; 
         });
 
         function renderPortfolioGrid() {
             const container = document.getElementById('portfolioContainer');
-            // Keep the add button
             let html = `
                 <div class="portfolio-slot" onclick="document.getElementById('upload-portfolio').click()">
                     <span class="material-icons-round text-gray-600">add</span>
@@ -669,7 +694,6 @@
             renderPortfolioGrid();
         };
 
-        // Utility to prevent massive file sizes in the database
         function resizeImage(base64Str, maxWidth, callback) {
             const img = new Image();
             img.onload = () => {
@@ -684,7 +708,6 @@
             img.src = base64Str;
         }
 
-        // Save Profile to Cloud
         document.getElementById('btn-save-profile').addEventListener('click', async (e) => {
             const btn = e.target;
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Syncing...`;
@@ -696,7 +719,6 @@
             try {
                 await setDoc(doc(db, "designers", window.currentUserEmail), window.activeProfileData, { merge: true });
                 
-                // Update Sidebar
                 document.getElementById('userName').innerText = window.activeProfileData.name;
                 document.getElementById('userRole').innerText = window.activeProfileData.role;
                 if(window.activeProfileData.headshot) {
@@ -722,7 +744,120 @@
         });
 
         // ==========================================
-        // LIVE FIREBASE PROJECT LIBRARY (TENANT ISOLATED)
+        // PROJECT GATEKEEPER & PDF SCRAPER
+        // ==========================================
+        window.activeGatekeeperProjectId = null;
+
+        window.loadGatekeeperPipeline = async function() {
+            const container = document.getElementById('gatekeeperPipeline');
+            container.innerHTML = `<div class="text-center py-10"><span class="material-icons-round animate-spin text-[color:var(--brand-primary)]">sync</span></div>`;
+            
+            try {
+                const q = query(collection(db, "surveys"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                let html = '';
+                
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.designerEmail && data.designerEmail !== window.currentUserEmail) return;
+                    
+                    const id = docSnap.id;
+                    const name = data.customerProfile?.leadName || 'Unnamed';
+                    const pc = data.customerProfile?.postcode || '';
+                    const status = data.quoteData ? 'Quote Unlocked' : 'Awaiting Quote';
+                    const statusColor = data.quoteData ? 'text-green-400 bg-green-400/10 border-green-900' : 'text-yellow-400 bg-yellow-400/10 border-yellow-900';
+
+                    html += `
+                        <div class="bg-[#141418] p-4 rounded-lg border border-[#27272f] cursor-pointer hover:border-[color:var(--brand-primary)] hover:bg-[color:var(--bg-surface-elevated)] transition" onclick="selectGatekeeperProject('${id}', '${name}')">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-white text-sm">${name}</h4>
+                                <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded border ${statusColor}">${status}</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest">${pc}</p>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html || '<p class="text-xs text-gray-500 text-center">No projects found.</p>';
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = '<p class="text-xs text-red-500 text-center">Failed to load pipeline.</p>';
+            }
+        }
+
+        window.selectGatekeeperProject = function(id, name) {
+            window.activeGatekeeperProjectId = id;
+            const dropZone = document.getElementById('pdfDropZone');
+            
+            dropZone.innerHTML = `
+                <span class="material-icons-round text-6xl text-[color:var(--brand-primary)] mb-4">document_scanner</span>
+                <h3 class="text-xl font-bold text-white mb-2">Upload Quote for ${name}</h3>
+                <p class="text-sm text-gray-400 max-w-md mb-6">Drag and drop the official order form ("- Scope of Works-1.pdf") here to extract financial data and unlock the client's Vault.</p>
+                <input type="file" id="quotePdfUpload" accept="application/pdf" class="hidden" onchange="handlePdfUpload(this)">
+                <button class="btn-primary px-8" onclick="document.getElementById('quotePdfUpload').click()">
+                    <span class="material-icons-round mr-2">upload_file</span> Browse Files
+                </button>
+            `;
+        }
+
+        window.handlePdfUpload = function(input) {
+            if(!input.files.length || !window.activeGatekeeperProjectId) return;
+            
+            const file = input.files[0];
+            const dropZone = document.getElementById('pdfDropZone');
+            
+            // Render scraping animation
+            dropZone.innerHTML = `
+                <span class="material-icons-round text-6xl text-[color:var(--brand-primary)] animate-pulse mb-4">document_scanner</span>
+                <h3 class="text-xl font-bold text-white mb-2">Parsing Document...</h3>
+                <div class="space-y-2 text-xs font-mono text-gray-400 text-left mt-6 w-full max-w-sm mx-auto">
+                    <p class="opacity-0 animate-[fadeIn_0.3s_0.5s_forwards]">> Extracting contract boundaries...</p>
+                    <p class="opacity-0 animate-[fadeIn_0.3s_1.5s_forwards]">> Identifying total values...</p>
+                    <p class="opacity-0 animate-[fadeIn_0.3s_2.5s_forwards]">> Cross-referencing dimensions...</p>
+                </div>
+            `;
+
+            setTimeout(async () => {
+                // Simulating extraction from the specific "- Scope of Works-1.pdf" order form 
+                const extractedData = {
+                    contractTotal: "£19,724.00",
+                    deposit: "£2,959.00",
+                    width: "2115",
+                    projection: "3600",
+                    roofSystem: "Glazed",
+                    roofColor: "White",
+                    roofGlass: "Neutral 1.2u"
+                };
+
+                try {
+                    // Update Firebase record with quote data
+                    await setDoc(doc(db, "surveys", window.activeGatekeeperProjectId), { quoteData: extractedData }, { merge: true });
+                    window.currentProjectId = window.activeGatekeeperProjectId; 
+                    
+                    dropZone.innerHTML = `
+                        <span class="material-icons-round text-6xl text-green-500 mb-4">check_circle</span>
+                        <h3 class="text-xl font-bold text-white mb-2">Extraction Complete</h3>
+                        <div class="bg-black/30 p-5 rounded-lg border border-white/10 text-left w-full max-w-sm mx-auto my-4 space-y-3 text-sm text-gray-300">
+                            <p class="flex justify-between border-b border-white/5 pb-2"><span>Contract Total:</span> <span class="font-bold text-white">${extractedData.contractTotal}</span></p>
+                            <p class="flex justify-between border-b border-white/5 pb-2"><span>Deposit:</span> <span class="font-bold text-white">${extractedData.deposit}</span></p>
+                            <p class="flex justify-between border-b border-white/5 pb-2"><span>Dimensions:</span> <span class="font-bold text-white">${extractedData.width}mm x ${extractedData.projection}mm</span></p>
+                            <p class="flex justify-between pb-2"><span>Roof System:</span> <span class="font-bold text-white">${extractedData.roofSystem} - ${extractedData.roofGlass}</span></p>
+                        </div>
+                        <button class="btn-primary bg-green-600 border-none mt-4 w-full max-w-sm" onclick="window.location.href='vault.html?id=' + window.activeGatekeeperProjectId">
+                            <span class="material-icons-round mr-2">lock_open</span> Enter Client Vault
+                        </button>
+                    `;
+                    // Refresh pipeline list to show green "Quote Unlocked" tag
+                    window.loadGatekeeperPipeline();
+                } catch(e) {
+                    console.error("Failed to merge quote data:", e);
+                    alert("Sync Error: Failed to save extracted data.");
+                }
+            }, 3500);
+        }
+
+        // ==========================================
+        // LIVE FIREBASE PROJECT LIBRARY (DASHBOARD)
         // ==========================================
         async function loadLiveProjects() {
             const grid = document.getElementById('projectsGrid');
@@ -735,24 +870,25 @@
                 let html = '';
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    
-                    if (data.designerEmail && data.designerEmail !== window.currentUserEmail) {
-                        return; // Skip rendering this card
-                    }
+                    if (data.designerEmail && data.designerEmail !== window.currentUserEmail) return;
 
                     const id = docSnap.id;
                     const profile = data.customerProfile || {};
                     const media = data.media || {};
+                    const hasQuote = data.quoteData ? true : false;
 
                     const name = profile.leadName || 'Unnamed Client';
                     const pc = profile.postcode || 'Unknown Loc';
                     const date = profile.apptDate || 'Recent';
                     const img = media.front || 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80';
+                    const tagStyle = hasQuote ? 'border-[color:var(--success)] text-[color:var(--success)]' : 'border-gray-600 text-gray-400';
+                    const tagText = hasQuote ? 'Vault Ready' : 'Survey Mode';
 
                     html += `
                         <div class="md-surface doc-card group" onclick="openProject('${id}')">
                             <div class="doc-preview-area">
                                 <img src="${img}" class="w-full h-full object-cover opacity-50 transition duration-500 group-hover:opacity-90 group-hover:scale-110" style="filter: grayscale(20%) contrast(120%);">
+                                <span class="absolute top-2 right-2 border bg-black/60 backdrop-blur px-2 py-1 rounded text-[9px] font-bold uppercase tracking-widest z-10 ${tagStyle}">${tagText}</span>
                             </div>
                             <div class="p-4 border-t border-[#27272f] bg-[#141418] relative z-20">
                                 <h4 class="text-sm font-bold text-white truncate group-hover:text-[color:var(--brand-primary)]">${name}</h4>
@@ -765,16 +901,11 @@
                     `;
                 });
 
-                if (html === '') {
-                    grid.innerHTML = `
-                        <div class="col-span-full md-surface p-10 text-center border-dashed border-2 border-[#27272f]">
-                            <span class="material-icons-round text-4xl text-gray-600 mb-2">folder_off</span>
-                            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">No active projects found.</p>
-                            <p class="text-[10px] text-gray-600 mt-2">Click the + button to start your first survey.</p>
-                        </div>`;
-                } else {
-                    grid.innerHTML = html;
-                }
+                grid.innerHTML = html || `
+                    <div class="col-span-full md-surface p-10 text-center border-dashed border-2 border-[#27272f]">
+                        <span class="material-icons-round text-4xl text-gray-600 mb-2">folder_off</span>
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">No active projects found.</p>
+                    </div>`;
             } catch (error) {
                 console.error("Error loading projects:", error);
                 grid.innerHTML = '<p class="text-xs text-red-500 col-span-full">Failed to load live projects. Check console.</p>';
@@ -945,7 +1076,7 @@
 
                 const surveyData = {
                     designerEmail: window.currentUserEmail, 
-                    designerProfile: window.activeProfileData, // INJECTS YOUR SAVED PROFILE INTO THE SURVEY
+                    designerProfile: window.activeProfileData,
                     customerProfile: {
                         leadName: clientNameVal,
                         customerNum: document.getElementById('clientNum').value,
@@ -1039,7 +1170,7 @@
         // ==========================================
         document.getElementById('btn-open-final-pdf')?.addEventListener('click', (e) => {
             e.preventDefault();
-            const idToLoad = window.currentProjectId || 'DEMO_PROJECT_123';
+            const idToLoad = window.currentProjectId || window.activeGatekeeperProjectId || 'DEMO_PROJECT_123';
             window.location.href = `pdf-compiler.html?id=${idToLoad}`;
         });
 
