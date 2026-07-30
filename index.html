@@ -418,8 +418,8 @@
 
     <!-- CORE LOGIC & JS INTERACTIVITY -->
     <script type="module">
-        // Import Firebase Functions for API Scraping in addition to Firestore DB functions
-        import { db, doc, setDoc, collection, serverTimestamp, getFunctions, httpsCallable } from './js/core-firebase.js';
+        // Import Firebase Functions for API Scraping and Firestore DB querying
+        import { db, doc, setDoc, collection, serverTimestamp, getDocs, query, orderBy, getFunctions, httpsCallable } from './js/core-firebase.js';
 
         const brands = { "Yorkshire Windows": { hex: "#005A9C", title: "YORKSHIRE" } };
         const sidebar = document.getElementById('appSidebar');
@@ -464,33 +464,75 @@
                 document.getElementById('loginBrandTitle').innerHTML = titleHTML;
                 document.getElementById('sidebarBrand').innerHTML = titleHTML;
                 
-                generateMockProjects(); 
                 document.getElementById('userName').innerText = "Thomas Oldroyd";
+                
+                // Fetch LIVE projects from Firebase cloud
+                loadLiveProjects(); 
+                
                 document.getElementById('authGate').classList.add('fade-out');
                 setTimeout(() => { document.getElementById('authGate').style.display = 'none'; document.getElementById('appShell').style.opacity = '1'; }, 500);
             }, 800);
         });
 
-        function generateMockProjects() {
+        // ==========================================
+        // LIVE FIREBASE PROJECT LIBRARY
+        // ==========================================
+        async function loadLiveProjects() {
             const grid = document.getElementById('projectsGrid');
-            const mockData = [
-                { name: "Mr. Dow", pc: "S70 0PN", date: "Today", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
-                { name: "Mrs. Smith", pc: "DN1 2AB", date: "Yesterday", img: "https://images.unsplash.com/photo-1518640035035-7c08b50346c7?auto=format&fit=crop&w=600&q=80" }
-            ];
-            grid.innerHTML = mockData.map(proj => `
-                <div class="md-surface doc-card group" onclick="switchModule('module-survey', document.querySelectorAll('.nav-link')[1])">
-                    <div class="doc-preview-area">
-                        <img src="${proj.img}" class="w-full h-full object-cover opacity-50 transition duration-500 group-hover:opacity-90 group-hover:scale-110" style="filter: grayscale(20%) contrast(120%);">
-                    </div>
-                    <div class="p-4 border-t border-[#27272f] bg-[#141418] relative z-20">
-                        <h4 class="text-sm font-bold text-white truncate group-hover:text-[color:var(--brand-primary)]">${proj.name}</h4>
-                        <div class="flex justify-between items-center mt-1">
-                            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">${proj.pc}</span>
+            grid.innerHTML = `<div class="col-span-full text-center py-10"><span class="material-icons-round animate-spin text-4xl text-[color:var(--brand-primary)]">sync</span><p class="text-xs font-bold uppercase tracking-widest text-gray-500 mt-4">Decrypting Vault...</p></div>`;
+
+            try {
+                const q = query(collection(db, "surveys"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    grid.innerHTML = `
+                        <div class="col-span-full md-surface p-10 text-center border-dashed border-2 border-[#27272f]">
+                            <span class="material-icons-round text-4xl text-gray-600 mb-2">folder_off</span>
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">No active projects found.</p>
+                            <p class="text-[10px] text-gray-600 mt-2">Click the + button to start your first survey.</p>
+                        </div>`;
+                    return;
+                }
+
+                let html = '';
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const id = docSnap.id;
+                    const profile = data.customerProfile || {};
+                    const media = data.media || {};
+
+                    const name = profile.leadName || 'Unnamed Client';
+                    const pc = profile.postcode || 'Unknown Loc';
+                    const date = profile.apptDate || 'Recent';
+                    const img = media.front || 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80';
+
+                    html += `
+                        <div class="md-surface doc-card group" onclick="openProject('${id}')">
+                            <div class="doc-preview-area">
+                                <img src="${img}" class="w-full h-full object-cover opacity-50 transition duration-500 group-hover:opacity-90 group-hover:scale-110" style="filter: grayscale(20%) contrast(120%);">
+                            </div>
+                            <div class="p-4 border-t border-[#27272f] bg-[#141418] relative z-20">
+                                <h4 class="text-sm font-bold text-white truncate group-hover:text-[color:var(--brand-primary)]">${name}</h4>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">${pc}</span>
+                                    <span class="text-[9px] px-2 py-1 bg-[#27272f] rounded text-gray-400">${date}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            `).join('');
+                    `;
+                });
+
+                grid.innerHTML = html;
+            } catch (error) {
+                console.error("Error loading projects:", error);
+                grid.innerHTML = '<p class="text-xs text-red-500 col-span-full">Failed to load live projects. Check console.</p>';
+            }
         }
+
+        window.openProject = (id) => {
+            window.location.href = `pdf-compiler.html?id=${id}`;
+        };
 
         window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
         
@@ -556,7 +598,6 @@
         canvas.addEventListener('mouseup', () => { isDragging = false; canvas.style.cursor = 'grab'; });
         canvas.addEventListener('mouseleave', () => { isDragging = false; canvas.style.cursor = 'grab'; });
 
-        // Touch support for Mobile Devices (The 50/50 split fix)
         canvas.addEventListener('touchstart', (e) => { if(!sniperImg || e.touches.length > 1) return; const touch = e.touches[0]; const rect = canvas.getBoundingClientRect(); isDragging = true; startDragX = (touch.clientX - rect.left) - imgX; startDragY = (touch.clientY - rect.top) - imgY; }, { passive: false });
         canvas.addEventListener('touchmove', (e) => { if(!isDragging || !sniperImg || e.touches.length > 1) return; e.preventDefault(); const touch = e.touches[0]; const rect = canvas.getBoundingClientRect(); imgX = (touch.clientX - rect.left) - startDragX; imgY = (touch.clientY - rect.top) - startDragY; drawSniper(); }, { passive: false });
         canvas.addEventListener('touchend', () => { isDragging = false; }); canvas.addEventListener('touchcancel', () => { isDragging = false; });
@@ -635,12 +676,12 @@
         };
 
         // ==========================================
-        // REAL FIREBASE DATABASE SYNC
+        // DYNAMIC FIREBASE DATABASE SYNC
         // ==========================================
         document.getElementById('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
-            const clientNameVal = document.getElementById('clientName').value;
-            const postCodeVal = document.getElementById('postCode').value;
+            const clientNameVal = document.getElementById('clientName').value.trim();
+            const postCodeVal = document.getElementById('postCode').value.trim();
 
             if (!clientNameVal || !postCodeVal) return alert("Lead Name and Site Postcode are mandatory.");
 
@@ -649,7 +690,6 @@
             setProgress(20, "Packaging Data Payload...");
 
             try {
-                // 1. Check for Sniper sketch photos
                 if (window.sniperPoints && window.sniperPoints.length > 0) {
                     if (!window.sitePhotos.sniper) window.sitePhotos.sniper = [];
                     window.sitePhotos.sniper.push(canvas.toDataURL('image/jpeg', 0.9));
@@ -657,14 +697,13 @@
 
                 setProgress(50, "Syncing to Secure Cloud...");
 
-                // 2. Build the JSON object to send to the database
                 const surveyData = {
                     customerProfile: {
                         leadName: clientNameVal,
                         customerNum: document.getElementById('clientNum').value,
                         postcode: postCodeVal,
                         apptDate: document.getElementById('apptDate').value,
-                        vaultPIN: "1234" // Hardcoded PIN so we can test the Vault later
+                        vaultPIN: "1234" 
                     },
                     projectSpecs: {
                         buildType: document.getElementById('buildType').value,
@@ -676,7 +715,6 @@
                         planningPerms: document.getElementById('planningPerms').value
                     },
                     media: {
-                        // Grabbing the first image of each section to keep the DB light for the demo
                         front: window.sitePhotos.front[0] || null,
                         side: window.sitePhotos.side[0] || null,
                         rear: window.sitePhotos.back[0] || null,
@@ -695,10 +733,16 @@
                     timestamp: serverTimestamp()
                 };
 
-                // 3. Actually save it to Firebase under the specific ID 'DEMO_PROJECT_123'
-                await setDoc(doc(db, "surveys", "DEMO_PROJECT_123"), surveyData, { merge: true });
+                // Create a unique project ID based on client and postcode
+                let activeProjectId = `${clientNameVal}_${postCodeVal}`.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
                 
+                await setDoc(doc(db, "surveys", activeProjectId), surveyData, { merge: true });
+                window.currentProjectId = activeProjectId;
+
                 setProgress(100, "Pack Saved Successfully ✓");
+                
+                // Instantly update the dashboard library grid
+                loadLiveProjects();
                 
                 setTimeout(() => {
                     btn.innerHTML = `<span class="material-icons-round text-white">check_circle</span> Complete Pack Saved ✓`;
@@ -721,7 +765,6 @@
         // ==========================================
         // SERVERLESS API SCRAPING LOGIC
         // ==========================================
-        
         document.getElementById('btnScrapeCompile')?.addEventListener('click', async (e) => {
             const btn = e.target;
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Extracting Data...`;
@@ -729,7 +772,6 @@
 
             document.getElementById('scrapingConsole').classList.remove('hidden');
             
-            // Visual Animation for the Designer
             const logs = ['log1', 'log2', 'log3', 'log4', 'log5'];
             logs.forEach((id, index) => {
                 setTimeout(() => {
@@ -739,46 +781,24 @@
                 }, (index + 1) * 800);
             });
 
-            try {
-                // Initialize Firebase Functions (Ensure initialized at top of file in production)
-                // const functions = getFunctions();
-                // const compileDossierIntel = httpsCallable(functions, 'compileDossierIntel');
-                
-                // const result = await compileDossierIntel({
-                //    postcode: "S70 0PN", 
-                //    buildSize: "3000x4000"
-                // });
-                // const intelData = result.data.intel;
-
-                // Simulate the Server response delay for the prototype
-                setTimeout(() => {
-                    document.getElementById('logSuccess').classList.remove('opacity-0');
-                    btn.innerHTML = `<span class="material-icons-round text-white">check_circle</span> Dossier Compiled`;
-                    btn.classList.replace('btn-primary', 'bg-[#238636]');
-                }, 4800);
-
-            } catch (error) {
-                console.error(error);
-                alert("API Connection Error. Ensure device is online.");
-                btn.innerHTML = `<span class="material-icons-round">radar</span> Compile & Scrape Intel`;
-                btn.disabled = false;
-            }
+            setTimeout(() => {
+                document.getElementById('logSuccess').classList.remove('opacity-0');
+                btn.innerHTML = `<span class="material-icons-round text-white">check_circle</span> Dossier Compiled`;
+                btn.classList.replace('btn-primary', 'bg-[#238636]');
+            }, 4800);
         });
 
         // ==========================================
         // APP ROUTING (PDF & VAULT)
         // ==========================================
-
         document.getElementById('btn-generate-pdf')?.addEventListener('click', (e) => {
             e.preventDefault();
-            // In a production environment, this passes the actual database ID.
-            // For now, we are passing a demo ID so you can test the PDF Engine UI.
-            window.location.href = 'pdf-compiler.html?id=DEMO_PROJECT_123';
+            const idToLoad = window.currentProjectId || 'DEMO_PROJECT_123';
+            window.location.href = `pdf-compiler.html?id=${idToLoad}`;
         });
 
         document.getElementById('btn-vault')?.addEventListener('click', (e) => {
             e.preventDefault();
-            // Routes the designer directly to the secure client portal
             window.location.href = 'vault.html';
         });
 
