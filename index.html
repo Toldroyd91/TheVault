@@ -50,7 +50,7 @@
         .luxury-input:focus { border-color: var(--brand-primary); background: var(--bg-surface-elevated); box-shadow: 0 0 0 2px var(--brand-bg-glow); }
         select.luxury-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b8b93%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 10px auto; padding-right: 36px; }
 
-        .btn-primary { background: var(--brand-primary); color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; padding: 16px 24px; transition: all 0.2s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: gap: 8px; }
+        .btn-primary { background: var(--brand-primary); color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; padding: 16px 24px; transition: all 0.2s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 6px 20px var(--brand-bg-glow); transform: translateY(-1px); }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         
@@ -95,6 +95,17 @@
         #syncProgressWrapper { display: none; margin-top: 20px; width: 100%; }
         .progress-bg { height: 8px; background: var(--border-subtle); border-radius: 4px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--brand-primary); width: 0%; transition: width 0.3s ease; }
+
+        /* Profile specific styles */
+        .avatar-upload-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--bg-surface-elevated); border: 2px dashed var(--border-subtle); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; transition: all 0.3s ease; }
+        .avatar-upload-circle:hover { border-color: var(--brand-primary); background: var(--brand-bg-glow); }
+        .avatar-img-preview { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 0.3s; }
+        .avatar-img-preview.active { opacity: 1; z-index: 10; }
+        
+        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 16px; }
+        .portfolio-slot { aspect-ratio: 4/3; background: var(--bg-base); border: 1px dashed var(--border-subtle); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; }
+        .portfolio-slot:hover { border-color: var(--brand-primary); background: var(--bg-surface-elevated); }
+        .portfolio-img { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 5; }
     </style>
 </head>
 <body class="flex w-full h-full relative">
@@ -108,7 +119,7 @@
                 <p class="text-xs text-gray-500 uppercase tracking-widest">Enterprise Authentication</p>
             </div>
             <div class="space-y-5">
-                <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input text-center" value="designer@yorkshirewindows.com">
+                <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input text-center" value="thomas@yorkshirewindows.com">
                 <input type="password" id="authPassword" placeholder="••••••••" class="luxury-input text-center tracking-[0.5em]" value="password123">
                 <button id="btnLogin" class="btn-primary w-full">Initialize Session</button>
             </div>
@@ -122,10 +133,13 @@
         <div class="p-6 pt-12 pb-4 border-b border-[#27272f] flex flex-col gap-4">
             <h2 class="text-xl font-black uppercase tracking-widest m-0" id="sidebarBrand">COHI<span style="color: var(--brand-primary)">PRO</span></h2>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-sm font-bold">T</div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-sm font-bold shadow-lg overflow-hidden relative">
+                    <span id="sidebarAvatarInitial">T</span>
+                    <img id="sidebarAvatarImg" src="" class="absolute inset-0 w-full h-full object-cover opacity-0">
+                </div>
                 <div>
                     <p class="text-sm font-bold text-white" id="userName">Loading...</p>
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">New Living Space Designer</p>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest truncate max-w-[150px]" id="userRole">New Living Space Designer</p>
                 </div>
             </div>
         </div>
@@ -136,6 +150,9 @@
             </div>
             <div class="nav-link" onclick="switchModule('module-survey', this)">
                 <span class="material-icons-round">architecture</span> Survey Engine
+            </div>
+            <div class="nav-link" onclick="switchModule('module-profile', this)">
+                <span class="material-icons-round">manage_accounts</span> Designer Profile
             </div>
             <div class="nav-link" onclick="switchModule('module-dossier', this)">
                 <span class="material-icons-round">auto_awesome_mosaic</span> Dossier Compiler
@@ -368,7 +385,66 @@
                         <div class="progress-bg"><div id="progressFill" class="progress-fill"></div></div>
                     </div>
                 </div>
+            </div>
 
+            <!-- MODULE: DESIGNER PROFILE ENGINE -->
+            <div id="module-profile" class="module-view max-w-4xl mx-auto pb-24">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-black uppercase tracking-tight">Designer Profile</h2>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Configure Your Dossier Branding</p>
+                </div>
+
+                <div class="md-surface p-6 md:p-8 mb-6 border-t-4 border-t-[color:var(--brand-primary)]">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <!-- Headshot Uploader -->
+                        <div class="flex flex-col items-center gap-3 shrink-0">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Headshot</label>
+                            <div class="avatar-upload-circle" onclick="document.getElementById('upload-avatar').click()">
+                                <span class="material-icons-round text-4xl text-gray-600">add_a_photo</span>
+                                <img id="preview-avatar" class="avatar-img-preview" src="">
+                            </div>
+                            <input type="file" id="upload-avatar" accept="image/*" class="hidden">
+                        </div>
+
+                        <!-- Text Inputs -->
+                        <div class="flex-1 w-full space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Display Name</label>
+                                    <input type="text" id="profName" class="luxury-input" placeholder="e.g. Thomas Oldroyd">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Job Title</label>
+                                    <input type="text" id="profRole" class="luxury-input" placeholder="New Living Space Designer">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Sales Biography (For PDF)</label>
+                                <textarea id="profBio" rows="4" class="luxury-input" placeholder="Write a brief professional summary focusing on your expertise, local area knowledge, and commitment to design standards..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Grid -->
+                <div class="md-surface p-6 md:p-8 mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest">Showcase Portfolio</label>
+                        <span class="text-[10px] bg-[#27272f] px-2 py-1 rounded text-gray-400">Max 4 Images</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4">These images will be injected into your master PDF to show clients examples of your past architectural work.</p>
+                    
+                    <div class="portfolio-grid" id="portfolioContainer">
+                        <div class="portfolio-slot" onclick="document.getElementById('upload-portfolio').click()">
+                            <span class="material-icons-round text-gray-600">add</span>
+                        </div>
+                        <input type="file" id="upload-portfolio" accept="image/*" multiple class="hidden">
+                    </div>
+                </div>
+
+                <button id="btn-save-profile" class="btn-primary w-full py-5 shadow-[0_4px_15px_var(--brand-bg-glow)]">
+                    <span class="material-icons-round">save</span> Sync Profile to Cloud
+                </button>
             </div>
 
             <!-- MODULE 3: DOSSIER COMPILER (API Scraper Logic Built In) -->
@@ -378,7 +454,6 @@
                     <p class="text-xs text-[#0dcaf0] font-bold uppercase tracking-widest mt-1">Enterprise Presentation API</p>
                 </div>
 
-                <!-- Active Project Card -->
                 <div class="md-surface p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-[color:var(--brand-border)] shadow-[0_0_20px_var(--brand-bg-glow)]">
                     <div>
                         <span class="bg-[color:var(--brand-primary)]/20 text-[color:var(--brand-primary)] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-3 inline-block border border-[color:var(--brand-border)]">Ready to Compile</span>
@@ -392,7 +467,6 @@
                     </div>
                 </div>
 
-                <!-- API Scraping Status Console (Hidden by default) -->
                 <div id="scrapingConsole" class="md-surface p-6 bg-[#0a0a0c] hidden">
                     <h4 class="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-4 border-b border-[#2c2c30] pb-2">Intelligence Extraction Protocol</h4>
                     <div class="space-y-3 font-mono text-xs">
@@ -400,9 +474,9 @@
                         <p id="log2" class="text-gray-500 opacity-0 transition-opacity duration-300">> Calculating thermal baseline and age...</p>
                         <p id="log3" class="text-gray-500 opacity-0 transition-opacity duration-300">> Fetching local authority planning precedents...</p>
                         <p id="log4" class="text-gray-500 opacity-0 transition-opacity duration-300">> Triangulating Open-Meteo structural snow loads...</p>
-                        <p id="log5" class="text-gray-500 opacity-0 transition-opacity duration-300">> Generating 40-page Master PDF Dossier...</p>
+                        <p id="log5" class="text-gray-500 opacity-0 transition-opacity duration-300">> Generating Master PDF Dossier...</p>
                         <div id="logSuccess" class="opacity-0 transition-opacity duration-500 pt-4">
-                            <button class="btn-primary w-full bg-[#238636] text-white shadow-[0_0_20px_rgba(35,134,54,0.3)]">
+                            <button id="btn-open-final-pdf" class="btn-primary w-full bg-[#238636] text-white shadow-[0_0_20px_rgba(35,134,54,0.3)]">
                                 <span class="material-icons-round">picture_as_pdf</span> Open Final Dossier
                             </button>
                         </div>
@@ -418,8 +492,7 @@
 
     <!-- CORE LOGIC & JS INTERACTIVITY -->
     <script type="module">
-        // Import Firebase Functions for API Scraping and Firestore DB querying
-        import { db, doc, setDoc, collection, serverTimestamp, getDocs, query, orderBy, getFunctions, httpsCallable } from './js/core-firebase.js';
+        import { db, doc, setDoc, getDoc, collection, serverTimestamp, getDocs, query, orderBy } from './js/core-firebase.js';
 
         const brands = { "Yorkshire Windows": { hex: "#005A9C", title: "YORKSHIRE" } };
         const sidebar = document.getElementById('appSidebar');
@@ -449,10 +522,16 @@
             if (window.innerWidth < 1024 && sidebar.classList.contains('open')) toggleMenu();
         };
 
+        // ==========================================
+        // AUTHENTICATION & PROFILE LOADING
+        // ==========================================
         document.getElementById('btnLogin').addEventListener('click', () => {
             const btn = document.getElementById('btnLogin');
+            const emailInput = document.getElementById('authEmail').value.trim().toLowerCase();
+            window.currentUserEmail = emailInput || "designer@yorkshirewindows.com";
+
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
-            setTimeout(() => {
+            setTimeout(async () => {
                 const config = brands["Yorkshire Windows"];
                 const root = document.documentElement;
                 root.style.setProperty('--brand-primary', config.hex);
@@ -464,9 +543,8 @@
                 document.getElementById('loginBrandTitle').innerHTML = titleHTML;
                 document.getElementById('sidebarBrand').innerHTML = titleHTML;
                 
-                document.getElementById('userName').innerText = "Thomas Oldroyd";
-                
-                // Fetch LIVE projects from Firebase cloud
+                // Fetch the Designer's Profile from Firebase
+                await loadDesignerProfile();
                 loadLiveProjects(); 
                 
                 document.getElementById('authGate').classList.add('fade-out');
@@ -475,7 +553,176 @@
         });
 
         // ==========================================
-        // LIVE FIREBASE PROJECT LIBRARY
+        // DESIGNER PROFILE ENGINE
+        // ==========================================
+        window.activeProfileData = {
+            name: "Thomas Oldroyd",
+            role: "New Living Space Designer",
+            bio: "Operating out of South Yorkshire, Thomas specializes in transforming existing architectural footprints into modern, thermally efficient living spaces...",
+            headshot: null,
+            portfolio: []
+        };
+
+        async function loadDesignerProfile() {
+            try {
+                const profileRef = doc(db, "designers", window.currentUserEmail);
+                const profileSnap = await getDoc(profileRef);
+
+                if (profileSnap.exists()) {
+                    window.activeProfileData = profileSnap.data();
+                } else if (window.currentUserEmail.includes("toldroyd") || window.currentUserEmail.includes("thomas")) {
+                    // Pre-fill default Thomas data for new accounts
+                    window.activeProfileData.name = "Thomas Oldroyd";
+                    window.activeProfileData.role = "New Living Space Designer";
+                } else {
+                    window.activeProfileData.name = "Guest Designer";
+                    window.activeProfileData.role = "Design Consultant";
+                }
+
+                // Update Sidebar UI
+                document.getElementById('userName').innerText = window.activeProfileData.name;
+                document.getElementById('userRole').innerText = window.activeProfileData.role;
+                document.getElementById('sidebarAvatarInitial').innerText = window.activeProfileData.name.charAt(0);
+                
+                if(window.activeProfileData.headshot) {
+                    const sbImg = document.getElementById('sidebarAvatarImg');
+                    sbImg.src = window.activeProfileData.headshot;
+                    sbImg.classList.add('opacity-100');
+                    sbImg.classList.remove('opacity-0');
+                    
+                    const pImg = document.getElementById('preview-avatar');
+                    pImg.src = window.activeProfileData.headshot;
+                    pImg.classList.add('active');
+                }
+
+                // Update Profile Module UI Inputs
+                document.getElementById('profName').value = window.activeProfileData.name;
+                document.getElementById('profRole').value = window.activeProfileData.role;
+                document.getElementById('profBio').value = window.activeProfileData.bio;
+                
+                renderPortfolioGrid();
+
+            } catch (error) {
+                console.error("Profile load error:", error);
+            }
+        }
+
+        // Handle Avatar Upload
+        document.getElementById('upload-avatar').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                resizeImage(event.target.result, 400, (resizedBase64) => {
+                    window.activeProfileData.headshot = resizedBase64;
+                    const pImg = document.getElementById('preview-avatar');
+                    pImg.src = resizedBase64;
+                    pImg.classList.add('active');
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Handle Portfolio Uploads
+        document.getElementById('upload-portfolio').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+            
+            files.forEach(file => {
+                if (window.activeProfileData.portfolio.length >= 4) return; // Cap at 4 for PDF layout safety
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    resizeImage(event.target.result, 800, (resizedBase64) => {
+                        window.activeProfileData.portfolio.push(resizedBase64);
+                        renderPortfolioGrid();
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+            this.value = ''; // Reset
+        });
+
+        function renderPortfolioGrid() {
+            const container = document.getElementById('portfolioContainer');
+            // Keep the add button
+            let html = `
+                <div class="portfolio-slot" onclick="document.getElementById('upload-portfolio').click()">
+                    <span class="material-icons-round text-gray-600">add</span>
+                </div>
+            `;
+            
+            window.activeProfileData.portfolio.forEach((imgSrc, index) => {
+                html += `
+                    <div class="portfolio-slot">
+                        <img src="${imgSrc}" class="portfolio-img">
+                        <button onclick="removePortfolioImage(${index})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 z-10 shadow hover:scale-110 transition">
+                            <span class="material-icons-round text-[12px]">close</span>
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        window.removePortfolioImage = (index) => {
+            window.activeProfileData.portfolio.splice(index, 1);
+            renderPortfolioGrid();
+        };
+
+        // Utility to prevent massive file sizes in the database
+        function resizeImage(base64Str, maxWidth, callback) {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let scaleSize = maxWidth / img.width;
+                if(scaleSize > 1) scaleSize = 1;
+                canvas.width = img.width * scaleSize; 
+                canvas.height = img.height * scaleSize;
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                callback(canvas.toDataURL('image/jpeg', 0.8));
+            };
+            img.src = base64Str;
+        }
+
+        // Save Profile to Cloud
+        document.getElementById('btn-save-profile').addEventListener('click', async (e) => {
+            const btn = e.target;
+            btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Syncing...`;
+            
+            window.activeProfileData.name = document.getElementById('profName').value.trim();
+            window.activeProfileData.role = document.getElementById('profRole').value.trim();
+            window.activeProfileData.bio = document.getElementById('profBio').value.trim();
+
+            try {
+                await setDoc(doc(db, "designers", window.currentUserEmail), window.activeProfileData, { merge: true });
+                
+                // Update Sidebar
+                document.getElementById('userName').innerText = window.activeProfileData.name;
+                document.getElementById('userRole').innerText = window.activeProfileData.role;
+                if(window.activeProfileData.headshot) {
+                    const sbImg = document.getElementById('sidebarAvatarImg');
+                    sbImg.src = window.activeProfileData.headshot;
+                    sbImg.classList.add('opacity-100');
+                }
+
+                btn.innerHTML = `<span class="material-icons-round">check_circle</span> Profile Synced ✓`;
+                btn.classList.replace('btn-primary', 'bg-[#238636]');
+                btn.style.color = 'white';
+                
+                setTimeout(() => {
+                    btn.innerHTML = `<span class="material-icons-round">save</span> Sync Profile to Cloud`;
+                    btn.classList.replace('bg-[#238636]', 'btn-primary');
+                    btn.style.color = '';
+                }, 2000);
+            } catch (err) {
+                console.error("Profile Save Error:", err);
+                alert("Failed to sync profile. Check console.");
+                btn.innerHTML = `<span class="material-icons-round">save</span> Sync Profile to Cloud`;
+            }
+        });
+
+        // ==========================================
+        // LIVE FIREBASE PROJECT LIBRARY (TENANT ISOLATED)
         // ==========================================
         async function loadLiveProjects() {
             const grid = document.getElementById('projectsGrid');
@@ -485,19 +732,14 @@
                 const q = query(collection(db, "surveys"), orderBy("timestamp", "desc"));
                 const querySnapshot = await getDocs(q);
 
-                if (querySnapshot.empty) {
-                    grid.innerHTML = `
-                        <div class="col-span-full md-surface p-10 text-center border-dashed border-2 border-[#27272f]">
-                            <span class="material-icons-round text-4xl text-gray-600 mb-2">folder_off</span>
-                            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">No active projects found.</p>
-                            <p class="text-[10px] text-gray-600 mt-2">Click the + button to start your first survey.</p>
-                        </div>`;
-                    return;
-                }
-
                 let html = '';
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
+                    
+                    if (data.designerEmail && data.designerEmail !== window.currentUserEmail) {
+                        return; // Skip rendering this card
+                    }
+
                     const id = docSnap.id;
                     const profile = data.customerProfile || {};
                     const media = data.media || {};
@@ -523,7 +765,16 @@
                     `;
                 });
 
-                grid.innerHTML = html;
+                if (html === '') {
+                    grid.innerHTML = `
+                        <div class="col-span-full md-surface p-10 text-center border-dashed border-2 border-[#27272f]">
+                            <span class="material-icons-round text-4xl text-gray-600 mb-2">folder_off</span>
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">No active projects found.</p>
+                            <p class="text-[10px] text-gray-600 mt-2">Click the + button to start your first survey.</p>
+                        </div>`;
+                } else {
+                    grid.innerHTML = html;
+                }
             } catch (error) {
                 console.error("Error loading projects:", error);
                 grid.innerHTML = '<p class="text-xs text-red-500 col-span-full">Failed to load live projects. Check console.</p>';
@@ -534,6 +785,9 @@
             window.location.href = `pdf-compiler.html?id=${id}`;
         };
 
+        // ==========================================
+        // CAMERA & CANVAS ENGINE
+        // ==========================================
         window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
         
         window.handlePhotoUpload = function(input, category) {
@@ -543,19 +797,11 @@
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1200; 
-                        let scaleSize = MAX_WIDTH / img.width;
-                        if(scaleSize > 1) scaleSize = 1; 
-                        canvas.width = img.width * scaleSize; canvas.height = img.height * scaleSize;
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        window.sitePhotos[category].push(canvas.toDataURL('image/jpeg', 0.8));
+                    resizeImage(e.target.result, 1200, (resizedBase64) => {
+                        window.sitePhotos[category].push(resizedBase64);
                         badge.innerText = window.sitePhotos[category].length;
                         btn.classList.add('has-photos');
-                    };
-                    img.src = e.target.result;
+                    });
                 };
                 reader.readAsDataURL(file);
             });
@@ -698,6 +944,8 @@
                 setProgress(50, "Syncing to Secure Cloud...");
 
                 const surveyData = {
+                    designerEmail: window.currentUserEmail, 
+                    designerProfile: window.activeProfileData, // INJECTS YOUR SAVED PROFILE INTO THE SURVEY
                     customerProfile: {
                         leadName: clientNameVal,
                         customerNum: document.getElementById('clientNum').value,
@@ -733,7 +981,6 @@
                     timestamp: serverTimestamp()
                 };
 
-                // Create a unique project ID based on client and postcode
                 let activeProjectId = `${clientNameVal}_${postCodeVal}`.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
                 
                 await setDoc(doc(db, "surveys", activeProjectId), surveyData, { merge: true });
@@ -741,7 +988,6 @@
 
                 setProgress(100, "Pack Saved Successfully ✓");
                 
-                // Instantly update the dashboard library grid
                 loadLiveProjects();
                 
                 setTimeout(() => {
@@ -789,8 +1035,14 @@
         });
 
         // ==========================================
-        // APP ROUTING (PDF & VAULT)
+        // APP ROUTING
         // ==========================================
+        document.getElementById('btn-open-final-pdf')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const idToLoad = window.currentProjectId || 'DEMO_PROJECT_123';
+            window.location.href = `pdf-compiler.html?id=${idToLoad}`;
+        });
+
         document.getElementById('btn-generate-pdf')?.addEventListener('click', (e) => {
             e.preventDefault();
             const idToLoad = window.currentProjectId || 'DEMO_PROJECT_123';
