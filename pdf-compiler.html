@@ -14,242 +14,257 @@
 
     <div class="text-center space-y-6">
         <span class="material-icons-round text-6xl text-[#005A9C] animate-pulse">auto_awesome_mosaic</span>
-        <h1 class="text-2xl font-black uppercase tracking-widest">Generating Dossier</h1>
-        <div id="statusLog" class="text-xs text-gray-500 font-mono space-y-2 text-left bg-[#141418] p-6 rounded-lg border border-[#27272f] min-w-[300px]">
-            <p>> Connecting to secure vault...</p>
+        <h1 class="text-2xl font-black uppercase tracking-widest">Generating Master Dossier</h1>
+        <div id="statusLog" class="text-xs text-gray-500 font-mono space-y-2 text-left bg-[#141418] p-6 rounded-lg border border-[#27272f] min-w-[350px] max-w-md mx-auto h-48 overflow-y-auto">
+            <p>> Initializing rendering engine...</p>
         </div>
     </div>
 
     <script type="module">
         import { db, doc, getDoc } from './js/core-firebase.js';
 
-        const log = (msg) => {
-            document.getElementById('statusLog').innerHTML += `<p>> ${msg}</p>`;
+        const log = (msg, isSuccess = false, isError = false) => {
+            const logBox = document.getElementById('statusLog');
+            let color = 'text-gray-500';
+            if (isSuccess) color = 'text-[#238636] font-bold';
+            if (isError) color = 'text-red-500 font-bold';
+            logBox.innerHTML += `<p class="${color}">> ${msg}</p>`;
+            logBox.scrollTop = logBox.scrollHeight;
         };
+
+        // Helper function to fetch GitHub JPGs and convert to Base64 for pdfMake
+        async function fetchImageAsBase64(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const blob = await response.blob();
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                console.warn(`Failed to load image: ${url}`);
+                return null;
+            }
+        }
 
         async function generatePDF() {
             try {
-                // 1. Fetch the data from Firebase
-                log("Extracting Project ID: DEMO_PROJECT_123...");
-                const docRef = doc(db, "surveys", "DEMO_PROJECT_123");
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('id') || "DEMO_PROJECT_123";
+                
+                log(`Extracting payload for ID: ${projectId}...`);
+                const docRef = doc(db, "surveys", projectId);
                 const docSnap = await getDoc(docRef);
 
                 if (!docSnap.exists()) {
-                    log("<span class='text-red-500'>ERROR: No data found. Run a sync first.</span>");
+                    log("ERROR: No data found. Run a sync first.", false, true);
                     return;
                 }
 
                 const data = docSnap.data();
                 const profile = data.customerProfile || {};
                 const specs = data.projectSpecs || {};
+                const media = data.media || {};
+                const pamphlets = data.pamphlets || {};
+                const insights = data.designerInsights || {};
                 
                 log("Structuring Architectural Layout...");
+                
+                // GitHub Base URL for Shared Assets
+                const gitHubBase = "https://raw.githubusercontent.com/Toldroyd91/TheVault/main/assets/shared/";
 
-                // 2. Define the PDF Document Structure
+                // Initialize Content Array
+                const content = [];
+
+                // ==========================================
+                // PAGE 1: COVER PAGE
+                // ==========================================
+                content.push(
+                    { text: 'YORKSHIRE', fontSize: 48, font: 'Helvetica', bold: true, color: '#005A9C', margin: [0, 150, 0, 0], alignment: 'center' },
+                    { text: 'WINDOWS', fontSize: 48, font: 'Helvetica', bold: true, color: '#27272f', margin: [0, -10, 0, 20], alignment: 'center' },
+                    { text: 'MASTER ARCHITECTURAL DOSSIER', fontSize: 14, bold: true, letterSpacing: 2, alignment: 'center', margin: [0, 0, 0, 50] },
+                    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 2, lineColor: '#005A9C' }], margin: [0, 0, 0, 20] },
+                    { text: `PREPARED FOR: ${profile.leadName ? profile.leadName.toUpperCase() : 'CLIENT'}`, fontSize: 12, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
+                    { text: `SITE LOCATION: ${profile.postcode ? profile.postcode.toUpperCase() : 'TBD'}`, fontSize: 12, color: '#555555', alignment: 'center', margin: [0, 0, 0, 50] },
+                    { text: 'LEAD DESIGNER: THOMAS OLDROYD', fontSize: 10, bold: true, color: '#8b8b93', alignment: 'center', pageBreak: 'after' }
+                );
+
+                // ==========================================
+                // PAGE 2: TABLE OF CONTENTS
+                // ==========================================
+                content.push({
+                    toc: { title: { text: 'TABLE OF CONTENTS', style: 'header', margin: [0, 0, 0, 20] } },
+                    pageBreak: 'after'
+                });
+
+                // ==========================================
+                // PAGE 3: SURVEY DATA & SPECIFICATIONS
+                // ==========================================
+                content.push(
+                    { text: '01. CLIENT & SITE PROFILE', style: 'sectionHeader', tocItem: true },
+                    {
+                        layout: 'lightHorizontalLines',
+                        table: {
+                            headerRows: 1, widths: ['*', '*'],
+                            body: [
+                                [{text: 'CLIENT DETAILS', bold: true, color: '#005A9C'}, {text: 'SITE DETAILS', bold: true, color: '#005A9C'}],
+                                [`Name: ${profile.leadName || 'N/A'}`, `Postcode: ${profile.postcode || 'N/A'}`],
+                                [`Customer Ref: ${profile.customerNum || 'N/A'}`, `Appt Date: ${profile.apptDate || 'N/A'}`]
+                            ]
+                        }, margin: [0, 0, 0, 30]
+                    },
+                    { text: '02. PROPOSED SPECIFICATION', style: 'sectionHeader', tocItem: true },
+                    {
+                        layout: 'lightHorizontalLines',
+                        table: {
+                            widths: ['*', '*'],
+                            body: [
+                                ['Build Type:', specs.buildType || 'N/A'],
+                                ['Roof Architecture:', specs.roofStyle || 'N/A'],
+                                ['Base / Foundations:', specs.baseType || 'N/A'],
+                                ['Proposed Footprint:', specs.proposedSize || 'N/A'],
+                                ['Frame Finish:', specs.frameColour || 'N/A'],
+                                ['Building Regulations:', specs.buildingRegs || 'N/A']
+                            ]
+                        }, margin: [0, 0, 0, 30]
+                    },
+                    { text: '03. DESIGNER FIELD NOTES', style: 'sectionHeader', tocItem: true },
+                    { text: insights.prep || "No structural notes recorded during survey.", fontSize: 10, italics: true, color: '#555', pageBreak: 'after' }
+                );
+
+                // ==========================================
+                // PAGE 4: MEET THE DESIGNER & PROCESS
+                // ==========================================
+                content.push(
+                    { text: '04. MEET YOUR DESIGNER', style: 'sectionHeader', tocItem: true },
+                    { text: 'THOMAS OLDROYD', fontSize: 16, bold: true, color: '#005A9C', margin: [0, 0, 0, 5] },
+                    { text: 'New Living Space Designer', fontSize: 12, bold: true, color: '#555', margin: [0, 0, 0, 15] },
+                    { text: "Operating out of South Yorkshire, Thomas specializes in transforming existing architectural footprints into modern, thermally efficient living spaces. With a focus on meticulous site surveys and client-focused design, Thomas ensures that every conservatory, orangery, and extension perfectly complements the primary residence while adhering to strict building regulations.", lineHeight: 1.5, margin: [0, 0, 0, 30] },
+                    { text: '05. OUR INSTALLATION JOURNEY', style: 'sectionHeader', tocItem: true }
+                );
+
+                log("Fetching core process assets...");
+                const journeyImg = await fetchImageAsBase64(`${gitHubBase}journey.jpg`);
+                if(journeyImg) {
+                    content.push({ image: journeyImg, width: 515, alignment: 'center', margin: [0, 10, 0, 0], pageBreak: 'after' });
+                } else {
+                    content.push({ text: "[ Process graphic unavailable ]", alignment: 'center', pageBreak: 'after' });
+                }
+
+                // ==========================================
+                // PAGE 5+: SITE PHOTOGRAPHY
+                // ==========================================
+                log("Injecting Site Staging Media...");
+                const photos = [
+                    { src: media.front, title: 'Main Elevation as seen from the road' },
+                    { src: media.rear, title: 'Rear Elevation' },
+                    { src: media.side, title: 'Side Context & Access' },
+                    { src: media.sketch, title: 'Architectural Markup' }
+                ];
+
+                let photoAdded = false;
+                photos.forEach(photo => {
+                    if (photo.src) {
+                        if(!photoAdded) {
+                            content.push({ text: '06. SITE ENGINEERING PHOTOGRAPHY', style: 'sectionHeader', tocItem: true });
+                            photoAdded = true;
+                        }
+                        content.push(
+                            { text: photo.title, fontSize: 10, bold: true, margin: [0, 15, 0, 5], color: '#555' },
+                            { image: photo.src, width: 515, alignment: 'center', margin: [0, 0, 0, 20] }
+                        );
+                    }
+                });
+                
+                if (photoAdded) content[content.length - 1].pageBreak = 'after'; // Page break after last photo
+
+                // ==========================================
+                // DYNAMIC APPENDICES (GitHub JPG Fetching)
+                // ==========================================
+                log("Downloading required compliance pamphlets...");
+                
+                if (pamphlets.brochure) {
+                    log("-> Attaching Company Profile...");
+                    content.push({ text: 'APPENDIX A: COMPANY PROFILE & TAILORED SERVICE', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
+                    const whoImg = await fetchImageAsBase64(`${gitHubBase}who-we-are.jpg`);
+                    if(whoImg) content.push({ image: whoImg, width: 515, alignment: 'center' });
+                    
+                    const whyImg = await fetchImageAsBase64(`${gitHubBase}why-choose-us.jpg`);
+                    if(whyImg) content.push({ image: whyImg, width: 515, alignment: 'center', pageBreak: 'before' });
+
+                    const tailImg = await fetchImageAsBase64(`${gitHubBase}tailored.jpg`);
+                    if(tailImg) content.push({ image: tailImg, width: 515, alignment: 'center', pageBreak: 'before' });
+                }
+
+                if (pamphlets.warranty) {
+                    log("-> Attaching Warranty Info...");
+                    content.push({ text: 'APPENDIX B: HOME PROTECTION & WARRANTY', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
+                    const protImg = await fetchImageAsBase64(`${gitHubBase}protecting-home.jpg`);
+                    if(protImg) content.push({ image: protImg, width: 515, alignment: 'center' });
+                }
+
+                if (pamphlets.planning) {
+                    log("-> Attaching Planning Precedents...");
+                    content.push({ text: 'APPENDIX C: PLANNING & REGULATIONS', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
+                    const planImg = await fetchImageAsBase64(`${gitHubBase}planning.jpg`);
+                    if(planImg) content.push({ image: planImg, width: 515, alignment: 'center' });
+                }
+
+                if (pamphlets.sap) {
+                    log("-> Attaching SAP Thermal Calcs...");
+                    content.push({ text: 'APPENDIX D: SAP CALCULATIONS', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
+                    const sapImg = await fetchImageAsBase64(`${gitHubBase}sap-calcs.jpg`);
+                    if(sapImg) content.push({ image: sapImg, width: 515, alignment: 'center' });
+                }
+
+                if (pamphlets.roof) {
+                    log("-> Attaching Engineering Specifications...");
+                    content.push({ text: 'APPENDIX E: ENGINEERING DETAILS (Piling & Box Guttering)', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
+                    const pileImg = await fetchImageAsBase64(`${gitHubBase}piling.jpg`);
+                    if(pileImg) content.push({ image: pileImg, width: 515, alignment: 'center' });
+                    
+                    const cavImg = await fetchImageAsBase64(`${gitHubBase}cavity.jpg`);
+                    if(cavImg) content.push({ image: cavImg, width: 515, alignment: 'center', pageBreak: 'before' });
+                }
+
+                // ==========================================
+                // DOCUMENT CONFIGURATION
+                // ==========================================
                 const docDefinition = {
                     pageSize: 'A4',
                     pageMargins: [40, 60, 40, 60],
-                    header: function(currentPage, pageCount) {
-                        if (currentPage === 1) return null; // No header on cover page
-                        return {
-                            text: 'YORKSHIRE WINDOWS | ARCHITECTURAL DOSSIER',
-                            margin: [40, 20, 40, 0],
-                            fontSize: 8,
-                            color: '#8b8b93',
-                            alignment: 'right'
-                        };
+                    header: function(currentPage) {
+                        if (currentPage === 1) return null;
+                        return { text: 'YORKSHIRE WINDOWS | ARCHITECTURAL DOSSIER', margin: [40, 20, 40, 0], fontSize: 8, color: '#8b8b93', alignment: 'right' };
                     },
                     footer: function(currentPage, pageCount) {
                         if (currentPage === 1) return null;
-                        return {
-                            text: `Page ${currentPage.toString()} of ${pageCount}`,
-                            margin: [40, 0, 40, 20],
-                            fontSize: 8,
-                            color: '#8b8b93',
-                            alignment: 'center'
-                        };
+                        return { text: `Page ${currentPage.toString()} of ${pageCount}`, margin: [40, 0, 40, 20], fontSize: 8, color: '#8b8b93', alignment: 'center' };
                     },
-                    content: [
-                        // --- PAGE 1: COVER PAGE ---
-                        {
-                            text: 'YORKSHIRE',
-                            fontSize: 48,
-                            bold: true,
-                            color: '#005A9C',
-                            margin: [0, 150, 0, 0],
-                            alignment: 'center'
-                        },
-                        {
-                            text: 'WINDOWS',
-                            fontSize: 48,
-                            bold: true,
-                            color: '#27272f',
-                            margin: [0, -10, 0, 20],
-                            alignment: 'center'
-                        },
-                        {
-                            text: 'ARCHITECTURAL DOSSIER & SITE SURVEY',
-                            fontSize: 14,
-                            bold: true,
-                            letterSpacing: 2,
-                            alignment: 'center',
-                            margin: [0, 0, 0, 50]
-                        },
-                        {
-                            canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 2, lineColor: '#005A9C' }],
-                            margin: [0, 0, 0, 20]
-                        },
-                        {
-                            text: `PREPARED FOR: ${profile.leadName ? profile.leadName.toUpperCase() : 'CLIENT'}`,
-                            fontSize: 12,
-                            bold: true,
-                            alignment: 'center',
-                            margin: [0, 0, 0, 5]
-                        },
-                        {
-                            text: `SITE LOCATION: ${profile.postcode ? profile.postcode.toUpperCase() : 'TBD'}`,
-                            fontSize: 12,
-                            color: '#555555',
-                            alignment: 'center',
-                            margin: [0, 0, 0, 50]
-                        },
-                        {
-                            text: 'LEAD DESIGNER: THOMAS OLDROYD',
-                            fontSize: 10,
-                            bold: true,
-                            color: '#8b8b93',
-                            alignment: 'center',
-                            pageBreak: 'after'
-                        },
-
-                        // --- PAGE 2: TABLE OF CONTENTS ---
-                        {
-                            toc: {
-                                title: { text: 'TABLE OF CONTENTS', style: 'header', margin: [0, 0, 0, 20] }
-                            },
-                            pageBreak: 'after'
-                        },
-
-                        // --- PAGE 3: SURVEY DATA ---
-                        { text: '01. CLIENT & SITE PROFILE', style: 'sectionHeader', tocItem: true },
-                        {
-                            layout: 'lightHorizontalLines',
-                            table: {
-                                headerRows: 1,
-                                widths: ['*', '*'],
-                                body: [
-                                    [{text: 'CLIENT DETAILS', bold: true, color: '#005A9C'}, {text: 'SITE DETAILS', bold: true, color: '#005A9C'}],
-                                    [`Name: ${profile.leadName || 'N/A'}`, `Postcode: ${profile.postcode || 'N/A'}`],
-                                    [`Customer Ref: ${profile.customerNum || 'N/A'}`, `Appt Date: ${profile.apptDate || 'N/A'}`]
-                                ]
-                            },
-                            margin: [0, 0, 0, 30]
-                        },
-
-                        { text: '02. STRUCTURAL INTELLIGENCE (API SCRAPED)', style: 'sectionHeader', tocItem: true },
-                        {
-                            text: 'Note: The following environmental data is synthesized based on regional averages for the provided postcode.',
-                            fontSize: 9,
-                            color: '#8b8b93',
-                            margin: [0, 0, 0, 10]
-                        },
-                        {
-                            layout: 'lightHorizontalLines',
-                            table: {
-                                widths: ['*', '*'],
-                                body: [
-                                    ['EPC Energy Rating:', 'C (Estimated)'],
-                                    ['Property Age Band:', '1960 - 1982'],
-                                    ['Elevation Exposure:', 'Moderate / Standard'],
-                                    ['Planning Precedent:', 'Permitted Development Likely']
-                                ]
-                            },
-                            margin: [0, 0, 0, 30]
-                        },
-
-                        { text: '03. PROPOSED SPECIFICATION', style: 'sectionHeader', tocItem: true },
-                        {
-                            layout: 'lightHorizontalLines',
-                            table: {
-                                widths: ['*', '*'],
-                                body: [
-                                    ['Build Type:', specs.buildType || 'N/A'],
-                                    ['Roof Architecture:', specs.roofStyle || 'N/A'],
-                                    ['Base / Foundations:', specs.baseType || 'N/A'],
-                                    ['Proposed Footprint:', specs.proposedSize || 'N/A'],
-                                    ['Frame Finish:', specs.frameColour || 'N/A'],
-                                    ['Building Regulations:', specs.buildingRegs || 'N/A']
-                                ]
-                            },
-                            pageBreak: 'after'
-                        },
-
-                        // --- PAGE 4: THE YORKSHIRE WINDOWS PROCESS ---
-                        { text: '04. OUR MANUFACTURING PROCESS', style: 'sectionHeader', tocItem: true },
-                        {
-                            text: 'At Yorkshire Windows, our commitment to quality begins long before installation. Every structure is heavily vetted through our internal compliance and design stages.',
-                            margin: [0, 0, 0, 15]
-                        },
-                        {
-                            ul: [
-                                'Bespoke Fabrication: Each frame and roof system is cut and assembled specifically to the millimeter of your site survey.',
-                                'Thermal Efficiency: Utilizing the latest in SAP-compliant glazing to ensure year-round ambient temperatures.',
-                                'Rigorous Quality Control: Multi-point factory inspections prior to dispatch.',
-                                'Seamless Installation: Our field teams operate with minimal disruption, respecting your property.'
-                            ],
-                            margin: [0, 0, 0, 30]
-                        },
-
-                        // --- PAGE 5: MEET YOUR DESIGNER ---
-                        { text: '05. MEET YOUR DESIGNER', style: 'sectionHeader', tocItem: true },
-                        {
-                            text: 'THOMAS OLDROYD',
-                            fontSize: 16,
-                            bold: true,
-                            color: '#005A9C',
-                            margin: [0, 0, 0, 5]
-                        },
-                        {
-                            text: 'New Living Space Designer',
-                            fontSize: 12,
-                            bold: true,
-                            color: '#555',
-                            margin: [0, 0, 0, 15]
-                        },
-                        {
-                            text: "Operating out of South Yorkshire, Thomas specializes in transforming existing architectural footprints into modern, thermally efficient living spaces. With a focus on meticulous site surveys and client-focused design, Thomas ensures that every conservatory, orangery, and extension perfectly complements the primary residence while adhering to strict building regulations.",
-                            lineHeight: 1.5
-                        }
-                    ],
+                    content: content,
                     styles: {
-                        header: { fontSize: 18, bold: true, color: '#005A9C' },
-                        sectionHeader: { fontSize: 14, bold: true, color: '#005A9C', margin: [0, 15, 0, 10] },
-                        coverTitle: { fontSize: 32, bold: true, alignment: 'center' },
-                        coverSub: { fontSize: 14, alignment: 'center', margin: [0, 10, 0, 0] }
+                        header: { fontSize: 18, bold: true, color: '#005A9C', font: 'Helvetica' },
+                        sectionHeader: { fontSize: 14, bold: true, color: '#005A9C', margin: [0, 15, 0, 10], font: 'Helvetica' }
                     },
-                    defaultStyle: {
-                        fontSize: 11,
-                        color: '#27272f'
-                    }
+                    defaultStyle: { fontSize: 11, color: '#27272f', font: 'Helvetica' }
                 };
 
-                log("Rendering PDF Engine...");
+                log("Assembling Final Vector Data...");
                 
-                // 3. Generate and open the PDF
-                pdfMake.createPdf(docDefinition).open();
+                pdfMake.createPdf(docDefinition).download(`Yorkshire_Windows_Dossier_${profile.leadName ? profile.leadName.replace(/\s+/g, '_') : 'Client'}.pdf`);
                 
-                log("<span class='text-[#238636] font-bold'>Dossier Generated Successfully ✓</span>");
+                log("Dossier Generated Successfully ✓", true);
 
             } catch (err) {
                 console.error(err);
-                log(`<span class="text-red-500">Generation Failed: ${err.message}</span>`);
+                log(`Generation Failed: ${err.message}`, false, true);
             }
         }
 
-        // Auto-run on page load
-        window.onload = () => {
-            setTimeout(generatePDF, 1000); // Small delay for visual effect
-        };
+        window.onload = () => { setTimeout(generatePDF, 500); };
     </script>
 </body>
 </html>
