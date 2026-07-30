@@ -3,361 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Client Vault | COHI Pro</title>
+    <title>Secure Client Vault | Yorkshire Windows</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
         :root {
             --brand-primary: #005A9C; 
-            --brand-bg-glow: rgba(0, 90, 156, 0.2);
+            --brand-bg-glow: rgba(0, 90, 156, 0.15);
             --brand-border: rgba(0, 90, 156, 0.4);
-            
-            --bg-base: #050505; /* Deeper black for the luxury feel */
-            --bg-glass: rgba(20, 20, 24, 0.6);
-            
+            --bg-base: #0a0a0c;
+            --bg-surface: #141418;
+            --bg-surface-elevated: #1e1e24;
             --text-main: #f4f4f6;
             --text-muted: #8b8b93;
-            --border-glass: rgba(255, 255, 255, 0.08);
+            --gold: #d4af37;
         }
 
-        html { height: 100%; height: -webkit-fill-available; }
-        
         body { 
-            height: 100%; min-height: -webkit-fill-available;
             background-color: var(--bg-base); 
-            background-image: radial-gradient(circle at 50% 0%, var(--brand-bg-glow), transparent 50%);
             color: var(--text-main); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased; 
-            overflow-x: hidden;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        /* Glassmorphism Panels */
-        .glass-panel { 
-            background: var(--bg-glass); 
-            backdrop-filter: blur(16px); 
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass); 
-            border-radius: 16px; 
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
+        /* Glassmorphism Utilities */
+        .glass-panel { background: rgba(20, 20, 24, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
+        .glass-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: center; border-radius: 12px; outline: none; transition: 0.3s; }
+        .glass-input:focus { border-color: var(--brand-primary); box-shadow: 0 0 15px var(--brand-bg-glow); }
 
-        .luxury-input { 
-            background: rgba(0,0,0,0.4); border: 1px solid var(--border-glass); 
-            color: #fff; border-radius: 10px; width: 100%; padding: 16px; 
-            font-size: 16px; transition: all 0.2s ease; outline: none; 
-            text-align: center; letter-spacing: 2px; font-weight: bold;
-        }
-        .luxury-input:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 2px var(--brand-bg-glow); }
-        .pin-input { font-size: 24px; letter-spacing: 12px; }
-
-        .btn-primary { 
-            background: var(--brand-primary); color: #fff; font-weight: 800; 
-            text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; 
-            padding: 16px 24px; transition: all 0.2s ease; border: none; 
-            cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; 
-        }
-        .btn-primary:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 6px 20px var(--brand-bg-glow); transform: translateY(-1px); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* Pipeline Tracker */
-        .pipeline-track { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-top: 10px; }
-        .pipeline-track::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: var(--border-glass); transform: translateY(-50%); z-index: 0; border-radius: 2px; }
-        .pipeline-progress { position: absolute; top: 50%; left: 0; height: 4px; background: var(--brand-primary); transform: translateY(-50%); z-index: 1; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 2px; box-shadow: 0 0 10px var(--brand-primary); }
+        /* Animations */
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .slide-up { animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .pipeline-node { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .node-circle { width: 24px; height: 24px; border-radius: 50%; background: #141418; border: 3px solid var(--border-glass); transition: all 0.5s ease; }
-        .node-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); text-align: center; }
-        
-        .pipeline-node.active .node-circle { background: var(--brand-primary); border-color: var(--brand-primary); box-shadow: 0 0 15px var(--brand-primary); }
-        .pipeline-node.active .node-label { color: #fff; }
-        .pipeline-node.completed .node-circle { background: var(--brand-primary); border-color: var(--brand-primary); }
-        .pipeline-node.completed .node-label { color: var(--text-muted); }
+        .blur-reveal { filter: blur(10px); transition: filter 1s ease, color 1s ease; user-select: none; }
+        .blur-reveal.unlocked { filter: blur(0px); color: #fff; }
 
-        /* Transitions */
-        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: #27272f; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
+
+        /* Mosaic Image Grid */
+        .mosaic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; grid-auto-rows: 200px; }
+        .mosaic-item { border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #27272f; transition: all 0.3s ease; cursor: pointer; }
+        .mosaic-item:hover { border-color: var(--brand-primary); transform: scale(1.02); z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .mosaic-item.large { grid-column: span 2; grid-row: span 2; }
+        .mosaic-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .mosaic-item:hover .mosaic-img { filter: brightness(1.1); }
         
-        .hidden-screen { display: none !important; }
+        /* Tab Navigation */
+        .vault-tab { cursor: pointer; padding: 12px 20px; border-radius: 12px; font-weight: 700; font-size: 13px; color: var(--text-muted); transition: 0.3s; display: flex; items-center; gap: 8px; }
+        .vault-tab:hover { background: rgba(255,255,255,0.05); color: white; }
+        .vault-tab.active { background: var(--brand-primary); color: white; box-shadow: 0 4px 15px var(--brand-bg-glow); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
     </style>
 </head>
-<body class="flex flex-col w-full h-full relative items-center justify-center p-4">
+<body class="relative">
 
-    <!-- SCREEN 1: SECURE AUTH GATE -->
-    <div id="authScreen" class="w-full max-w-md w-full z-10 fade-in">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-black tracking-widest mb-2 text-white">YORKSHIRE<span style="color: var(--brand-primary)">WINDOWS</span></h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-widest">Secure Client Vault</p>
-        </div>
+    <!-- DYNAMIC BACKGROUND -->
+    <div class="absolute inset-0 z-0">
+        <!-- Default fallback image, will be replaced by the actual project render -->
+        <img id="bgImage" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80" class="w-full h-full object-cover opacity-20 filter blur-sm">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/80 to-transparent"></div>
+    </div>
 
-        <div class="glass-panel p-8">
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 text-center">Project Postcode</label>
-                    <input type="text" id="vaultPostcode" placeholder="e.g. S70 0PN" class="luxury-input uppercase">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 text-center">4-Digit Security PIN</label>
-                    <input type="password" id="vaultPIN" placeholder="••••" maxlength="4" class="luxury-input pin-input" inputmode="numeric">
-                </div>
-                <button id="btnUnlock" class="btn-primary w-full mt-4 py-5 text-sm">
-                    <span class="material-icons-round">lock_open</span> Unlock Vault
-                </button>
-                <div id="authError" class="text-red-400 text-xs font-bold text-center uppercase tracking-widest mt-4 opacity-0 transition-opacity">Invalid Postcode or PIN</div>
+    <!-- STAGE 1: SECURE PIN GATE -->
+    <div id="pinGate" class="absolute inset-0 z-50 flex items-center justify-center p-6 backdrop-blur-md bg-black/40 transition-opacity duration-700">
+        <div class="glass-panel p-10 max-w-sm w-full text-center slide-up border-t-4 border-t-[color:var(--brand-primary)]">
+            <h1 class="text-3xl font-black tracking-widest text-white mb-1">YORKSHIRE</h1>
+            <p class="text-[10px] text-[color:var(--brand-primary)] font-bold uppercase tracking-widest mb-8">Secure Client Vault</p>
+            
+            <div class="mb-6">
+                <span class="material-icons-round text-5xl text-gray-500 mb-4">lock</span>
+                <p class="text-xs text-gray-400">Enter your 4-digit project PIN to access your architectural dossier.</p>
             </div>
+            
+            <div class="flex justify-center gap-3 mb-8">
+                <input type="password" maxlength="1" class="pin-box glass-input w-14 h-16 text-2xl font-black" onkeyup="moveToNext(this, event)">
+                <input type="password" maxlength="1" class="pin-box glass-input w-14 h-16 text-2xl font-black" onkeyup="moveToNext(this, event)">
+                <input type="password" maxlength="1" class="pin-box glass-input w-14 h-16 text-2xl font-black" onkeyup="moveToNext(this, event)">
+                <input type="password" maxlength="1" class="pin-box glass-input w-14 h-16 text-2xl font-black" onkeyup="unlockVault(this, event)">
+            </div>
+            
+            <button class="text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition">Request PIN Reset</button>
         </div>
     </div>
 
-    <!-- SCREEN 2: THE CLIENT DASHBOARD -->
-    <div id="dashboardScreen" class="w-full max-w-5xl h-full flex flex-col hidden-screen z-10 py-6 md:py-10">
+    <!-- STAGE 2: VAULT DASHBOARD (Hidden until PIN is correct) -->
+    <div id="vaultDashboard" class="relative z-10 h-full flex flex-col hidden opacity-0 transition-opacity duration-1000 max-w-7xl mx-auto">
         
-        <!-- Dashboard Header -->
-        <header class="flex justify-between items-end mb-8 md:mb-12">
+        <!-- HEADER -->
+        <header class="flex justify-between items-center p-6 border-b border-white/5 bg-black/20 backdrop-blur-sm">
             <div>
-                <h1 class="text-2xl md:text-4xl font-black uppercase tracking-tight text-white">Project <span style="color: var(--brand-primary)">Vault</span></h1>
-                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2">Welcome back, <span id="clientNameDisplay" class="text-white">Client</span></p>
+                <h1 class="text-xl font-black tracking-widest text-white">YORKSHIRE</h1>
+                <p class="text-[10px] text-[color:var(--brand-primary)] font-bold uppercase tracking-widest">Client Portal</p>
             </div>
-            <button onclick="location.reload()" class="text-[10px] text-gray-500 hover:text-white uppercase font-bold tracking-widest transition flex items-center gap-1">
-                <span class="material-icons-round text-sm">logout</span> Secure Exit
-            </button>
+            <div class="text-right">
+                <h2 id="clientNameDisplay" class="text-lg font-bold text-white">Mr. Dow</h2>
+                <p id="clientPostcodeDisplay" class="text-[10px] text-gray-400 uppercase tracking-widest">Project: S70 0PN</p>
+            </div>
         </header>
 
-        <!-- Pipeline Tracker -->
-        <div class="glass-panel p-6 md:p-8 mb-8 fade-in" style="animation-delay: 0.1s;">
-            <div class="flex justify-between items-center mb-4 border-b border-[color:var(--border-glass)] pb-4">
-                <h2 class="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2">
-                    <span class="material-icons-round text-[color:var(--brand-primary)]">timeline</span> Live Project Status
-                </h2>
-                <span class="bg-[color:var(--brand-primary)]/20 text-[color:var(--brand-primary)] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest border border-[color:var(--brand-border)]">In Progress</span>
-            </div>
+        <!-- MAIN LAYOUT -->
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
             
-            <div class="pipeline-track px-4 md:px-12 mt-8 mb-4">
-                <div class="pipeline-progress" style="width: 25%;"></div> <!-- dynamically set by JS -->
+            <!-- SIDEBAR NAVIGATION -->
+            <nav class="w-full md:w-64 p-6 flex flex-row md:flex-col gap-2 overflow-x-auto border-r border-white/5 bg-black/20 backdrop-blur-sm shrink-0">
+                <p class="hidden md:block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2 px-2">Project Modules</p>
                 
-                <div class="pipeline-node completed">
-                    <div class="node-circle"></div>
-                    <div class="node-label mt-3 hidden md:block">Consultation</div>
+                <div class="vault-tab active" onclick="switchVaultTab('tab-quote', this)">
+                    <span class="material-icons-round text-lg">request_quote</span> The Proposal
                 </div>
-                <div class="pipeline-node active">
-                    <div class="node-circle"></div>
-                    <div class="node-label mt-3 hidden md:block">Engineering & Intel</div>
+                <div class="vault-tab" onclick="switchVaultTab('tab-survey', this)">
+                    <span class="material-icons-round text-lg">architecture</span> Structural Survey
                 </div>
-                <div class="pipeline-node">
-                    <div class="node-circle"></div>
-                    <div class="node-label mt-3 hidden md:block">Manufacturing</div>
+                <div class="vault-tab" onclick="switchVaultTab('tab-gallery', this)">
+                    <span class="material-icons-round text-lg">collections</span> Visual Gallery
                 </div>
-                <div class="pipeline-node">
-                    <div class="node-circle"></div>
-                    <div class="node-label mt-3 hidden md:block">Installation</div>
+                <div class="vault-tab" onclick="switchVaultTab('tab-docs', this)">
+                    <span class="material-icons-round text-lg">folder_open</span> Documents & Uploads
                 </div>
-            </div>
-            <p class="text-center text-xs text-gray-400 md:hidden font-bold uppercase tracking-widest mt-6" id="mobileStatusLabel">Current: Engineering & Intel</p>
-        </div>
+                
+                <div class="mt-auto hidden md:block pt-6 border-t border-white/5">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 px-2">Your Lead Designer</p>
+                    <div class="flex items-center gap-3 px-2">
+                        <img src="https://ui-avatars.com/api/?name=Thomas+Oldroyd&background=005A9C&color=fff" class="w-10 h-10 rounded-full border border-gray-600">
+                        <div>
+                            <p class="text-xs font-bold text-white">Thomas Oldroyd</p>
+                            <button class="text-[10px] text-[color:var(--brand-primary)] hover:text-white transition uppercase font-bold mt-1 flex items-center gap-1">
+                                <span class="material-icons-round text-[12px]">chat</span> Message
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
 
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- Left Column: Specs & Downloads -->
-            <div class="lg:col-span-1 flex flex-col gap-8">
+            <!-- SCROLLABLE CONTENT AREA -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
                 
-                <!-- Architectural Spec -->
-                <div class="glass-panel p-6 fade-in" style="animation-delay: 0.2s;">
-                    <h3 class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-6 border-b border-[color:var(--border-glass)] pb-2">Proposed Architecture</h3>
+                <!-- MODULE: THE PROPOSAL (Supersedes Survey when Quote is ready) -->
+                <div id="tab-quote" class="tab-content active">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <span class="bg-[color:var(--brand-primary)]/20 text-[color:var(--brand-primary)] px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest border border-[color:var(--brand-border)] mb-2 inline-block">Stage 2: Quotation Ready</span>
+                            <h2 class="text-3xl font-black text-white tracking-wide">Project Proposal</h2>
+                        </div>
+                        <button class="glass-panel px-4 py-2 text-xs font-bold hover:bg-[color:var(--brand-primary)] hover:border-[color:var(--brand-primary)] transition flex items-center gap-2">
+                            <span class="material-icons-round text-sm">picture_as_pdf</span> Download Full Quote
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Financial Breakdown (The Padlock Teaser Feature) -->
+                        <div class="lg:col-span-2 glass-panel p-8 relative overflow-hidden group">
+                            <!-- Designer Override Button (Hidden from client view, used by designer in home) -->
+                            <button onclick="triggerQuoteUnlock()" class="absolute top-4 right-4 bg-black/50 hover:bg-[color:var(--brand-primary)] p-2 rounded-full transition z-20" title="Designer Override Unlock">
+                                <span class="material-icons-round text-sm" id="lockIcon">lock</span>
+                            </button>
+
+                            <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 border-b border-white/10 pb-2">Financial Summary</h3>
+                            
+                            <div class="space-y-4 relative z-10">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-300">Base Build & Foundations</span>
+                                    <span class="text-lg font-mono blur-reveal price-val">£5,200.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-300">Edwardian roof System (Neutral 1.2u)</span>
+                                    <span class="text-lg font-mono blur-reveal price-val">£6,450.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-300">Glazing, Frames & Doors (White)</span>
+                                    <span class="text-lg font-mono blur-reveal price-val">£4,850.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-300">Internal Finishes & Labour</span>
+                                    <span class="text-lg font-mono blur-reveal price-val">£3,224.00</span>
+                                </div>
+                                
+                                <div class="pt-6 mt-6 border-t border-white/20 flex justify-between items-end">
+                                    <div>
+                                        <p class="text-[10px] text-gray-400 uppercase tracking-widest">Total Contract Value (Inc VAT)</p>
+                                        <p class="text-xs text-[color:var(--brand-primary)] font-bold mt-1">Agreed Deposit: <span class="blur-reveal price-val">£2,959.00</span></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-4xl font-black text-white blur-reveal price-val tracking-tight">£19,724.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Padlock Overlay -->
+                            <div id="quoteOverlay" class="absolute inset-0 backdrop-blur-xl bg-black/60 z-10 flex flex-col items-center justify-center transition-all duration-700">
+                                <div class="w-16 h-16 rounded-full bg-[color:var(--brand-primary)]/20 border border-[color:var(--brand-primary)] flex items-center justify-center mb-4">
+                                    <span class="material-icons-round text-3xl text-[color:var(--brand-primary)]">lock</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-white mb-2">Quotation Locked</h4>
+                                <p class="text-xs text-gray-400 max-w-xs text-center">Your final financial breakdown will be unlocked and presented during your follow-up design consultation.</p>
+                            </div>
+                        </div>
+
+                        <!-- Technical Specs Mini-Card -->
+                        <div class="glass-panel p-6 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4 border-b border-white/10 pb-2">Specification</h3>
+                                <ul class="space-y-3 text-sm text-gray-300">
+                                    <li class="flex items-center gap-2"><span class="material-icons-round text-[color:var(--brand-primary)] text-[16px]">architecture</span> Dimensions: 2115mm x 3600mm</li>
+                                    <li class="flex items-center gap-2"><span class="material-icons-round text-[color:var(--brand-primary)] text-[16px]">roofing</span> Roof: Edwardian roof</li>
+                                    <li class="flex items-center gap-2"><span class="material-icons-round text-[color:var(--brand-primary)] text-[16px]">water_drop</span> Box Gutter Details: Yes</li>
+                                    <li class="flex items-center gap-2"><span class="material-icons-round text-[color:var(--brand-primary)] text-[16px]">foundation</span> Foundations: Exempt (Up to 600mm)</li>
+                                </ul>
+                            </div>
+                            <div class="mt-8 p-4 bg-black/40 rounded-lg border border-white/5">
+                                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Estimated Lead Time</p>
+                                <p class="text-lg font-black text-white">6 - 8 Weeks</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE: STRUCTURAL SURVEY -->
+                <div id="tab-survey" class="tab-content">
+                     <div class="mb-6">
+                        <h2 class="text-3xl font-black text-white tracking-wide">Initial Site Survey</h2>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mt-1">Captured by Thomas Oldroyd</p>
+                    </div>
                     
-                    <div class="space-y-4">
+                    <div class="glass-panel p-8 text-center flex flex-col items-center justify-center min-h-[400px]">
+                        <span class="material-icons-round text-6xl text-gray-700 mb-4">analytics</span>
+                        <h3 class="text-lg font-bold text-white mb-2">Survey Data Archived</h3>
+                        <p class="text-sm text-gray-400 max-w-md">The initial structural survey and API intelligence report has been successfully processed and superseded by the active Quotation Proposal.</p>
+                        <button class="mt-6 border border-[#27272f] hover:border-[color:var(--brand-primary)] px-6 py-2 rounded-lg text-xs font-bold transition">View Original Survey Dossier PDF</button>
+                    </div>
+                </div>
+
+                <!-- MODULE: VISUAL GALLERY (Mosaic Grid) -->
+                <div id="tab-gallery" class="tab-content">
+                    <div class="mb-6 flex justify-between items-end">
                         <div>
-                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Build Type</p>
-                            <p class="text-sm font-bold text-white" id="valBuildType">Loading...</p>
+                            <h2 class="text-3xl font-black text-white tracking-wide">Visual Gallery</h2>
+                            <p class="text-xs text-gray-400 uppercase tracking-widest mt-1">Renders & Site Photography</p>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Roof System</p>
-                            <p class="text-sm font-bold text-[color:var(--brand-primary)]" id="valRoofType">Loading...</p>
+                    </div>
+
+                    <!-- Mosaic Layout Engine -->
+                    <div class="mosaic-grid">
+                        <!-- Large Hero Render -->
+                        <div class="mosaic-item large">
+                            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase z-20 border border-white/10 text-white">3D Render (Exterior)</div>
+                            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" class="mosaic-img">
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Footprint</p>
-                                <p class="text-sm font-bold text-white" id="valSize">--</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Frame</p>
-                                <p class="text-sm font-bold text-white" id="valFrame">--</p>
-                            </div>
+                        
+                        <div class="mosaic-item">
+                            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase z-20 border border-white/10 text-white">Site Elev</div>
+                            <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=400&q=80" class="mosaic-img">
+                        </div>
+                        
+                        <div class="mosaic-item">
+                            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase z-20 border border-white/10 text-white">Access Route</div>
+                            <img src="https://images.unsplash.com/photo-1518640035035-7c08b50346c7?auto=format&fit=crop&w=400&q=80" class="mosaic-img">
+                        </div>
+                        
+                        <!-- Internal Render Large -->
+                        <div class="mosaic-item large">
+                            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase z-20 border border-white/10 text-white">3D Render (Interior)</div>
+                            <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=80" class="mosaic-img">
+                        </div>
+                        
+                        <div class="mosaic-item">
+                            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase z-20 border border-white/10 text-white">Brick Match</div>
+                            <img src="https://images.unsplash.com/photo-1588614959060-4d144f28b207?auto=format&fit=crop&w=400&q=80" class="mosaic-img">
+                        </div>
+
+                         <div class="mosaic-item">
+                            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase z-20 border border-white/10 text-white">Drainage</div>
+                            <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80" class="mosaic-img">
                         </div>
                     </div>
                 </div>
 
-                <!-- Digital Dossier Download -->
-                <div class="glass-panel p-6 fade-in flex flex-col justify-center items-center text-center border border-[color:var(--brand-border)]" style="animation-delay: 0.3s; background: linear-gradient(180deg, var(--bg-glass) 0%, rgba(0, 90, 156, 0.1) 100%);">
-                    <span class="material-icons-round text-5xl text-[color:var(--brand-primary)] mb-4 drop-shadow-[0_0_15px_var(--brand-bg-glow)]">picture_as_pdf</span>
-                    <h3 class="text-lg font-black uppercase text-white mb-2">Master Dossier</h3>
-                    <p class="text-xs text-gray-400 mb-6 px-4">Your complete 40-page architectural brief, structural intelligence, and product specifications.</p>
-                    <button id="btnDownloadPDF" class="btn-primary w-full shadow-[0_4px_15px_var(--brand-bg-glow)]">
-                        <span class="material-icons-round">file_download</span> Download PDF
-                    </button>
-                </div>
+                <!-- MODULE: DOCUMENTS & UPLOADS -->
+                <div id="tab-docs" class="tab-content">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-black text-white tracking-wide">Secure Hub</h2>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mt-1">Brochures, Compliance & Customer Uploads</p>
+                    </div>
 
-            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Downloadable Brochures (Sourced from GitHub) -->
+                        <div class="glass-panel p-6">
+                            <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4 border-b border-white/10 pb-2 flex items-center gap-2"><span class="material-icons-round text-lg">download</span> Project Resources</h3>
+                            
+                            <div class="space-y-3">
+                                <a href="https://raw.githubusercontent.com/Toldroyd91/TheVault/main/assets/shared/who-we-are.jpg" target="_blank" class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/5 hover:border-[color:var(--brand-primary)] transition group">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-icons-round text-red-400">picture_as_pdf</span>
+                                        <span class="text-sm text-gray-300 font-bold group-hover:text-white transition">Yorkshire Windows Standard</span>
+                                    </div>
+                                    <span class="material-icons-round text-gray-600 group-hover:text-[color:var(--brand-primary)]">download</span>
+                                </a>
+                                
+                                <a href="https://raw.githubusercontent.com/Toldroyd91/TheVault/main/assets/shared/protecting-home.jpg" target="_blank" class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/5 hover:border-[color:var(--brand-primary)] transition group">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-icons-round text-red-400">picture_as_pdf</span>
+                                        <span class="text-sm text-gray-300 font-bold group-hover:text-white transition">Warranty & Protection</span>
+                                    </div>
+                                    <span class="material-icons-round text-gray-600 group-hover:text-[color:var(--brand-primary)]">download</span>
+                                </a>
 
-            <!-- Right Column: Site Media Gallery -->
-            <div class="lg:col-span-2 glass-panel p-6 md:p-8 fade-in" style="animation-delay: 0.4s;">
-                <div class="flex justify-between items-center mb-6 border-b border-[color:var(--border-glass)] pb-4">
-                    <h3 class="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2">
-                        <span class="material-icons-round text-[color:var(--brand-primary)]">collections</span> Site Survey Media
-                    </h3>
-                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" id="photoCount">0 Files</span>
-                </div>
+                                <a href="https://raw.githubusercontent.com/Toldroyd91/TheVault/main/assets/shared/planning.jpg" target="_blank" class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/5 hover:border-[color:var(--brand-primary)] transition group">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-icons-round text-red-400">picture_as_pdf</span>
+                                        <span class="text-sm text-gray-300 font-bold group-hover:text-white transition">Planning Regulations Guide</span>
+                                    </div>
+                                    <span class="material-icons-round text-gray-600 group-hover:text-[color:var(--brand-primary)]">download</span>
+                                </a>
+                            </div>
+                        </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="vaultGallery">
-                    <!-- Javascript will inject photos here -->
-                    <div class="h-64 rounded-lg bg-[#141418] border border-[color:var(--border-glass)] flex items-center justify-center text-gray-600">
-                        <span class="material-icons-round text-4xl animate-pulse">image</span>
+                        <!-- Customer Upload Zone -->
+                        <div class="glass-panel p-6 flex flex-col">
+                            <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4 border-b border-white/10 pb-2 flex items-center gap-2"><span class="material-icons-round text-lg">cloud_upload</span> Client Upload Zone</h3>
+                            <p class="text-xs text-gray-400 mb-4">Drag and drop files here to send them securely to your designer (e.g. Planning permission letters, property boundary documents, or inspiration photos).</p>
+                            
+                            <div class="flex-1 border-2 border-dashed border-[#27272f] rounded-xl flex flex-col items-center justify-center p-6 bg-black/20 hover:border-[color:var(--brand-primary)] hover:bg-[color:var(--brand-bg-glow)] transition cursor-pointer">
+                                <span class="material-icons-round text-4xl text-gray-500 mb-2">upload_file</span>
+                                <span class="text-sm font-bold text-gray-300">Select Files to Upload</span>
+                                <span class="text-[10px] text-gray-500 mt-1">PDF, JPG, PNG accepted</span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
 
-    <!-- FIREBASE & LOGIC ENGINE -->
-    <script type="module">
-        import { db, collection, query, where, getDocs } from './js/core-firebase.js';
-
-        const authScreen = document.getElementById('authScreen');
-        const dashboardScreen = document.getElementById('dashboardScreen');
-        const btnUnlock = document.getElementById('btnUnlock');
-        const authError = document.getElementById('authError');
-
-        // Vault Unlock Logic
-        btnUnlock.addEventListener('click', async () => {
-            const postcode = document.getElementById('vaultPostcode').value.trim().toUpperCase();
-            const pin = document.getElementById('vaultPIN').value.trim();
-
-            if (!postcode || !pin) {
-                showError("Please enter Postcode and PIN");
-                return;
+    <script>
+        // --- 1. PIN Gate Logic ---
+        function moveToNext(current, event) {
+            if (current.value.length >= 1) {
+                let next = current.nextElementSibling;
+                if (next) next.focus();
             }
-
-            btnUnlock.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Decrypting...`;
-            btnUnlock.disabled = true;
-            authError.style.opacity = '0';
-
-            try {
-                // Query Firebase for a match
-                const q = query(
-                    collection(db, "surveys"), 
-                    where("customerProfile.postcode", "==", postcode),
-                    where("customerProfile.vaultPIN", "==", pin)
-                );
-                
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    // Match Found! Extract data
-                    const projectData = querySnapshot.docs[0].data();
-                    const projectId = querySnapshot.docs[0].id; // Keep ID for PDF generation link
-                    
-                    // Artificial delay for premium "loading" feel
-                    setTimeout(() => {
-                        buildVaultUI(projectData, projectId);
-                        
-                        // Transition Screens
-                        authScreen.classList.add('hidden-screen');
-                        dashboardScreen.classList.remove('hidden-screen');
-                    }, 800);
-                } else {
-                    // Invalid Credentials
-                    showError("Invalid Postcode or PIN sequence.");
+            if (event.key === "Backspace") {
+                let prev = current.previousElementSibling;
+                if (prev) {
+                    prev.value = "";
+                    prev.focus();
                 }
-            } catch (err) {
-                console.error("Vault Access Error:", err);
-                showError("Secure connection failed. Check network.");
             }
-        });
-
-        function showError(msg) {
-            btnUnlock.innerHTML = `<span class="material-icons-round">lock_open</span> Unlock Vault`;
-            btnUnlock.disabled = false;
-            authError.innerText = msg;
-            authError.style.opacity = '1';
         }
 
-        // Map Database to Vault Interface
-        function buildVaultUI(data, projectId) {
-            const cp = data.customerProfile || {};
-            const ps = data.projectSpecs || {};
+        function unlockVault(current, event) {
+            if (event.key === "Backspace") { moveToNext(current, event); return; }
             
-            // Header
-            document.getElementById('clientNameDisplay').innerText = cp.leadName || 'Client';
+            // Collect PIN
+            const inputs = document.querySelectorAll('.pin-box');
+            let pin = "";
+            inputs.forEach(input => pin += input.value);
             
-            // Specs
-            document.getElementById('valBuildType').innerText = ps.buildType || 'Bespoke Extension';
-            document.getElementById('valRoofType').innerText = ps.roofStyle || 'Edwardian roof';
-            document.getElementById('valSize').innerText = ps.proposedSize || 'TBC';
-            
-            // Format Frame string (removes the internal color split for cleaner client UI)
-            let frame = ps.frameColour || 'TBC';
-            if(frame.includes(' / Int:')) frame = frame.split(' / Int:')[0];
-            document.getElementById('valFrame').innerText = frame;
-
-            // Media Gallery
-            const gallery = document.getElementById('vaultGallery');
-            gallery.innerHTML = '';
-            const photos = [];
-            
-            if (data.media) {
-                // Prioritize the elevation shot and the sniper sketch
-                if (data.media.front) photos.push({url: data.media.front, label: 'Front Elevation'});
-                if (data.media.sketch) photos.push({url: data.media.sketch, label: 'Architectural Markup'});
-                if (data.media.rear) photos.push({url: data.media.rear, label: 'Rear Elevation'});
-                if (data.media.side) photos.push({url: data.media.side, label: 'Side Elevation'});
-            }
-
-            document.getElementById('photoCount').innerText = `${photos.length} Secure Files`;
-
-            if (photos.length > 0) {
-                photos.forEach((img, i) => {
-                    const delay = 0.5 + (i * 0.1);
-                    gallery.innerHTML += `
-                        <div class="h-64 rounded-xl border border-[color:var(--border-glass)] overflow-hidden relative group fade-in" style="animation-delay: ${delay}s;">
-                            <div style="width: 100%; height: 100%; background-image: url('${img.url}'); background-size: cover; background-position: center; transition: transform 0.5s ease;" class="group-hover:scale-110"></div>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 pt-10">
-                                <p class="text-xs font-bold uppercase tracking-widest text-white m-0">${img.label}</p>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                gallery.innerHTML = `
-                    <div class="col-span-2 p-8 text-center border border-dashed border-[color:var(--border-glass)] rounded-xl">
-                        <span class="material-icons-round text-4xl text-gray-600 mb-2">image_search</span>
-                        <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Media syncing in progress...</p>
-                    </div>
-                `;
-            }
-
-            // PDF Download Action
-            document.getElementById('btnDownloadPDF').addEventListener('click', (e) => {
-                const btn = e.target;
-                btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Preparing Secure File...`;
-                btn.disabled = true;
+            if (pin.length === 4) {
+                // Simulate Authentication Success
+                const gate = document.getElementById('pinGate');
+                const vault = document.getElementById('vaultDashboard');
                 
-                // Simulate generation delay, then redirect to the compiler tool running in client-view mode
+                inputs.forEach(i => {
+                    i.style.borderColor = "var(--success)";
+                    i.style.color = "var(--success)";
+                    i.style.boxShadow = "0 0 15px rgba(35, 134, 54, 0.4)";
+                });
+
                 setTimeout(() => {
-                    btn.innerHTML = `<span class="material-icons-round">check_circle</span> Download Complete`;
-                    btn.style.background = "#238636";
-                    
-                    // If you want to actually trigger the PDF compiler, you can route them here:
-                    // window.location.href = `pdf-compiler.html?id=${projectId}`;
-                    
+                    gate.style.opacity = '0';
                     setTimeout(() => {
-                        btn.innerHTML = `<span class="material-icons-round">file_download</span> Download PDF`;
-                        btn.style.background = "";
-                        btn.disabled = false;
-                    }, 4000);
-                }, 2500);
-            });
+                        gate.style.display = 'none';
+                        vault.classList.remove('hidden');
+                        // Small delay before fading in vault for smooth transition
+                        setTimeout(() => { vault.classList.add('fade-in'); }, 100);
+                    }, 700);
+                }, 500);
+            }
         }
+
+        // --- 2. Vault Navigation Logic ---
+        function switchVaultTab(tabId, clickedElement) {
+            // Update Tab Styling
+            document.querySelectorAll('.vault-tab').forEach(tab => tab.classList.remove('active'));
+            clickedElement.classList.add('active');
+            
+            // Switch Content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // --- 3. Designer Quote Unlock (2nd Appointment Theatrics) ---
+        function triggerQuoteUnlock() {
+            const overlay = document.getElementById('quoteOverlay');
+            const blurItems = document.querySelectorAll('.blur-reveal');
+            const icon = document.getElementById('lockIcon');
+            
+            if (overlay.style.opacity === '0') {
+                // Relock
+                overlay.style.opacity = '1';
+                overlay.style.pointerEvents = 'auto';
+                icon.innerText = 'lock';
+                blurItems.forEach(el => el.classList.remove('unlocked'));
+            } else {
+                // Unlock! (In a real app, this might prompt for a master password first)
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none';
+                icon.innerText = 'lock_open';
+                icon.style.color = 'var(--success)';
+                blurItems.forEach(el => el.classList.add('unlocked'));
+            }
+        }
+
+        // Auto-focus first PIN box on load
+        window.onload = () => {
+            document.querySelector('.pin-box').focus();
+        };
     </script>
 </body>
 </html>
