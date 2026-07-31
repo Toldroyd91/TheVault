@@ -3,336 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compiling Dossier...</title>
+    <title>Generating Dossier | COHI Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-</head>
-<body class="bg-[#0a0a0c] text-[#f4f4f6] h-screen flex flex-col items-center justify-center font-sans">
+    
+    <!-- PDF GENERATION ENGINE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        body { 
+            background: #0a0a0c; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            font-family: monospace; 
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .terminal { 
+            background: #141418; 
+            padding: 2rem; 
+            border-radius: 8px; 
+            border: 1px solid #27272f; 
+            width: 100%; 
+            max-width: 600px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            z-index: 10;
+        }
+        
+        .log { opacity: 0; color: #8b8b93; margin-bottom: 0.75rem; font-size: 14px; }
+        .log.active { opacity: 1; transition: opacity 0.3s; }
+        .success-text { color: #238636; font-weight: bold; }
+        
+        /* FIX: Container is now positioned behind the terminal, not off-screen */
+        #pdf-container { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            z-index: -100; 
+            opacity: 0.01; 
+            pointer-events: none; 
+        }
 
-    <div class="text-center space-y-6">
-        <span class="material-icons-round text-6xl text-[#005A9C] animate-pulse">auto_awesome_mosaic</span>
-        <h1 class="text-2xl font-black uppercase tracking-widest">Generating Master Dossier</h1>
-        <div id="statusLog" class="text-xs text-gray-500 font-mono space-y-2 text-left bg-[#141418] p-6 rounded-lg border border-[#27272f] min-w-[350px] max-w-md mx-auto h-48 overflow-y-auto">
-            <p>> Initializing rendering engine...</p>
+        #pdf-content { 
+            display: block; 
+            width: 800px; 
+            padding: 40px; 
+            background: white; 
+            color: black; 
+            font-family: -apple-system, sans-serif;
+        }
+        .pdf-header { border-bottom: 3px solid #005A9C; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .pdf-title { color: #005A9C; font-size: 28px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        .pdf-section { margin-bottom: 30px; }
+        .pdf-section-title { font-size: 16px; color: #555; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; }
+        .pdf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .pdf-label { font-size: 10px; color: #888; text-transform: uppercase; font-weight: bold; }
+        .pdf-value { font-size: 14px; font-weight: 600; color: #111; }
+        .pdf-img { width: 100%; height: 250px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <!-- VISUAL TERMINAL UI -->
+    <div class="mb-8 flex flex-col items-center z-10">
+        <div class="grid grid-cols-2 gap-1 mb-6">
+            <div class="w-6 h-10 bg-[#005A9C] rounded-l-md"></div>
+            <div class="flex flex-col gap-1">
+                <div class="w-6 h-4.5 bg-[#005A9C] rounded-tr-md"></div>
+                <div class="w-6 h-[18px] bg-[#005A9C] rounded-br-md"></div>
+            </div>
+        </div>
+        <h1 class="text-2xl font-black tracking-widest uppercase text-center">Generating Master Dossier</h1>
+    </div>
+
+    <div class="terminal" id="terminal">
+        <div class="log">> Building Dynamic Designer Profile...</div>
+        <div class="log">> Fetching Process Journey...</div>
+        <div class="log">> Integrating Site Specifications...</div>
+        <div class="log">> Injecting Context Photography...</div>
+        <div class="log">> Attaching Compliance & Technical Data...</div>
+        <div class="log">> Assembling Final Vector Data...</div>
+        <div class="log success-text" id="final-log">> Initializing Download Engine...</div>
+        <div id="btn-container" class="mt-6 hidden">
+            <button onclick="window.location.href='index.html'" class="bg-[#27272f] hover:bg-[#005A9C] text-white px-6 py-3 rounded text-sm font-bold uppercase tracking-wider transition w-full">Return to Dashboard</button>
         </div>
     </div>
 
+    <!-- HIDDEN A4 PDF TEMPLATE -->
+    <div id="pdf-container">
+         <div id="pdf-content">
+            <div class="pdf-header">
+                <div>
+                    <h1 class="pdf-title">Yorkshire Windows</h1>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Official Project Survey & Technical Dossier</p>
+                </div>
+                <div style="text-align: right;">
+                    <p class="pdf-label">Date Generated</p>
+                    <p class="pdf-value" id="pdf-date">Loading...</p>
+                </div>
+            </div>
+
+            <div class="pdf-grid">
+                <div class="pdf-section">
+                    <h2 class="pdf-section-title">Client Profile</h2>
+                    <div style="margin-bottom: 10px;">
+                        <span class="pdf-label">Lead Name</span>
+                        <div class="pdf-value" id="pdf-name">Loading...</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span class="pdf-label">Site Postcode</span>
+                        <div class="pdf-value" id="pdf-pc">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="pdf-section">
+                    <h2 class="pdf-section-title">Architectural Scope</h2>
+                    <div style="margin-bottom: 10px;">
+                        <span class="pdf-label">Build Type</span>
+                        <div class="pdf-value" id="pdf-build">Loading...</div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span class="pdf-label">Roof System</span>
+                        <div class="pdf-value" id="pdf-roof">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pdf-section">
+                <h2 class="pdf-section-title">Primary Site Elevation</h2>
+                <img id="pdf-hero-img" src="" class="pdf-img" style="display: none;">
+                <p id="pdf-no-img" style="color: #999; font-style: italic; font-size: 12px;">No primary elevation photo provided.</p>
+            </div>
+            
+            <div class="pdf-section">
+                <h2 class="pdf-section-title">Designer Notes</h2>
+                <p id="pdf-notes" style="font-size: 12px; line-height: 1.6; color: #444;">No additional notes recorded.</p>
+            </div>
+         </div>
+    </div>
+
+    <!-- FIREBASE & COMPILATION LOGIC -->
     <script type="module">
         import { db, doc, getDoc } from './js/core-firebase.js';
 
-        const log = (msg, isSuccess = false, isError = false) => {
-            const logBox = document.getElementById('statusLog');
-            let color = 'text-gray-500';
-            if (isSuccess) color = 'text-[#238636] font-bold';
-            if (isError) color = 'text-red-500 font-bold';
-            logBox.innerHTML += `<p class="${color}">> ${msg}</p>`;
-            logBox.scrollTop = logBox.scrollHeight;
-        };
-
-        async function fetchImageAsBase64(url) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Network response error');
-                const blob = await response.blob();
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
-            } catch (e) {
-                console.warn(`Failed to load image: ${url}`);
-                return null;
-            }
-        }
-
-        async function generatePDF() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const projectId = urlParams.get('id') || "DEMO_PROJECT_123";
+        async function executeCompilation() {
+            const logs = document.querySelectorAll('.log');
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('id') || 'DEMO_PROJECT_123';
+            let customerNameForFile = "Client";
+            
+            for (let i = 0; i < logs.length; i++) {
+                const delay = i === logs.length - 1 ? 500 : Math.random() * 400 + 300;
+                await new Promise(r => setTimeout(r, delay));
+                logs[i].classList.add('active');
                 
-                log(`Extracting payload for ID: ${projectId}...`);
-                const docSnap = await getDoc(doc(db, "surveys", projectId));
-
-                if (!docSnap.exists()) {
-                    log("ERROR: No data found. Run a sync first.", false, true);
-                    return;
-                }
-
-                const data = docSnap.data();
-                const profile = data.customerProfile || {};
-                const specs = data.projectSpecs || {};
-                const media = data.media || {};
-                const pamphlets = data.pamphlets || {};
-                const insights = data.designerInsights || {};
-                
-                // Fallback Designer Profile (if dynamic setup hasn't been done yet)
-                const designer = data.designerProfile || {
-                    name: "Thomas Oldroyd",
-                    role: "New Living Space Designer",
-                    bio: "Operating out of South Yorkshire, Thomas specializes in transforming existing architectural footprints into modern, thermally efficient living spaces. With a focus on meticulous site surveys and client-focused design, Thomas ensures that every structure perfectly complements the primary residence while adhering to strict building regulations.",
-                    headshot: null,
-                    portfolio: [] // Array of base64 images
-                };
-
-                // Simulated Live Review Data (Will be replaced by your API scraper later)
-                const reviews = data.brandReviews || {
-                    trustpilot: { score: "4.8", count: "1,204" },
-                    google: { score: "4.9", count: "856" }
-                };
-                
-                log("Structuring Strategic Sales Flow...");
-                const gitHubBase = "https://raw.githubusercontent.com/Toldroyd91/TheVault/main/assets/shared/";
-                const content = [];
-
-                // ==========================================
-                // 1. COVER PAGE & CONTENTS
-                // ==========================================
-                content.push(
-                    { text: 'YORKSHIRE', fontSize: 48, font: 'Helvetica', bold: true, color: '#005A9C', margin: [0, 150, 0, 0], alignment: 'center' },
-                    { text: 'WINDOWS', fontSize: 48, font: 'Helvetica', bold: true, color: '#27272f', margin: [0, -10, 0, 20], alignment: 'center' },
-                    { text: 'MASTER ARCHITECTURAL DOSSIER', fontSize: 14, bold: true, letterSpacing: 2, alignment: 'center', margin: [0, 0, 0, 50] },
-                    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 2, lineColor: '#005A9C' }], margin: [0, 0, 0, 20] },
-                    { text: `PREPARED FOR: ${profile.leadName ? profile.leadName.toUpperCase() : 'CLIENT'}`, fontSize: 12, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
-                    { text: `SITE LOCATION: ${profile.postcode ? profile.postcode.toUpperCase() : 'TBD'}`, fontSize: 12, color: '#555555', alignment: 'center', margin: [0, 0, 0, 50] },
-                    { text: `LEAD DESIGNER: ${designer.name.toUpperCase()}`, fontSize: 10, bold: true, color: '#8b8b93', alignment: 'center', pageBreak: 'after' },
-                    
-                    { toc: { title: { text: 'DOCUMENT CONTENTS', style: 'header', margin: [0, 0, 0, 20] } }, pageBreak: 'after' }
-                );
-
-                // ==========================================
-                // 2. THE PITCH (Company Profile)
-                // ==========================================
-                if (pamphlets.brochure) {
-                    log("Injecting Company Profile...");
-                    content.push({ text: '01. THE YORKSHIRE WINDOWS STANDARD', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
-                    
-                    const whoImg = await fetchImageAsBase64(`${gitHubBase}who-we-are.jpg`);
-                    if(whoImg) content.push({ image: whoImg, width: 515, alignment: 'center', pageBreak: 'before' });
-                    
-                    const whyImg = await fetchImageAsBase64(`${gitHubBase}why-choose-us.jpg`);
-                    if(whyImg) content.push({ image: whyImg, width: 515, alignment: 'center', pageBreak: 'before' });
-
-                    const tailImg = await fetchImageAsBase64(`${gitHubBase}tailored.jpg`);
-                    if(tailImg) content.push({ image: tailImg, width: 515, alignment: 'center', pageBreak: 'after' });
-                }
-
-                // ==========================================
-                // 3. SOCIAL PROOF (Live Reviews)
-                // ==========================================
-                log("Injecting Review Framework...");
-                content.push(
-                    { text: '02. CLIENT TRUST & VERIFICATION', style: 'sectionHeader', tocItem: true },
-                    { text: 'Our commitment to quality is reflected in the live feedback from our local community.', margin: [0, 0, 0, 30] },
-                    {
-                        columns: [
-                            {
-                                width: '50%',
-                                alignment: 'center',
-                                stack: [
-                                    { text: '★ ★ ★ ★ ★', fontSize: 24, color: '#00b67a', margin: [0, 0, 0, 10] }, // Trustpilot green
-                                    { text: 'TRUSTPILOT', fontSize: 14, bold: true, margin: [0, 0, 0, 5] },
-                                    { text: `${reviews.trustpilot.score} / 5.0`, fontSize: 20, bold: true, color: '#27272f' },
-                                    { text: `Based on ${reviews.trustpilot.count} reviews`, fontSize: 10, color: '#8b8b93', margin: [0, 5, 0, 0] }
-                                ]
-                            },
-                            {
-                                width: '50%',
-                                alignment: 'center',
-                                stack: [
-                                    { text: '★ ★ ★ ★ ★', fontSize: 24, color: '#fbbc05', margin: [0, 0, 0, 10] }, // Google yellow
-                                    { text: 'GOOGLE REVIEWS', fontSize: 14, bold: true, margin: [0, 0, 0, 5] },
-                                    { text: `${reviews.google.score} / 5.0`, fontSize: 20, bold: true, color: '#27272f' },
-                                    { text: `Based on ${reviews.google.count} verified client ratings`, fontSize: 10, color: '#8b8b93', margin: [0, 5, 0, 0] }
-                                ]
+                if (i === 2 && projectId !== 'DEMO_PROJECT_123') {
+                    try {
+                        const docRef = doc(db, "surveys", projectId);
+                        const docSnap = await getDoc(docRef);
+                        
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            customerNameForFile = data.customerProfile?.leadName || "Client";
+                            
+                            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString('en-GB');
+                            document.getElementById('pdf-name').innerText = data.customerProfile?.leadName || 'N/A';
+                            document.getElementById('pdf-pc').innerText = data.customerProfile?.postcode || 'N/A';
+                            
+                            document.getElementById('pdf-build').innerText = data.projectSpecs?.buildType || 'N/A';
+                            document.getElementById('pdf-roof').innerText = data.projectSpecs?.roofStyle || 'N/A';
+                            
+                            if(data.designerInsights?.prep) {
+                                document.getElementById('pdf-notes').innerText = data.designerInsights.prep;
                             }
-                        ],
-                        margin: [0, 0, 0, 40]
-                    },
-                    { canvas: [{ type: 'line', x1: 100, y1: 0, x2: 415, y2: 0, lineWidth: 1, lineColor: '#e5e7eb' }], margin: [0, 20, 0, 20] },
-                    { text: 'This data is dynamically linked to independent review platforms and updates automatically.', fontSize: 8, italics: true, color: '#8b8b93', alignment: 'center', pageBreak: 'after' }
-                );
 
-                // ==========================================
-                // 4. THE PERSONAL TOUCH (Meet the Designer)
-                // ==========================================
-                log("Building Dynamic Designer Profile...");
-                content.push({ text: '03. MEET YOUR DESIGNER', style: 'sectionHeader', tocItem: true });
-
-                const designerLayout = { columns: [], margin: [0, 0, 0, 30] };
-                
-                // If the user has uploaded a headshot to their profile, render it on the left
-                if (designer.headshot) {
-                    designerLayout.columns.push({ image: designer.headshot, width: 150, margin: [0, 0, 20, 0] });
-                }
-
-                // Push the text bio to the right (or full width if no headshot)
-                designerLayout.columns.push({
-                    stack: [
-                        { text: designer.name.toUpperCase(), fontSize: 18, bold: true, color: '#005A9C', margin: [0, 0, 0, 5] },
-                        { text: designer.role, fontSize: 12, bold: true, color: '#555', margin: [0, 0, 0, 15] },
-                        { text: designer.bio, lineHeight: 1.5, fontSize: 11, color: '#27272f' }
-                    ]
-                });
-                content.push(designerLayout);
-
-                // If portfolio images exist in the designer's profile, render a mini grid
-                if (designer.portfolio && designer.portfolio.length > 0) {
-                    content.push({ text: 'RECENT PORTFOLIO', fontSize: 10, bold: true, color: '#8b8b93', margin: [0, 0, 0, 10] });
-                    const gridBody = [];
-                    // Simplified: just dumping the first two portfolio images side-by-side for the demo
-                    if (designer.portfolio.length >= 2) {
-                        gridBody.push([
-                            { image: designer.portfolio[0], width: 250 },
-                            { image: designer.portfolio[1], width: 250 }
-                        ]);
-                    }
-                    if(gridBody.length > 0) {
-                        content.push({ table: { widths: ['*', '*'], body: gridBody }, layout: 'noBorders' });
-                    }
-                }
-                content[content.length - 1].pageBreak = 'after'; // Page break after designer section
-
-                // ==========================================
-                // 5. THE PROCESS (Installation Journey)
-                // ==========================================
-                log("Fetching Process Journey...");
-                content.push({ text: '04. THE INSTALLATION JOURNEY', style: 'sectionHeader', tocItem: true });
-                const journeyImg = await fetchImageAsBase64(`${gitHubBase}journey.jpg`);
-                if(journeyImg) {
-                    content.push({ image: journeyImg, width: 515, alignment: 'center', margin: [0, 10, 0, 0], pageBreak: 'after' });
-                } else {
-                    content.push({ text: "[ Process graphic unavailable ]", alignment: 'center', pageBreak: 'after' });
-                }
-
-                // ==========================================
-                // 6. THE CUSTOM PROJECT (Survey Data)
-                // ==========================================
-                log("Integrating Site Specifications...");
-                content.push(
-                    { text: '05. BESPOKE PROJECT SPECIFICATIONS', style: 'sectionHeader', tocItem: true },
-                    {
-                        layout: 'lightHorizontalLines',
-                        table: {
-                            headerRows: 1, widths: ['*', '*'],
-                            body: [
-                                [{text: 'CLIENT DETAILS', bold: true, color: '#005A9C'}, {text: 'SITE DETAILS', bold: true, color: '#005A9C'}],
-                                [`Name: ${profile.leadName || 'N/A'}`, `Postcode: ${profile.postcode || 'N/A'}`],
-                                [`Customer Ref: ${profile.customerNum || 'N/A'}`, `Appt Date: ${profile.apptDate || 'N/A'}`]
-                            ]
-                        }, margin: [0, 0, 0, 30]
-                    },
-                    {
-                        layout: 'lightHorizontalLines',
-                        table: {
-                            widths: ['*', '*'],
-                            body: [
-                                ['Build Type:', specs.buildType || 'N/A'],
-                                ['Roof Architecture:', specs.roofStyle || 'N/A'],
-                                ['Base / Foundations:', specs.baseType || 'N/A'],
-                                ['Proposed Footprint:', specs.proposedSize || 'N/A'],
-                                ['Frame Finish:', specs.frameColour || 'N/A'],
-                                ['Building Regulations:', specs.buildingRegs || 'N/A']
-                            ]
-                        }, margin: [0, 0, 0, 30]
-                    },
-                    { text: 'DESIGNER ENGINEERING NOTES', fontSize: 10, bold: true, color: '#005A9C', margin: [0, 0, 0, 5] },
-                    { text: insights.prep || "No structural notes recorded during survey.", fontSize: 10, italics: true, color: '#555', pageBreak: 'after' }
-                );
-
-                // ==========================================
-                // 7. SITE PHOTOGRAPHY
-                // ==========================================
-                log("Injecting Context Photography...");
-                const photos = [
-                    { src: media.front, title: 'Main Elevation as seen from the road' },
-                    { src: media.rear, title: 'Rear Elevation' },
-                    { src: media.side, title: 'Side Context & Access' },
-                    { src: media.sketch, title: 'Architectural Markup' }
-                ];
-
-                let photoAdded = false;
-                photos.forEach(photo => {
-                    if (photo.src) {
-                        if(!photoAdded) {
-                            content.push({ text: '06. SITE PHOTOGRAPHY', style: 'sectionHeader', tocItem: true });
-                            photoAdded = true;
+                            if (data.media?.front) {
+                                document.getElementById('pdf-hero-img').src = data.media.front;
+                                document.getElementById('pdf-hero-img').style.display = 'block';
+                                document.getElementById('pdf-no-img').style.display = 'none';
+                            }
                         }
-                        content.push(
-                            { text: photo.title, fontSize: 10, bold: true, margin: [0, 15, 0, 5], color: '#555' },
-                            { image: photo.src, width: 515, alignment: 'center', margin: [0, 0, 0, 20] }
-                        );
+                    } catch (error) {
+                        console.error("Firebase fetch error:", error);
                     }
-                });
-                if (photoAdded) content[content.length - 1].pageBreak = 'after';
-
-                // ==========================================
-                // 8. TECHNICAL APPENDICES (Compliance)
-                // ==========================================
-                log("Attaching Compliance & Technical Data...");
-
-                if (pamphlets.roof) {
-                    content.push({ text: 'APPENDIX A: ENGINEERING (Piling & Box Guttering Detail)', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
-                    const pileImg = await fetchImageAsBase64(`${gitHubBase}piling.jpg`);
-                    if(pileImg) content.push({ image: pileImg, width: 515, alignment: 'center' });
-                    
-                    const cavImg = await fetchImageAsBase64(`${gitHubBase}cavity.jpg`);
-                    if(cavImg) content.push({ image: cavImg, width: 515, alignment: 'center', pageBreak: 'before' });
                 }
-
-                if (pamphlets.sap) {
-                    content.push({ text: 'APPENDIX B: SAP CALCULATIONS', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
-                    const sapImg = await fetchImageAsBase64(`${gitHubBase}sap-calcs.jpg`);
-                    if(sapImg) content.push({ image: sapImg, width: 515, alignment: 'center' });
-                }
-
-                if (pamphlets.planning) {
-                    content.push({ text: 'APPENDIX C: PLANNING & REGULATIONS', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
-                    const planImg = await fetchImageAsBase64(`${gitHubBase}planning.jpg`);
-                    if(planImg) content.push({ image: planImg, width: 515, alignment: 'center' });
-                }
-
-                if (pamphlets.warranty) {
-                    content.push({ text: 'APPENDIX D: HOME PROTECTION & WARRANTY', style: 'sectionHeader', tocItem: true, pageBreak: 'before' });
-                    const protImg = await fetchImageAsBase64(`${gitHubBase}protecting-home.jpg`);
-                    if(protImg) content.push({ image: protImg, width: 515, alignment: 'center' });
-                }
-
-                // ==========================================
-                // RENDER DOCUMENT
-                // ==========================================
-                const docDefinition = {
-                    pageSize: 'A4',
-                    pageMargins: [40, 60, 40, 60],
-                    header: function(currentPage) {
-                        if (currentPage === 1) return null;
-                        return { text: 'YORKSHIRE WINDOWS | ARCHITECTURAL DOSSIER', margin: [40, 20, 40, 0], fontSize: 8, color: '#8b8b93', alignment: 'right' };
-                    },
-                    footer: function(currentPage, pageCount) {
-                        if (currentPage === 1) return null;
-                        return { text: `Page ${currentPage.toString()} of ${pageCount}`, margin: [40, 0, 40, 20], fontSize: 8, color: '#8b8b93', alignment: 'center' };
-                    },
-                    content: content,
-                    styles: {
-                        header: { fontSize: 18, bold: true, color: '#005A9C', font: 'Helvetica' },
-                        sectionHeader: { fontSize: 14, bold: true, color: '#005A9C', margin: [0, 15, 0, 10], font: 'Helvetica' }
-                    },
-                    defaultStyle: { fontSize: 11, color: '#27272f', font: 'Helvetica' }
-                };
-
-                log("Assembling Final Vector Data...");
-                pdfMake.createPdf(docDefinition).download(`Yorkshire_Windows_Dossier_${profile.leadName ? profile.leadName.replace(/\s+/g, '_') : 'Client'}.pdf`);
-                log("Dossier Generated Successfully ✓", true);
-
-            } catch (err) {
-                console.error(err);
-                log(`Generation Failed: ${err.message}`, false, true);
             }
+
+            // Trigger the Download
+            setTimeout(() => {
+                const element = document.getElementById('pdf-content');
+                const opt = {
+                    margin:       0.5,
+                    filename:     `Yorkshire_Windows_Dossier_${customerNameForFile.replace(/\s+/g, '_')}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, logging: false },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+                
+                html2pdf().set(opt).from(element).save().then(() => {
+                    document.getElementById('final-log').innerText = "> Dossier Downloaded Successfully ✓";
+                    document.getElementById('btn-container').classList.remove('hidden');
+                }).catch(err => {
+                    console.error("PDF Compilation Failed:", err);
+                    document.getElementById('final-log').innerText = "> Error: Check Console.";
+                    document.getElementById('final-log').style.color = "red";
+                    document.getElementById('btn-container').classList.remove('hidden');
+                });
+            }, 800);
         }
 
-        window.onload = () => { setTimeout(generatePDF, 500); };
+        window.onload = executeCompilation;
     </script>
 </body>
 </html>
