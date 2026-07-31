@@ -1034,19 +1034,21 @@
             }
 
             if (window.innerWidth < 1024 && sidebar.classList.contains('open')) {
-                toggleMenu();
+                window.toggleMenu();
             }
         };
 
         // ==========================================
-        // AUTHENTICATION & PROFILE LOADING
+        // AUTHENTICATION & SESSION PERSISTENCE
         // ==========================================
-        document.getElementById('btnLogin').addEventListener('click', () => {
+        window.performLogin = (email) => {
+            window.currentUserEmail = email || "thomas@yorkshirewindows.com";
+            
+            // Save the session to the browser so it remembers you on reload within this incognito session
+            localStorage.setItem('cohi_user_session', window.currentUserEmail);
+            
             const btn = document.getElementById('btnLogin');
-            const emailInput = document.getElementById('authEmail').value.trim().toLowerCase();
-            if(emailInput) window.currentUserEmail = emailInput;
-
-            btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
+            if(btn) btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
             
             setTimeout(async () => {
                 // Apply Brand CSS Variables
@@ -1058,18 +1060,41 @@
                 root.style.setProperty('--brand-border', `rgba(${rgb}, 0.3)`);
                 
                 const titleHTML = `${config.title}<span style="color: var(--brand-primary)">PRO</span>`;
-                document.getElementById('loginBrandTitle').innerHTML = titleHTML;
+                const loginTitle = document.getElementById('loginBrandTitle');
+                if(loginTitle) loginTitle.innerHTML = titleHTML;
                 document.getElementById('sidebarBrand').innerHTML = titleHTML;
                 
                 await window.loadDesignerProfile();
                 window.loadLiveProjects(); 
                 
-                document.getElementById('authGate').classList.add('fade-out');
-                setTimeout(() => { 
-                    document.getElementById('authGate').style.display = 'none'; 
-                    document.getElementById('appShell').style.opacity = '1'; 
-                }, 500);
+                const authGate = document.getElementById('authGate');
+                if (authGate) {
+                    authGate.classList.add('fade-out');
+                    setTimeout(() => { 
+                        authGate.style.display = 'none'; 
+                        document.getElementById('appShell').style.opacity = '1'; 
+                    }, 500);
+                } else {
+                    document.getElementById('appShell').style.opacity = '1';
+                }
             }, 800);
+        };
+
+        document.getElementById('btnLogin')?.addEventListener('click', () => {
+            const emailInput = document.getElementById('authEmail').value.trim().toLowerCase();
+            window.performLogin(emailInput);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSession = localStorage.getItem('cohi_user_session');
+            if (savedSession) {
+                const authGate = document.getElementById('authGate');
+                if(authGate) {
+                    authGate.style.opacity = '0';
+                    authGate.style.pointerEvents = 'none';
+                }
+                window.performLogin(savedSession);
+            }
         });
 
         // ==========================================
@@ -1349,7 +1374,7 @@
                         <span class="material-icons-round text-6xl text-red-500 mb-4">error</span>
                         <h3 class="text-xl font-bold text-white mb-2">Parsing Failed</h3>
                         <p class="text-sm text-gray-400">Could not read PDF structure.</p>
-                        <button class="btn-secondary mt-4" onclick="selectGatekeeperProject('${window.activeGatekeeperProjectId}', 'Client')">Try Again</button>
+                        <button class="btn-secondary mt-4" onclick="window.selectGatekeeperProject('${window.activeGatekeeperProjectId}', 'Client')">Try Again</button>
                     `;
                 }
             };
