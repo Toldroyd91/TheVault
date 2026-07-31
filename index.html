@@ -1692,6 +1692,7 @@
                         customerNum: document.getElementById('clientNum').value,
                         postcode: postCodeVal,
                         apptDate: document.getElementById('apptDate').value,
+                        revisitDate: document.getElementById('revisitDate').value,
                         vaultPIN: "1234" 
                     },
                     projectSpecs: {
@@ -1699,9 +1700,19 @@
                         proposedSize: document.getElementById('proposedSize').value,
                         roofStyle: document.getElementById('roofType').value,
                         frameColour: document.getElementById('frameColour').value,
+                        internalFrameColour: document.getElementById('internalFrameColour').value,
                         baseType: document.getElementById('baseType').value,
+                        dpcDepth: document.getElementById('dpcDepth').value,
+                        fasciaHeight: document.getElementById('fasciaHeight').value,
+                        airBricks: document.getElementById('airBricks').value,
+                        accessDifficult: document.getElementById('accessDifficult').value,
+                        accessWidth: document.getElementById('accessWidth').value,
+                        drainage: document.getElementById('drainage').value,
+                        wallObstacles: document.getElementById('wallObstacles').value,
                         buildingRegs: document.getElementById('buildingRegs').value,
-                        planningPerms: document.getElementById('planningPerms').value
+                        planningPerms: document.getElementById('planningPerms').value,
+                        roofPitch: document.getElementById('roofPitch').value,
+                        sapCalcs: document.getElementById('sapCalcs').value
                     },
                     media: {
                         front: window.sitePhotos.front[0] || null,
@@ -1806,8 +1817,56 @@
             }
         };
 
-        window.openProject = (id) => { 
-            window.location.href = `pdf-compiler.html?id=${id}`; 
+        // NEW: Fetch Survey Data instead of directly routing to PDF Compiler
+        window.openProject = async function(id) {
+            try {
+                const docRef = doc(db, "surveys", id);
+                const docSnap = await getDoc(docRef);
+                
+                if (!docSnap.exists()) return alert("Survey record not found.");
+                const data = docSnap.data();
+                
+                // Populate Survey Engine Fields
+                document.getElementById('clientName').value = data.customerProfile?.leadName || '';
+                document.getElementById('clientNum').value = data.customerProfile?.customerNum || '';
+                document.getElementById('postCode').value = data.customerProfile?.postcode || '';
+                document.getElementById('apptDate').value = data.customerProfile?.apptDate || '';
+                document.getElementById('revisitDate').value = data.customerProfile?.revisitDate || '';
+                
+                if(data.projectSpecs) {
+                    document.getElementById('buildType').value = data.projectSpecs.buildType || '';
+                    document.getElementById('proposedSize').value = data.projectSpecs.proposedSize || '';
+                    document.getElementById('roofType').value = data.projectSpecs.roofStyle || '';
+                    document.getElementById('frameColour').value = data.projectSpecs.frameColour || '';
+                    document.getElementById('internalFrameColour').value = data.projectSpecs.internalFrameColour || '';
+                    document.getElementById('baseType').value = data.projectSpecs.baseType || '';
+                    document.getElementById('dpcDepth').value = data.projectSpecs.dpcDepth || '';
+                    document.getElementById('fasciaHeight').value = data.projectSpecs.fasciaHeight || '';
+                    document.getElementById('airBricks').value = data.projectSpecs.airBricks || '';
+                    document.getElementById('accessDifficult').value = data.projectSpecs.accessDifficult || '';
+                    document.getElementById('accessWidth').value = data.projectSpecs.accessWidth || '';
+                    document.getElementById('drainage').value = data.projectSpecs.drainage || '';
+                    document.getElementById('wallObstacles').value = data.projectSpecs.wallObstacles || '';
+                    document.getElementById('buildingRegs').value = data.projectSpecs.buildingRegs || '';
+                    document.getElementById('planningPerms').value = data.projectSpecs.planningPerms || '';
+                    document.getElementById('roofPitch').value = data.projectSpecs.roofPitch || '';
+                    document.getElementById('sapCalcs').value = data.projectSpecs.sapCalcs || '';
+                }
+                
+                if(data.designerInsights) {
+                    document.getElementById('designerNotes').value = data.designerInsights.prep || '';
+                }
+
+                window.currentProjectId = id;
+                
+                // Switch view to Survey Engine smoothly
+                const surveyNav = document.querySelectorAll('.nav-link')[1];
+                window.switchModule('module-survey', surveyNav);
+                
+            } catch (err) {
+                console.error("Error opening project:", err);
+                alert("Could not load project details.");
+            }
         };
 
         // ==========================================
