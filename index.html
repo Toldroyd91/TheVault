@@ -27,7 +27,10 @@
             --border-subtle: #27272f;
         }
 
-        html { height: 100%; height: -webkit-fill-available; }
+        html { 
+            height: 100%; 
+            height: -webkit-fill-available; 
+        }
 
         body { 
             height: 100%; 
@@ -38,79 +41,380 @@
             -webkit-font-smoothing: antialiased; 
             overflow: hidden;
             
+            /* Native Mobile Safe Area Rendering */
             padding-bottom: env(safe-area-inset-bottom);
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
         }
 
-        .md-surface { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .md-surface { 
+            background: var(--bg-surface); 
+            border: 1px solid var(--border-subtle); 
+            border-radius: 16px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
         
-        .doc-card { display: flex; flex-direction: column; aspect-ratio: 4/3; cursor: pointer; overflow: hidden; position: relative; border-radius: 14px; }
-        .doc-card:hover { background: var(--bg-surface-elevated); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.6); border-color: var(--brand-border); }
-        .doc-preview-area { flex: 1; background: var(--bg-base); border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; color: var(--text-muted); position: relative; overflow: hidden; }
+        .doc-card { 
+            display: flex; 
+            flex-direction: column; 
+            aspect-ratio: 4/3; 
+            cursor: pointer; 
+            overflow: hidden; 
+            position: relative; 
+            border-radius: 14px; 
+        }
+        .doc-card:hover { 
+            background: var(--bg-surface-elevated); 
+            transform: translateY(-4px); 
+            box-shadow: 0 16px 32px rgba(0,0,0,0.6); 
+            border-color: var(--brand-border); 
+        }
+        .doc-preview-area { 
+            flex: 1; 
+            background: var(--bg-base); 
+            border-bottom: 1px solid var(--border-subtle); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: var(--text-muted); 
+            position: relative; 
+            overflow: hidden; 
+        }
         
-        .luxury-input { background: var(--bg-base); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 10px; width: 100%; padding: 14px 16px; font-size: 14px; transition: all 0.2s ease; outline: none; }
-        .luxury-input:focus { border-color: var(--brand-primary); background: var(--bg-surface-elevated); box-shadow: 0 0 0 2px var(--brand-bg-glow); }
-        select.luxury-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b8b93%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 10px auto; padding-right: 36px; }
+        .luxury-input { 
+            background: var(--bg-base); 
+            border: 1px solid var(--border-subtle); 
+            color: var(--text-main); 
+            border-radius: 10px; 
+            width: 100%; 
+            padding: 14px 16px; 
+            font-size: 14px; 
+            transition: all 0.2s ease; 
+            outline: none; 
+        }
+        .luxury-input:focus { 
+            border-color: var(--brand-primary); 
+            background: var(--bg-surface-elevated); 
+            box-shadow: 0 0 0 2px var(--brand-bg-glow); 
+        }
+        select.luxury-input { 
+            appearance: none; 
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b8b93%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
+            background-repeat: no-repeat; 
+            background-position: right 16px top 50%; 
+            background-size: 10px auto; 
+            padding-right: 36px; 
+        }
 
-        .btn-primary { background: var(--brand-primary); color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; padding: 16px 24px; transition: all 0.2s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 6px 20px var(--brand-bg-glow); transform: translateY(-1px); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-primary { 
+            background: var(--brand-primary); 
+            color: #fff; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            border-radius: 10px; 
+            padding: 16px 24px; 
+            transition: all 0.2s ease; 
+            border: none; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+        }
+        .btn-primary:hover:not(:disabled) { 
+            filter: brightness(1.15); 
+            box-shadow: 0 6px 20px var(--brand-bg-glow); 
+            transform: translateY(-1px); 
+        }
+        .btn-primary:disabled { 
+            opacity: 0.6; 
+            cursor: not-allowed; 
+        }
         
-        .btn-secondary { background: var(--bg-surface-elevated); color: var(--text-main); border: 1px solid var(--border-subtle); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; padding: 14px 20px; transition: all 0.2s ease; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); background: #27272f; }
-        .btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-secondary { 
+            background: var(--bg-surface-elevated); 
+            color: var(--text-main); 
+            border: 1px solid var(--border-subtle); 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            border-radius: 10px; 
+            padding: 14px 20px; 
+            transition: all 0.2s ease; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+        }
+        .btn-secondary:hover:not(:disabled) { 
+            border-color: var(--text-muted); 
+            background: #27272f; 
+        }
+        .btn-secondary:disabled { 
+            opacity: 0.6; 
+            cursor: not-allowed; 
+        }
 
-        .fab { position: fixed; bottom: 32px; right: 32px; width: 64px; height: 64px; border-radius: 20px; background: var(--brand-primary); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 40; }
-        .fab:hover { transform: scale(1.06) translateY(-2px); border-radius: 16px; filter: brightness(1.15); }
+        .fab { 
+            position: fixed; 
+            bottom: 32px; 
+            right: 32px; 
+            width: 64px; 
+            height: 64px; 
+            border-radius: 20px; 
+            background: var(--brand-primary); 
+            color: #fff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            z-index: 40; 
+        }
+        .fab:hover { 
+            transform: scale(1.06) translateY(-2px); 
+            border-radius: 16px; 
+            filter: brightness(1.15); 
+        }
 
-        #appSidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        #appSidebar.open { transform: translateX(0); }
-        .nav-link { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 0 24px 24px 0; color: var(--text-main); font-weight: 600; font-size: 14px; transition: all 0.2s ease; margin-right: 16px; cursor: pointer; }
-        .nav-link:hover { background: var(--bg-surface-elevated); }
-        .nav-link.active { background: var(--brand-bg-glow); color: var(--brand-primary); }
+        #appSidebar { 
+            transform: translateX(-100%); 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        #appSidebar.open { 
+            transform: translateX(0); 
+        }
         
-        .module-view { display: none; animation: fadeIn 0.3s ease-out; }
-        .module-view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-link { 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+            padding: 14px 20px; 
+            border-radius: 0 24px 24px 0; 
+            color: var(--text-main); 
+            font-weight: 600; 
+            font-size: 14px; 
+            transition: all 0.2s ease; 
+            margin-right: 16px; 
+            cursor: pointer; 
+        }
+        .nav-link:hover { 
+            background: var(--bg-surface-elevated); 
+        }
+        .nav-link.active { 
+            background: var(--brand-bg-glow); 
+            color: var(--brand-primary); 
+        }
         
-        #authGate { transition: opacity 0.5s ease; }
-        .fade-out { opacity: 0; pointer-events: none; }
+        .module-view { 
+            display: none; 
+            animation: fadeIn 0.3s ease-out; 
+        }
+        .module-view.active { 
+            display: block; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(8px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
         
-        .luxury-checkbox { display: flex; align-items: center; gap: 12px; background: var(--bg-base); padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border-subtle); cursor: pointer; transition: 0.2s; }
-        .luxury-checkbox:hover { border-color: var(--brand-primary); background: var(--bg-surface-elevated); }
-        .luxury-checkbox input { accent-color: var(--brand-primary); width: 18px; height: 18px; cursor: pointer; }
-        .luxury-checkbox span { font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-main); }
+        #authGate { 
+            transition: opacity 0.5s ease; 
+        }
+        .fade-out { 
+            opacity: 0; 
+            pointer-events: none; 
+        }
+        
+        .luxury-checkbox { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            background: var(--bg-base); 
+            padding: 14px 16px; 
+            border-radius: 10px; 
+            border: 1px solid var(--border-subtle); 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+        .luxury-checkbox:hover { 
+            border-color: var(--brand-primary); 
+            background: var(--bg-surface-elevated); 
+        }
+        .luxury-checkbox input { 
+            accent-color: var(--brand-primary); 
+            width: 18px; 
+            height: 18px; 
+            cursor: pointer; 
+        }
+        .luxury-checkbox span { 
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            color: var(--text-main); 
+        }
 
-        .photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-        @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); } }
+        .photo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 12px; 
+        }
+        @media (min-width: 768px) { 
+            .photo-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); } 
+        }
         
-        .photo-btn { background: var(--bg-base); border: 1px solid var(--border-subtle); padding: 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; font-size: 12px; color: var(--text-muted); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-        .photo-btn:hover { border-color: var(--brand-primary); color: #fff; background: var(--bg-surface-elevated); }
-        .photo-btn .badge { background: var(--border-subtle); color: var(--text-muted); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 900; }
-        .photo-btn.has-photos { border-color: var(--success); color: #fff; background: rgba(35, 134, 54, 0.12); }
-        .photo-btn.has-photos .badge { background: var(--success); color: #fff; }
+        .photo-btn { 
+            background: var(--bg-base); 
+            border: 1px solid var(--border-subtle); 
+            padding: 16px; 
+            border-radius: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            font-size: 12px; 
+            color: var(--text-muted); 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        .photo-btn:hover { 
+            border-color: var(--brand-primary); 
+            color: #fff; 
+            background: var(--bg-surface-elevated); 
+        }
+        .photo-btn .badge { 
+            background: var(--border-subtle); 
+            color: var(--text-muted); 
+            padding: 2px 8px; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            font-weight: 900; 
+        }
+        .photo-btn.has-photos { 
+            border-color: var(--success); 
+            color: #fff; 
+            background: rgba(35, 134, 54, 0.12); 
+        }
+        .photo-btn.has-photos .badge { 
+            background: var(--success); 
+            color: #fff; 
+        }
 
-        .canvas-container { background: #000; border-radius: 14px; width: 100%; height: 400px; border: 2px dashed var(--border-subtle); display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; touch-action: none; }
-        @media (min-width: 768px) { .canvas-container { height: 500px; } }
-        canvas { max-width: 100%; max-height: 100%; }
+        .canvas-container { 
+            background: #000; 
+            border-radius: 14px; 
+            width: 100%; 
+            height: 400px; 
+            border: 2px dashed var(--border-subtle); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+            position: relative; 
+            touch-action: none; 
+        }
+        @media (min-width: 768px) { 
+            .canvas-container { height: 500px; } 
+        }
+        canvas { 
+            max-width: 100%; 
+            max-height: 100%; 
+        }
         
-        #syncProgressWrapper { display: none; margin-top: 20px; width: 100%; }
-        .progress-bg { height: 8px; background: var(--border-subtle); border-radius: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--brand-primary); width: 0%; transition: width 0.3s ease; }
+        #syncProgressWrapper { 
+            display: none; 
+            margin-top: 20px; 
+            width: 100%; 
+        }
+        .progress-bg { 
+            height: 8px; 
+            background: var(--border-subtle); 
+            border-radius: 4px; 
+            overflow: hidden; 
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: var(--brand-primary); 
+            width: 0%; 
+            transition: width 0.3s ease; 
+        }
 
         /* Profile specific styles */
-        .avatar-upload-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--bg-surface-elevated); border: 2px dashed var(--border-subtle); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; transition: all 0.3s ease; }
-        .avatar-upload-circle:hover { border-color: var(--brand-primary); background: var(--brand-bg-glow); }
-        .avatar-img-preview { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 0.3s; }
-        .avatar-img-preview.active { opacity: 1; z-index: 10; }
+        .avatar-upload-circle { 
+            width: 120px; 
+            height: 120px; 
+            border-radius: 50%; 
+            background: var(--bg-surface-elevated); 
+            border: 2px dashed var(--border-subtle); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            overflow: hidden; 
+            position: relative; 
+            transition: all 0.3s ease; 
+        }
+        .avatar-upload-circle:hover { 
+            border-color: var(--brand-primary); 
+            background: var(--brand-bg-glow); 
+        }
+        .avatar-img-preview { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+        }
+        .avatar-img-preview.active { 
+            opacity: 1; 
+            z-index: 10; 
+        }
         
-        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 16px; }
-        .portfolio-slot { aspect-ratio: 4/3; background: var(--bg-base); border: 1px dashed var(--border-subtle); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; }
-        .portfolio-slot:hover { border-color: var(--brand-primary); background: var(--bg-surface-elevated); }
-        .portfolio-img { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 5; }
+        .portfolio-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+            gap: 12px; 
+            margin-top: 16px; 
+        }
+        .portfolio-slot { 
+            aspect-ratio: 4/3; 
+            background: var(--bg-base); 
+            border: 1px dashed var(--border-subtle); 
+            border-radius: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            overflow: hidden; 
+            position: relative; 
+        }
+        .portfolio-slot:hover { 
+            border-color: var(--brand-primary); 
+            background: var(--bg-surface-elevated); 
+        }
+        .portfolio-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            position: absolute; 
+            z-index: 5; 
+        }
 
-        .glass-panel { background: rgba(20, 20, 24, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
+        .glass-panel { 
+            background: rgba(20, 20, 24, 0.6); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 20px; 
+        }
     </style>
 </head>
 <body class="flex w-full h-full relative">
@@ -131,6 +435,7 @@
         </div>
     </div>
 
+    <!-- MOBILE SIDEBAR OVERLAY -->
     <div id="drawerOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity opacity-0" onclick="toggleMenu()"></div>
 
     <!-- SIDEBAR -->
@@ -189,7 +494,9 @@
                 <div class="flex justify-between items-end mb-6">
                     <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest">Recent Surveys</h2>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="projectsGrid"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="projectsGrid">
+                    <!-- Projects populated here -->
+                </div>
                 <button class="fab" onclick="switchModule('module-survey', document.querySelectorAll('.nav-link')[1])" title="Start New Survey">
                     <span class="material-icons-round">add</span>
                 </button>
@@ -213,12 +520,30 @@
                         <span class="material-icons-round text-lg">person</span> 01. Client Profile
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Lead Name *</label><input type="text" id="clientName" placeholder="e.g. Mr. Dow" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Customer Number</label><input type="text" id="clientNum" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">House No. / Name *</label><input type="text" id="houseNum" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Site Postcode *</label><input type="text" id="postCode" placeholder="e.g. S70 0PN" class="luxury-input uppercase"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Consultation Date</label><input type="date" id="apptDate" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Revisit Date</label><input type="date" id="revisitDate" class="luxury-input"></div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Lead Name *</label>
+                            <input type="text" id="clientName" placeholder="e.g. Mr. Dow" class="luxury-input">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Customer Number</label>
+                            <input type="text" id="clientNum" class="luxury-input">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">House No. / Name *</label>
+                            <input type="text" id="houseNum" class="luxury-input">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Site Postcode *</label>
+                            <input type="text" id="postCode" placeholder="e.g. S70 0PN" class="luxury-input uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Consultation Date</label>
+                            <input type="date" id="apptDate" class="luxury-input">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Revisit Date</label>
+                            <input type="date" id="revisitDate" class="luxury-input">
+                        </div>
                     </div>
                 </div>
 
@@ -228,20 +553,59 @@
                         <span class="material-icons-round text-lg">architecture</span> 02. Project Scope & Structure
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="md:col-span-2"><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Build Type</label>
-                            <select id="buildType" class="luxury-input"><option value="">Select...</option><option value="Single Storey Extension">Single Storey Extension</option><option value="Conservatory">Conservatory</option><option value="Orangery">Orangery</option><option value="Hybrid Extension">Hybrid Extension</option><option value="Porch">Porch</option><option value="Garage Conversion">Garage Conversion</option></select>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Build Type</label>
+                            <select id="buildType" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Single Storey Extension">Single Storey Extension</option>
+                                <option value="Conservatory">Conservatory</option>
+                                <option value="Orangery">Orangery</option>
+                                <option value="Hybrid Extension">Hybrid Extension</option>
+                                <option value="Porch">Porch</option>
+                                <option value="Garage Conversion">Garage Conversion</option>
+                            </select>
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Proposed Size (mm)</label><input type="text" id="proposedSize" placeholder="e.g. 3000x4000" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Existing House Material</label>
-                            <select id="houseMaterial" class="luxury-input"><option value="">Select...</option><option value="Standard Brick">Standard Brick</option><option value="Stone">Stone</option><option value="Rendered">Rendered</option><option value="Pebbledash">Pebbledash</option><option value="Timber Clad">Timber Clad</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Proposed Size (mm)</label>
+                            <input type="text" id="proposedSize" placeholder="e.g. 3000x4000" class="luxury-input">
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Base Type</label>
-                            <select id="baseType" class="luxury-input"><option value="">Select...</option><option value="Standard Concrete">Standard Concrete</option><option value="Block & Beam">Block & Beam</option><option value="Piled / Steel">Piled / Steel</option><option value="Existing Base">Existing Base (Retained)</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Existing House Material</label>
+                            <select id="houseMaterial" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Standard Brick">Standard Brick</option>
+                                <option value="Stone">Stone</option>
+                                <option value="Rendered">Rendered</option>
+                                <option value="Pebbledash">Pebbledash</option>
+                                <option value="Timber Clad">Timber Clad</option>
+                            </select>
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">DPC Depth (mm)</label><input type="number" id="dpcDepth" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Fascia Height (mm)</label><input type="number" id="fasciaHeight" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Sub-Floor Venting (Air Bricks)</label>
-                            <select id="airBricks" class="luxury-input"><option value="">Select...</option><option value="Standard Venting Required">Standard Venting Required</option><option value="Telescopic Sub-Floor Ducts">Telescopic Sub-Floor Ducts</option><option value="None Required">None Required</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Base Type</label>
+                            <select id="baseType" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Standard Concrete">Standard Concrete</option>
+                                <option value="Block & Beam">Block & Beam</option>
+                                <option value="Piled / Steel">Piled / Steel</option>
+                                <option value="Existing Base">Existing Base (Retained)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">DPC Depth (mm)</label>
+                            <input type="number" id="dpcDepth" class="luxury-input">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Fascia Height (mm)</label>
+                            <input type="number" id="fasciaHeight" class="luxury-input">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Sub-Floor Venting (Air Bricks)</label>
+                            <select id="airBricks" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Standard Venting Required">Standard Venting Required</option>
+                                <option value="Telescopic Sub-Floor Ducts">Telescopic Sub-Floor Ducts</option>
+                                <option value="None Required">None Required</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -252,14 +616,36 @@
                         <span class="material-icons-round text-lg">warning</span> 03. Logistics & Restrictions
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Access Difficulties</label>
-                            <select id="accessDifficult" class="luxury-input"><option value="">Select...</option><option value="Unrestricted Access">Unrestricted Access</option><option value="Narrow Side Gate">Narrow Side Gate</option><option value="Through Garage Only">Through Garage Only</option><option value="Through House Only">Through House Only</option><option value="Severe Incline / Steps">Severe Incline / Steps</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Access Difficulties</label>
+                            <select id="accessDifficult" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Unrestricted Access">Unrestricted Access</option>
+                                <option value="Narrow Side Gate">Narrow Side Gate</option>
+                                <option value="Through Garage Only">Through Garage Only</option>
+                                <option value="Through House Only">Through House Only</option>
+                                <option value="Severe Incline / Steps">Severe Incline / Steps</option>
+                            </select>
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Access Width (mm)</label><input type="number" id="accessWidth" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Drainage Relocations</label>
-                            <select id="drainage" class="luxury-input"><option value="">Select...</option><option value="Clear / No Action">Clear / No Action</option><option value="Manhole Cover Move">Manhole Cover Move</option><option value="Rainwater Pipe Move">Rainwater Pipe Move</option><option value="Soil Pipe Move">Soil Pipe Move</option><option value="Gulley Move">Gulley Move</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Access Width (mm)</label>
+                            <input type="number" id="accessWidth" class="luxury-input">
                         </div>
-                        <div class="md:col-span-2"><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Wall Obstacles (Flues, Vents)</label><input type="text" id="wallObstacles" class="luxury-input"></div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Drainage Relocations</label>
+                            <select id="drainage" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Clear / No Action">Clear / No Action</option>
+                                <option value="Manhole Cover Move">Manhole Cover Move</option>
+                                <option value="Rainwater Pipe Move">Rainwater Pipe Move</option>
+                                <option value="Soil Pipe Move">Soil Pipe Move</option>
+                                <option value="Gulley Move">Gulley Move</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Wall Obstacles (Flues, Vents)</label>
+                            <input type="text" id="wallObstacles" class="luxury-input">
+                        </div>
                     </div>
                 </div>
 
@@ -269,15 +655,41 @@
                         <span class="material-icons-round text-lg">palette</span> 04. Design Specification
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Roof System</label>
-                            <select id="roofType" class="luxury-input"><option value="">Select...</option><option value="Edwardian roof">Edwardian roof</option><option value="Ultra380 Solid Roof">Ultra380 Solid Roof</option><option value="Hybrid/Livin Roof">Hybrid/Livin Roof</option><option value="Glass Conservatory Roof">Glass Conservatory Roof</option><option value="Polycarbonate Roof">Polycarbonate Roof</option><option value="Standard Flat Roof">Standard Flat Roof</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Roof System</label>
+                            <select id="roofType" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Edwardian roof">Edwardian roof</option>
+                                <option value="Ultra380 Solid Roof">Ultra380 Solid Roof</option>
+                                <option value="Hybrid/Livin Roof">Hybrid/Livin Roof</option>
+                                <option value="Glass Conservatory Roof">Glass Conservatory Roof</option>
+                                <option value="Polycarbonate Roof">Polycarbonate Roof</option>
+                                <option value="Standard Flat Roof">Standard Flat Roof</option>
+                            </select>
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Roof Pitch (Degrees)</label><input type="number" id="roofPitch" class="luxury-input"></div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Frame Colour (External)</label>
-                            <select id="frameColour" class="luxury-input"><option value="">Select...</option><option value="White">White</option><option value="Anthracite Grey (Smooth)">Anthracite Grey (Smooth)</option><option value="Grey Foil">Grey Foil</option><option value="Chartwell Green">Chartwell Green</option><option value="Rosewood">Rosewood</option><option value="Light Oak">Light Oak</option><option value="Black Foil">Black Foil</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Roof Pitch (Degrees)</label>
+                            <input type="number" id="roofPitch" class="luxury-input">
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Frame Colour (Internal)</label>
-                            <select id="internalFrameColour" class="luxury-input"><option value="White">White</option><option value="Match External">Match External</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Frame Colour (External)</label>
+                            <select id="frameColour" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="White">White</option>
+                                <option value="Anthracite Grey (Smooth)">Anthracite Grey (Smooth)</option>
+                                <option value="Grey Foil">Grey Foil</option>
+                                <option value="Chartwell Green">Chartwell Green</option>
+                                <option value="Rosewood">Rosewood</option>
+                                <option value="Light Oak">Light Oak</option>
+                                <option value="Black Foil">Black Foil</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Frame Colour (Internal)</label>
+                            <select id="internalFrameColour" class="luxury-input">
+                                <option value="White">White</option>
+                                <option value="Match External">Match External</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -288,24 +700,52 @@
                         <span class="material-icons-round text-lg">gavel</span> 05. Compliance & Regulations
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Building Regs Requirement</label>
-                            <select id="buildingRegs" class="luxury-input"><option value="">Select...</option><option value="Full Building Control Required">Full Building Control Required</option><option value="Replacement - Masonry Alterations">Replacement - Masonry Alterations</option><option value="Replacement - No Alterations">Replacement - No Alterations</option><option value="Exempt / Not Required">Exempt / Not Required</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Building Regs Requirement</label>
+                            <select id="buildingRegs" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Full Building Control Required">Full Building Control Required</option>
+                                <option value="Replacement - Masonry Alterations">Replacement - Masonry Alterations</option>
+                                <option value="Replacement - No Alterations">Replacement - No Alterations</option>
+                                <option value="Exempt / Not Required">Exempt / Not Required</option>
+                            </select>
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Planning Authority Status</label>
-                            <select id="planningPerms" class="luxury-input"><option value="">Select...</option><option value="Full Planning Permission Needed">Full Planning Permission Needed</option><option value="NCS Prior Approval Needed">NCS Prior Approval Needed</option><option value="Permitted Development (No Action)">Permitted Development (No Action)</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Planning Authority Status</label>
+                            <select id="planningPerms" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Full Planning Permission Needed">Full Planning Permission Needed</option>
+                                <option value="NCS Prior Approval Needed">NCS Prior Approval Needed</option>
+                                <option value="Permitted Development (No Action)">Permitted Development (No Action)</option>
+                            </select>
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">SAP Energy Calcs</label>
-                            <select id="sapCalcs" class="luxury-input"><option value="">Select...</option><option value="Yes">Yes - Required</option><option value="No">No - Exempt</option></select>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">SAP Energy Calcs</label>
+                            <select id="sapCalcs" class="luxury-input">
+                                <option value="">Select...</option>
+                                <option value="Yes">Yes - Required</option>
+                                <option value="No">No - Exempt</option>
+                            </select>
                         </div>
                     </div>
                     
                     <h4 class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 mt-6">Handover Pamphlets</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="luxury-checkbox"><input type="checkbox" id="cb-brochure"> <span>Product Brochure Handed Over</span></label>
-                        <label class="luxury-checkbox"><input type="checkbox" id="cb-warranty"> <span>Warranty Documentation Provided</span></label>
-                        <label class="luxury-checkbox"><input type="checkbox" id="cb-planning"> <span>Planning Guide / Regulatory Handout</span></label>
-                        <label class="luxury-checkbox"><input type="checkbox" id="cb-sap"> <span>SAP Calculations Factsheet</span></label>
-                        <label class="luxury-checkbox"><input type="checkbox" id="cb-roof"> <span>Roof System Specification Guide</span></label>
+                        <label class="luxury-checkbox">
+                            <input type="checkbox" id="cb-brochure"> <span>Product Brochure Handed Over</span>
+                        </label>
+                        <label class="luxury-checkbox">
+                            <input type="checkbox" id="cb-warranty"> <span>Warranty Documentation Provided</span>
+                        </label>
+                        <label class="luxury-checkbox">
+                            <input type="checkbox" id="cb-planning"> <span>Planning Guide / Regulatory Handout</span>
+                        </label>
+                        <label class="luxury-checkbox">
+                            <input type="checkbox" id="cb-sap"> <span>SAP Calculations Factsheet</span>
+                        </label>
+                        <label class="luxury-checkbox">
+                            <input type="checkbox" id="cb-roof"> <span>Roof System Specification Guide</span>
+                        </label>
                     </div>
                 </div>
 
@@ -339,28 +779,44 @@
                     </h3>
                     
                     <div class="photo-grid">
-                        <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()"><span>Front Elev</span><span class="badge" id="badge-front">0</span></div>
+                        <div class="photo-btn" id="btn-front" onclick="document.getElementById('upload-front').click()">
+                            <span>Front Elev</span><span class="badge" id="badge-front">0</span>
+                        </div>
                         <input type="file" id="upload-front" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'front')">
                         
-                        <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()"><span>Side Elev</span><span class="badge" id="badge-side">0</span></div>
+                        <div class="photo-btn" id="btn-side" onclick="document.getElementById('upload-side').click()">
+                            <span>Side Elev</span><span class="badge" id="badge-side">0</span>
+                        </div>
                         <input type="file" id="upload-side" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'side')">
                         
-                        <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()"><span>Back Elev</span><span class="badge" id="badge-back">0</span></div>
+                        <div class="photo-btn" id="btn-back" onclick="document.getElementById('upload-back').click()">
+                            <span>Back Elev</span><span class="badge" id="badge-back">0</span>
+                        </div>
                         <input type="file" id="upload-back" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'back')">
                         
-                        <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()"><span>Access Route</span><span class="badge" id="badge-access">0</span></div>
+                        <div class="photo-btn" id="btn-access" onclick="document.getElementById('upload-access').click()">
+                            <span>Access Route</span><span class="badge" id="badge-access">0</span>
+                        </div>
                         <input type="file" id="upload-access" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'access')">
                         
-                        <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()"><span>Drainage</span><span class="badge" id="badge-drainage">0</span></div>
+                        <div class="photo-btn" id="btn-drainage" onclick="document.getElementById('upload-drainage').click()">
+                            <span>Drainage</span><span class="badge" id="badge-drainage">0</span>
+                        </div>
                         <input type="file" id="upload-drainage" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'drainage')">
                         
-                        <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()"><span>Trees/Roots</span><span class="badge" id="badge-trees">0</span></div>
+                        <div class="photo-btn" id="btn-trees" onclick="document.getElementById('upload-trees').click()">
+                            <span>Trees/Roots</span><span class="badge" id="badge-trees">0</span>
+                        </div>
                         <input type="file" id="upload-trees" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'trees')">
                         
-                        <div class="photo-btn" id="btn-brick" onclick="document.getElementById('upload-brick').click()"><span>Brick Match</span><span class="badge" id="badge-brick">0</span></div>
+                        <div class="photo-btn" id="btn-brick" onclick="document.getElementById('upload-brick').click()">
+                            <span>Brick Match</span><span class="badge" id="badge-brick">0</span>
+                        </div>
                         <input type="file" id="upload-brick" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'brick')">
                         
-                        <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()"><span>Misc Doc</span><span class="badge" id="badge-misc">0</span></div>
+                        <div class="photo-btn" id="btn-misc" onclick="document.getElementById('upload-misc').click()">
+                            <span>Misc Doc</span><span class="badge" id="badge-misc">0</span>
+                        </div>
                         <input type="file" id="upload-misc" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(this, 'misc')">
                     </div>
                 </div>
@@ -371,7 +827,9 @@
                         <span class="material-icons-round text-lg">edit_note</span> 08. Designer Notes
                     </h3>
                     <textarea id="designerNotes" rows="6" class="luxury-input mb-4" placeholder="Enter specific field notes for installers, structural anomalies, or specific design requests from the client..."></textarea>
-                    <button id="btn-ai-polish" class="btn-secondary w-full mb-6"><span class="material-icons-round">auto_fix_high</span> AI Polish Notes</button>
+                    <button id="btn-ai-polish" class="btn-secondary w-full mb-6">
+                        <span class="material-icons-round">auto_fix_high</span> AI Polish Notes
+                    </button>
                     
                     <div class="flex flex-col md:flex-row gap-4 pt-6 border-t border-[#27272f]">
                         <button id="btn-sync" class="btn-primary flex-[2] py-5 shadow-[0_4px_15px_var(--brand-bg-glow)]">
@@ -489,8 +947,8 @@
                 <div class="md-surface p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-[color:var(--brand-border)] shadow-[0_0_20px_var(--brand-bg-glow)]">
                     <div>
                         <span class="bg-[color:var(--brand-primary)]/20 text-[color:var(--brand-primary)] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-3 inline-block border border-[color:var(--brand-border)]">Ready to Compile</span>
-                        <h3 class="m-0 font-black text-white text-2xl tracking-wide">Mr. Dow</h3>
-                        <p class="m-0 mt-1 text-xs text-gray-400 font-bold uppercase tracking-widest">S70 0PN <span class="mx-2 text-[#2c2c30]">|</span> Edwardian roof</p>
+                        <h3 class="m-0 font-black text-white text-2xl tracking-wide">Selected Project</h3>
+                        <p class="m-0 mt-1 text-xs text-gray-400 font-bold uppercase tracking-widest">Awaiting Sync</p>
                     </div>
                     <div class="flex flex-col gap-2 w-full md:w-auto">
                         <button id="btnScrapeCompile" class="btn-primary px-8">
@@ -523,10 +981,26 @@
     <script type="module">
         import { db, doc, setDoc, getDoc, collection, serverTimestamp, getDocs, query, orderBy } from './js/core-firebase.js';
 
-        // Initialize PDF.js Worker
+        // Initialize PDF.js Worker for True OCR
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
+        // Brand Configuration
         const brands = { "Yorkshire Windows": { hex: "#005A9C", title: "YORKSHIRE" } };
+        
+        // Globals
+        window.activeProfileData = { name: "Thomas Oldroyd", role: "New Living Space Designer", bio: "", headshot: null, portfolio: [] };
+        window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
+        window.sniperPoints = [];
+        window.currentUserEmail = "thomas@yorkshirewindows.com";
+        window.currentProjectId = null;
+        window.activeGatekeeperProjectId = null;
+        
+        let lines = []; 
+        let calibrationRatio = null;
+
+        // ==========================================
+        // UI & NAVIGATION ENGINE
+        // ==========================================
         const sidebar = document.getElementById('appSidebar');
         const overlay = document.getElementById('drawerOverlay');
 
@@ -546,17 +1020,22 @@
         window.switchModule = (moduleId, clickedElement) => {
             document.querySelectorAll('.module-view').forEach(mod => mod.classList.remove('active'));
             document.getElementById(moduleId).classList.add('active');
+            
             if (clickedElement && clickedElement.classList.contains('nav-link')) {
                 document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
                 clickedElement.classList.add('active');
                 document.getElementById('appBarTitle').innerText = clickedElement.innerText.replace(/^[^\w]*/, '').trim();
-            } else if (moduleId === 'module-survey') document.getElementById('appBarTitle').innerText = "Survey Engine";
+            } else if (moduleId === 'module-survey') {
+                document.getElementById('appBarTitle').innerText = "Survey Engine";
+            }
             
             if (moduleId === 'module-gatekeeper') {
                 window.loadGatekeeperPipeline();
             }
 
-            if (window.innerWidth < 1024 && sidebar.classList.contains('open')) toggleMenu();
+            if (window.innerWidth < 1024 && sidebar.classList.contains('open')) {
+                toggleMenu();
+            }
         };
 
         // ==========================================
@@ -565,10 +1044,12 @@
         document.getElementById('btnLogin').addEventListener('click', () => {
             const btn = document.getElementById('btnLogin');
             const emailInput = document.getElementById('authEmail').value.trim().toLowerCase();
-            window.currentUserEmail = emailInput || "designer@yorkshirewindows.com";
+            if(emailInput) window.currentUserEmail = emailInput;
 
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
+            
             setTimeout(async () => {
+                // Apply Brand CSS Variables
                 const config = brands["Yorkshire Windows"];
                 const root = document.documentElement;
                 root.style.setProperty('--brand-primary', config.hex);
@@ -580,20 +1061,21 @@
                 document.getElementById('loginBrandTitle').innerHTML = titleHTML;
                 document.getElementById('sidebarBrand').innerHTML = titleHTML;
                 
-                await loadDesignerProfile();
-                loadLiveProjects(); 
+                await window.loadDesignerProfile();
+                window.loadLiveProjects(); 
                 
                 document.getElementById('authGate').classList.add('fade-out');
-                setTimeout(() => { document.getElementById('authGate').style.display = 'none'; document.getElementById('appShell').style.opacity = '1'; }, 500);
+                setTimeout(() => { 
+                    document.getElementById('authGate').style.display = 'none'; 
+                    document.getElementById('appShell').style.opacity = '1'; 
+                }, 500);
             }, 800);
         });
 
         // ==========================================
         // DESIGNER PROFILE ENGINE
         // ==========================================
-        window.activeProfileData = { name: "Thomas Oldroyd", role: "New Living Space Designer", bio: "", headshot: null, portfolio: [] };
-
-        async function loadDesignerProfile() {
+        window.loadDesignerProfile = async function() {
             try {
                 const profileRef = doc(db, "designers", window.currentUserEmail);
                 const profileSnap = await getDoc(profileRef);
@@ -619,16 +1101,19 @@
                 document.getElementById('profName').value = window.activeProfileData.name;
                 document.getElementById('profRole').value = window.activeProfileData.role;
                 document.getElementById('profBio').value = window.activeProfileData.bio || "";
-                renderPortfolioGrid();
-            } catch (error) { console.error("Profile load error:", error); }
-        }
+                
+                window.renderPortfolioGrid();
+            } catch (error) { 
+                console.error("Profile load error:", error); 
+            }
+        };
 
         document.getElementById('upload-avatar').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (event) => {
-                resizeImage(event.target.result, 400, (resizedBase64) => {
+                window.resizeImage(event.target.result, 400, (resizedBase64) => {
                     window.activeProfileData.headshot = resizedBase64;
                     const pImg = document.getElementById('preview-avatar');
                     pImg.src = resizedBase64;
@@ -641,13 +1126,14 @@
         document.getElementById('upload-portfolio').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             if (!files.length) return;
+            
             files.forEach(file => {
                 if (window.activeProfileData.portfolio.length >= 4) return;
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    resizeImage(event.target.result, 800, (resizedBase64) => {
+                    window.resizeImage(event.target.result, 800, (resizedBase64) => {
                         window.activeProfileData.portfolio.push(resizedBase64);
-                        renderPortfolioGrid();
+                        window.renderPortfolioGrid();
                     });
                 };
                 reader.readAsDataURL(file);
@@ -655,7 +1141,7 @@
             this.value = ''; 
         });
 
-        function renderPortfolioGrid() {
+        window.renderPortfolioGrid = function() {
             const container = document.getElementById('portfolioContainer');
             let html = `
                 <div class="portfolio-slot" onclick="document.getElementById('upload-portfolio').click()">
@@ -673,14 +1159,14 @@
                 `;
             });
             container.innerHTML = html;
-        }
+        };
 
         window.removePortfolioImage = (index) => {
             window.activeProfileData.portfolio.splice(index, 1);
-            renderPortfolioGrid();
+            window.renderPortfolioGrid();
         };
 
-        function resizeImage(base64Str, maxWidth, callback) {
+        window.resizeImage = function(base64Str, maxWidth, callback) {
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement('canvas');
@@ -692,27 +1178,32 @@
                 callback(canvas.toDataURL('image/jpeg', 0.8));
             };
             img.src = base64Str;
-        }
+        };
 
         document.getElementById('btn-save-profile').addEventListener('click', async (e) => {
             const btn = e.target;
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Syncing...`;
+            
             window.activeProfileData.name = document.getElementById('profName').value.trim();
             window.activeProfileData.role = document.getElementById('profRole').value.trim();
             window.activeProfileData.bio = document.getElementById('profBio').value.trim();
 
             try {
                 await setDoc(doc(db, "designers", window.currentUserEmail), window.activeProfileData, { merge: true });
+                
                 document.getElementById('userName').innerText = window.activeProfileData.name;
                 document.getElementById('userRole').innerText = window.activeProfileData.role;
+                
                 if(window.activeProfileData.headshot) {
                     const sbImg = document.getElementById('sidebarAvatarImg');
                     sbImg.src = window.activeProfileData.headshot;
                     sbImg.classList.add('opacity-100');
                 }
+                
                 btn.innerHTML = `<span class="material-icons-round">check_circle</span> Profile Synced ✓`;
                 btn.classList.replace('btn-primary', 'bg-[#238636]');
                 btn.style.color = 'white';
+                
                 setTimeout(() => {
                     btn.innerHTML = `<span class="material-icons-round">save</span> Sync Profile to Cloud`;
                     btn.classList.replace('bg-[#238636]', 'btn-primary');
@@ -728,8 +1219,6 @@
         // ==========================================
         // PROJECT GATEKEEPER & TRUE PDF OCR SCRAPER
         // ==========================================
-        window.activeGatekeeperProjectId = null;
-
         window.loadGatekeeperPipeline = async function() {
             const container = document.getElementById('gatekeeperPipeline');
             container.innerHTML = `<div class="text-center py-10"><span class="material-icons-round animate-spin text-[color:var(--brand-primary)]">sync</span></div>`;
@@ -760,12 +1249,16 @@
                     `;
                 });
                 container.innerHTML = html || '<p class="text-xs text-gray-500 text-center">No projects found.</p>';
-            } catch(e) { console.error(e); }
+            } catch(e) { 
+                console.error(e); 
+                container.innerHTML = '<p class="text-xs text-red-500 text-center">Error loading pipeline.</p>';
+            }
         };
 
         window.selectGatekeeperProject = function(id, name) {
             window.activeGatekeeperProjectId = id;
             const dropZone = document.getElementById('pdfDropZone');
+            
             dropZone.innerHTML = `
                 <span class="material-icons-round text-6xl text-[color:var(--brand-primary)] mb-4">document_scanner</span>
                 <h3 class="text-xl font-bold text-white mb-2">Upload Quote for ${name}</h3>
@@ -786,9 +1279,9 @@
                 <span class="material-icons-round text-6xl text-[color:var(--brand-primary)] animate-pulse mb-4">document_scanner</span>
                 <h3 class="text-xl font-bold text-white mb-2">Running OCR Engine...</h3>
                 <div class="space-y-2 text-xs font-mono text-gray-400 text-left mt-6 w-full max-w-sm mx-auto">
-                    <p>> Converting to ArrayBuffer...</p>
-                    <p id="ocrLog1">> Scanning text layers...</p>
-                    <p id="ocrLog2">> Extracting financial variables...</p>
+                    <p class="animate-[fadeIn_0.3s_0.2s_forwards]">> Converting to ArrayBuffer...</p>
+                    <p class="opacity-0 animate-[fadeIn_0.3s_0.8s_forwards]" id="ocrLog1">> Scanning text layers...</p>
+                    <p class="opacity-0 animate-[fadeIn_0.3s_1.5s_forwards]" id="ocrLog2">> Extracting financial variables...</p>
                 </div>
             `;
 
@@ -797,6 +1290,7 @@
                 try {
                     const typedarray = new Uint8Array(e.target.result);
                     const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    
                     document.getElementById('ocrLog1').innerText = `> Loaded ${pdf.numPages} pages. Scanning text...`;
                     
                     let fullText = "";
@@ -807,6 +1301,7 @@
                         fullText += pageText + " ";
                     }
 
+                    // Regex Extraction Logic
                     const totalMatch = fullText.match(/CONTRACT\s*TOTAL\s*£?\s*([\d,]+\.\d{2})/i);
                     const contractTotal = totalMatch ? `£${totalMatch[1]}` : "£19,724.00";
 
@@ -850,25 +1345,31 @@
 
                 } catch (error) {
                     console.error("PDF Parsing Error:", error);
-                    dropZone.innerHTML = `<span class="material-icons-round text-6xl text-red-500 mb-4">error</span><h3 class="text-xl font-bold text-white mb-2">Parsing Failed</h3><p class="text-sm text-gray-400">Could not read PDF structure.</p>`;
+                    dropZone.innerHTML = `
+                        <span class="material-icons-round text-6xl text-red-500 mb-4">error</span>
+                        <h3 class="text-xl font-bold text-white mb-2">Parsing Failed</h3>
+                        <p class="text-sm text-gray-400">Could not read PDF structure.</p>
+                        <button class="btn-secondary mt-4" onclick="selectGatekeeperProject('${window.activeGatekeeperProjectId}', 'Client')">Try Again</button>
+                    `;
                 }
             };
             fileReader.readAsArrayBuffer(file);
         };
 
         // ==========================================
-        // CAMERA, CANVAS & PHOTO GRID ENGINE
+        // SITE PHOTOGRAPHY GRID ENGINE
         // ==========================================
-        window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
-        
         window.handlePhotoUpload = function(input, category) {
-            const files = input.files; if(!files.length) return;
-            const badge = document.getElementById('badge-' + category); const btn = document.getElementById('btn-' + category);
+            const files = input.files; 
+            if(!files.length) return;
+            
+            const badge = document.getElementById('badge-' + category); 
+            const btn = document.getElementById('btn-' + category);
             
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    resizeImage(e.target.result, 1200, (resizedBase64) => {
+                    window.resizeImage(e.target.result, 1200, (resizedBase64) => {
                         window.sitePhotos[category].push(resizedBase64);
                         badge.innerText = window.sitePhotos[category].length;
                         btn.classList.add('has-photos');
@@ -879,16 +1380,32 @@
             input.value = ''; 
         };
 
+        // ==========================================
+        // ELEVATION SNIPER CANVAS ENGINE
+        // ==========================================
         const canvas = document.getElementById('sniperCanvas');
         const ctx = canvas.getContext('2d');
         const zoomSlider = document.getElementById('sniperZoom');
         const markBtn = document.getElementById('btn-sniper-mark');
-        let sniperImg = null; let imgScale = 1; let imgX = 0, imgY = 0; let isDragging = false; let startDragX = 0, startDragY = 0;
-        window.sniperPoints = []; let lines = []; let calibrationRatio = null; 
+        
+        let sniperImg = null; 
+        let imgScale = 1; 
+        let imgX = 0, imgY = 0; 
+        let isDragging = false; 
+        let startDragX = 0, startDragY = 0;
 
         document.getElementById('btn-load-sniper-img')?.addEventListener('click', () => {
-            const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
-            input.onchange = (e) => { const file = e.target.files[0]; if(file) { const reader = new FileReader(); reader.onload = (ev) => window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: ev.target.result })); reader.readAsDataURL(file); } };
+            const input = document.createElement('input'); 
+            input.type = 'file'; 
+            input.accept = 'image/*';
+            input.onchange = (e) => { 
+                const file = e.target.files[0]; 
+                if(file) { 
+                    const reader = new FileReader(); 
+                    reader.onload = (ev) => window.dispatchEvent(new CustomEvent('loadSniperImage', { detail: ev.target.result })); 
+                    reader.readAsDataURL(file); 
+                } 
+            };
             input.click();
         });
 
@@ -896,77 +1413,220 @@
             sniperImg = new Image();
             sniperImg.onload = () => {
                 imgScale = Math.min(canvas.width / sniperImg.width, canvas.height / sniperImg.height);
-                if (zoomSlider) { zoomSlider.value = imgScale; zoomSlider.min = imgScale * 0.5; }
-                imgX = (canvas.width - (sniperImg.width * imgScale)) / 2; imgY = (canvas.height - (sniperImg.height * imgScale)) / 2;
-                window.sniperPoints = []; lines = []; calibrationRatio = null; resetMarkButton(); drawSniper();
+                if (zoomSlider) { 
+                    zoomSlider.value = imgScale; 
+                    zoomSlider.min = imgScale * 0.5; 
+                }
+                imgX = (canvas.width - (sniperImg.width * imgScale)) / 2; 
+                imgY = (canvas.height - (sniperImg.height * imgScale)) / 2;
+                window.sniperPoints = []; 
+                lines = []; 
+                calibrationRatio = null; 
+                resetMarkButton(); 
+                drawSniper();
             };
             sniperImg.src = e.detail;
         });
 
         zoomSlider?.addEventListener('input', (e) => {
             if(!sniperImg) return;
-            const newScale = parseFloat(e.target.value); const cx = canvas.width / 2; const cy = canvas.height / 2;
-            imgX = cx - ((cx - imgX) * (newScale / imgScale)); imgY = cy - ((cy - imgY) * (newScale / imgScale));
-            imgScale = newScale; drawSniper();
+            const newScale = parseFloat(e.target.value); 
+            const cx = canvas.width / 2; 
+            const cy = canvas.height / 2;
+            imgX = cx - ((cx - imgX) * (newScale / imgScale)); 
+            imgY = cy - ((cy - imgY) * (newScale / imgScale));
+            imgScale = newScale; 
+            drawSniper();
         });
 
-        canvas.addEventListener('mousedown', (e) => { if(!sniperImg) return; isDragging = true; startDragX = e.offsetX - imgX; startDragY = e.offsetY - imgY; canvas.style.cursor = 'grabbing'; });
-        canvas.addEventListener('mousemove', (e) => { if(!isDragging || !sniperImg) return; imgX = e.offsetX - startDragX; imgY = e.offsetY - startDragY; drawSniper(); });
-        canvas.addEventListener('mouseup', () => { isDragging = false; canvas.style.cursor = 'grab'; });
-        canvas.addEventListener('mouseleave', () => { isDragging = false; canvas.style.cursor = 'grab'; });
+        // Mouse Listeners
+        canvas.addEventListener('mousedown', (e) => { 
+            if(!sniperImg) return; 
+            isDragging = true; 
+            startDragX = e.offsetX - imgX; 
+            startDragY = e.offsetY - imgY; 
+            canvas.style.cursor = 'grabbing'; 
+        });
+        canvas.addEventListener('mousemove', (e) => { 
+            if(!isDragging || !sniperImg) return; 
+            imgX = e.offsetX - startDragX; 
+            imgY = e.offsetY - startDragY; 
+            drawSniper(); 
+        });
+        canvas.addEventListener('mouseup', () => { 
+            isDragging = false; 
+            canvas.style.cursor = 'grab'; 
+        });
+        canvas.addEventListener('mouseleave', () => { 
+            isDragging = false; 
+            canvas.style.cursor = 'grab'; 
+        });
+
+        // Touch Listeners
+        canvas.addEventListener('touchstart', (e) => { 
+            if(!sniperImg || e.touches.length > 1) return; 
+            const touch = e.touches[0]; 
+            const rect = canvas.getBoundingClientRect(); 
+            isDragging = true; 
+            startDragX = (touch.clientX - rect.left) - imgX; 
+            startDragY = (touch.clientY - rect.top) - imgY; 
+        }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { 
+            if(!isDragging || !sniperImg || e.touches.length > 1) return; 
+            e.preventDefault(); 
+            const touch = e.touches[0]; 
+            const rect = canvas.getBoundingClientRect(); 
+            imgX = (touch.clientX - rect.left) - startDragX; 
+            imgY = (touch.clientY - rect.top) - startDragY; 
+            drawSniper(); 
+        }, { passive: false });
+        canvas.addEventListener('touchend', () => { isDragging = false; }); 
+        canvas.addEventListener('touchcancel', () => { isDragging = false; });
 
         function drawSniper() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); if(!sniperImg) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            if(!sniperImg) return;
+            
             ctx.drawImage(sniperImg, 0, 0, sniperImg.width, sniperImg.height, imgX, imgY, sniperImg.width * imgScale, sniperImg.height * imgScale);
 
             lines.forEach(line => {
-                const p1 = window.sniperPoints[line.p1]; const p2 = window.sniperPoints[line.p2];
-                const screenX1 = (p1.x * imgScale) + imgX; const screenY1 = (p1.y * imgScale) + imgY; const screenX2 = (p2.x * imgScale) + imgX; const screenY2 = (p2.y * imgScale) + imgY;
-                ctx.beginPath(); ctx.moveTo(screenX1, screenY1); ctx.lineTo(screenX2, screenY2); ctx.strokeStyle = '#0dcaf0'; ctx.lineWidth = 2; ctx.stroke();
-                const midX = (screenX1 + screenX2) / 2; const midY = (screenY1 + screenY2) / 2; const text = line.realLength + 'mm';
-                ctx.font = 'bold 12px -apple-system, sans-serif'; const textWidth = ctx.measureText(text).width;
-                ctx.fillStyle = 'rgba(10, 10, 12, 0.9)'; ctx.fillRect(midX - (textWidth / 2) - 8, midY - 12, textWidth + 16, 24);
-                ctx.fillStyle = '#f4f4f6'; ctx.fillText(text, midX - (textWidth / 2), midY + 4);
+                const p1 = window.sniperPoints[line.p1]; 
+                const p2 = window.sniperPoints[line.p2];
+                const screenX1 = (p1.x * imgScale) + imgX; 
+                const screenY1 = (p1.y * imgScale) + imgY; 
+                const screenX2 = (p2.x * imgScale) + imgX; 
+                const screenY2 = (p2.y * imgScale) + imgY;
+                
+                ctx.beginPath(); 
+                ctx.moveTo(screenX1, screenY1); 
+                ctx.lineTo(screenX2, screenY2); 
+                ctx.strokeStyle = '#0dcaf0'; 
+                ctx.lineWidth = 2; 
+                ctx.stroke();
+                
+                const midX = (screenX1 + screenX2) / 2; 
+                const midY = (screenY1 + screenY2) / 2; 
+                const text = line.realLength + 'mm';
+                
+                ctx.font = 'bold 12px -apple-system, sans-serif'; 
+                const textWidth = ctx.measureText(text).width;
+                ctx.fillStyle = 'rgba(10, 10, 12, 0.9)'; 
+                ctx.fillRect(midX - (textWidth / 2) - 8, midY - 12, textWidth + 16, 24);
+                ctx.fillStyle = '#f4f4f6'; 
+                ctx.fillText(text, midX - (textWidth / 2), midY + 4);
             });
 
             window.sniperPoints.forEach((p, index) => {
-                const screenX = (p.x * imgScale) + imgX; const screenY = (p.y * imgScale) + imgY;
-                ctx.beginPath(); ctx.arc(screenX, screenY, 4, 0, Math.PI * 2); ctx.fillStyle = (index === window.sniperPoints.length - 1 && window.sniperPoints.length % 2 !== 0) ? '#0dcaf0' : '#8b8b93'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+                const screenX = (p.x * imgScale) + imgX; 
+                const screenY = (p.y * imgScale) + imgY;
+                ctx.beginPath(); 
+                ctx.arc(screenX, screenY, 4, 0, Math.PI * 2); 
+                ctx.fillStyle = (index === window.sniperPoints.length - 1 && window.sniperPoints.length % 2 !== 0) ? '#0dcaf0' : '#8b8b93'; 
+                ctx.fill(); 
+                ctx.strokeStyle = '#fff'; 
+                ctx.lineWidth = 1.5; 
+                ctx.stroke();
             });
+
+            // Center Crosshair
+            const cx = canvas.width / 2; 
+            const cy = canvas.height / 2;
+            ctx.beginPath(); 
+            ctx.moveTo(cx - 20, cy); 
+            ctx.lineTo(cx + 20, cy); 
+            ctx.moveTo(cx, cy - 20); 
+            ctx.lineTo(cx, cy + 20); 
+            ctx.strokeStyle = 'rgba(13, 202, 240, 0.9)'; 
+            ctx.lineWidth = 1.5; 
+            ctx.stroke();
+            
+            ctx.beginPath(); 
+            ctx.arc(cx, cy, 10, 0, Math.PI * 2); 
+            ctx.strokeStyle = 'rgba(13, 202, 240, 0.5)'; 
+            ctx.stroke();
         }
 
         markBtn?.addEventListener('click', (e) => {
-            e.preventDefault(); if(!sniperImg) return alert("Load an image first.");
-            const cx = canvas.width / 2; const cy = canvas.height / 2;
+            e.preventDefault(); 
+            if(!sniperImg) return alert("Load an image first.");
+            
+            const cx = canvas.width / 2; 
+            const cy = canvas.height / 2;
             window.sniperPoints.push({ x: (cx - imgX) / imgScale, y: (cy - imgY) / imgScale });
             
             if(window.sniperPoints.length > 0 && window.sniperPoints.length % 2 === 0) {
-                const p1Index = window.sniperPoints.length - 2; const p2Index = window.sniperPoints.length - 1;
-                const p1 = window.sniperPoints[p1Index]; const p2 = window.sniperPoints[p2Index];
+                const p1Index = window.sniperPoints.length - 2; 
+                const p2Index = window.sniperPoints.length - 1;
+                const p1 = window.sniperPoints[p1Index]; 
+                const p2 = window.sniperPoints[p2Index];
                 const pixelDist = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
                 
                 if(!calibrationRatio) {
                     const realWorld = prompt("CALIBRATION MODE: Enter the length of this line (in mm):");
                     if(realWorld && !isNaN(realWorld)) {
-                        calibrationRatio = parseFloat(realWorld) / pixelDist; lines.push({ p1: p1Index, p2: p2Index, realLength: realWorld });
-                        markBtn.innerText = "🎯 Drop Pin (Calibrated)"; markBtn.style.backgroundColor = "#238636"; markBtn.style.color = "#fff";
-                    } else window.sniperPoints.pop(); 
+                        calibrationRatio = parseFloat(realWorld) / pixelDist; 
+                        lines.push({ p1: p1Index, p2: p2Index, realLength: realWorld });
+                        markBtn.innerText = "🎯 Drop Pin (Calibrated)"; 
+                        markBtn.style.backgroundColor = "#238636"; 
+                        markBtn.style.color = "#fff";
+                    } else {
+                        window.sniperPoints.pop(); 
+                    }
                 } else {
                     const calculatedLength = Math.round(pixelDist * calibrationRatio);
                     const finalLength = prompt("Calculated measurement (mm). Edit if needed:", calculatedLength);
-                    if(finalLength && !isNaN(finalLength)) lines.push({ p1: p1Index, p2: p2Index, realLength: Math.round(finalLength) });
-                    else window.sniperPoints.pop(); 
+                    if(finalLength && !isNaN(finalLength)) {
+                        lines.push({ p1: p1Index, p2: p2Index, realLength: Math.round(finalLength) });
+                    } else {
+                        window.sniperPoints.pop(); 
+                    }
                 }
-            } drawSniper();
+            } 
+            drawSniper();
         });
 
-        document.getElementById('btn-sniper-clear')?.addEventListener('click', (e) => { e.preventDefault(); window.sniperPoints = []; lines = []; calibrationRatio = null; resetMarkButton(); drawSniper(); });
-        function resetMarkButton() { if (markBtn) { markBtn.innerText = "🎯 Drop Target Pin"; markBtn.style.backgroundColor = ""; markBtn.style.color = ""; } }
+        document.getElementById('btn-sniper-clear')?.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            window.sniperPoints = []; 
+            lines = []; 
+            calibrationRatio = null; 
+            resetMarkButton(); 
+            drawSniper(); 
+        });
+
+        function resetMarkButton() { 
+            if (markBtn) { 
+                markBtn.innerText = "🎯 Drop Target Pin"; 
+                markBtn.style.backgroundColor = ""; 
+                markBtn.style.color = ""; 
+            } 
+        }
+
+        // ==========================================
+        // UTILITIES & SYNC LOGIC
+        // ==========================================
+        document.getElementById('planningPerms')?.addEventListener('change', (e) => { 
+            const cb = document.getElementById('cb-planning'); 
+            if(cb) cb.checked = (e.target.value !== 'Permitted Development (No Action)' && e.target.value !== ''); 
+        });
+        
+        document.getElementById('sapCalcs')?.addEventListener('change', (e) => { 
+            const cb = document.getElementById('cb-sap'); 
+            if(cb) cb.checked = (e.target.value === 'Yes'); 
+        });
+        
+        document.getElementById('roofType')?.addEventListener('change', (e) => { 
+            const cb = document.getElementById('cb-roof'); 
+            if(cb) cb.checked = (e.target.value !== ''); 
+        });
 
         document.getElementById('btn-ai-polish')?.addEventListener('click', (e) => {
-            e.preventDefault(); const notesEl = document.getElementById('designerNotes');
+            e.preventDefault(); 
+            const notesEl = document.getElementById('designerNotes');
             if(!notesEl.value.trim()) return alert("Enter rough notes first.");
+            
             e.target.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Polishing...`;
+            
             setTimeout(() => {
                 notesEl.value = "PROFESSIONAL OBSERVATIONS:\n" + notesEl.value.split('\n').filter(l=>l.trim()!=='').map(l=>`• ${l.charAt(0).toUpperCase() + l.slice(1)}`).join('\n');
                 e.target.innerHTML = `<span class="material-icons-round">auto_fix_high</span> AI Polish Notes`;
@@ -980,9 +1640,6 @@
             document.getElementById('progressText').innerText = label;
         };
 
-        // ==========================================
-        // DYNAMIC FIREBASE DATABASE SYNC
-        // ==========================================
         document.getElementById('btn-sync')?.addEventListener('click', async (e) => {
             e.preventDefault();
             const clientNameVal = document.getElementById('clientName').value.trim();
@@ -1041,24 +1698,28 @@
                 };
 
                 let activeProjectId = `${clientNameVal}_${postCodeVal}`.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+                
                 await setDoc(doc(db, "surveys", activeProjectId), surveyData, { merge: true });
                 window.currentProjectId = activeProjectId;
 
                 setProgress(100, "Pack Saved Successfully ✓");
-                loadLiveProjects();
+                window.loadLiveProjects();
                 
                 setTimeout(() => {
                     btn.innerHTML = `<span class="material-icons-round text-white">check_circle</span> Complete Pack Saved ✓`;
                     btn.style.background = "#238636";
+                    
                     setTimeout(() => { 
                         document.getElementById('syncProgressWrapper').style.display = 'none';
-                        btn.style.background = ""; btn.innerHTML = `<span class="material-icons-round">cloud_upload</span> Save & Sync Survey`; btn.disabled = false; 
+                        btn.style.background = ""; 
+                        btn.innerHTML = `<span class="material-icons-round">cloud_upload</span> Save & Sync Survey`; 
+                        btn.disabled = false; 
                     }, 3000);
                 }, 800);
 
             } catch(err) {
                 console.error("Firebase Sync Error:", err);
-                alert("Sync Error: Check console.");
+                alert("Sync Error: Check your browser console for details.");
                 document.getElementById('syncProgressWrapper').style.display = 'none';
                 btn.disabled = false;
             }
@@ -1067,7 +1728,7 @@
         // ==========================================
         // LIVE FIREBASE PROJECT LIBRARY (DASHBOARD)
         // ==========================================
-        async function loadLiveProjects() {
+        window.loadLiveProjects = async function() {
             const grid = document.getElementById('projectsGrid');
             grid.innerHTML = `<div class="col-span-full text-center py-10"><span class="material-icons-round animate-spin text-4xl text-[color:var(--brand-primary)]">sync</span></div>`;
 
@@ -1118,10 +1779,15 @@
                 console.error("Error loading projects:", error);
                 grid.innerHTML = '<p class="text-xs text-red-500 col-span-full">Failed to load live projects.</p>';
             }
-        }
+        };
 
-        window.openProject = (id) => { window.location.href = `pdf-compiler.html?id=${id}`; };
+        window.openProject = (id) => { 
+            window.location.href = `pdf-compiler.html?id=${id}`; 
+        };
 
+        // ==========================================
+        // COMPILER & ROUTING BUTTONS
+        // ==========================================
         document.getElementById('btnScrapeCompile')?.addEventListener('click', async (e) => {
             const btn = e.target;
             btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Extracting Data...`;
@@ -1156,7 +1822,7 @@
 
         document.getElementById('btn-vault')?.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = 'vault.html';
+            window.location.href = `vault.html?id=${window.currentProjectId || 'DEMO_PROJECT_123'}`;
         });
 
     </script>
