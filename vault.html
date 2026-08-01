@@ -7,76 +7,131 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     
+    <!-- Luxury Typography Pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    
     <style>
         :root {
+            /* Yorkshire Windows brand blue retained as a subtle accent */
             --brand-primary: #005A9C; 
-            --brand-glow: rgba(0, 90, 156, 0.15);
-            --bg-base: #f8fafc;
-            --surface: #ffffff;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
+            
+            /* Luxury Palette */
+            --onyx: #0a0a0a;
+            --charcoal: #1a1a1a;
+            --slate: #2d2d2d;
+            --paper: #fcfcfc;
+            --champagne: #D4AF37;
+            --champagne-muted: rgba(212, 175, 55, 0.2);
+            --border-delicate: #e5e5e5;
         }
 
         body { 
-            background-color: var(--bg-base); 
-            color: var(--text-dark); 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Roboto, sans-serif;
+            background-color: var(--paper); 
+            color: var(--charcoal); 
+            font-family: 'Montserrat', sans-serif;
             -webkit-font-smoothing: antialiased; 
             height: 100%;
         }
 
-        .glass-surface {
-            background: var(--surface);
-            border-radius: 20px;
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.02);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        /* Editorial Typography */
+        h1, h2, h3, .font-serif {
+            font-family: 'Playfair Display', serif;
         }
 
+        /* Architectural Framing */
+        .glass-surface {
+            background: #ffffff;
+            border: 1px solid var(--border-delicate);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+        }
+        
+        .glass-surface::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: var(--border-delicate);
+            transform: scaleX(0);
+            transition: transform 0.6s ease;
+            transform-origin: right;
+        }
+        
+        .glass-surface:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* Luxury Buttons */
         .luxury-btn {
-            background: var(--brand-primary);
+            background: var(--onyx);
             color: white;
-            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 16px 24px;
-            border-radius: 12px;
+            letter-spacing: 2px;
+            padding: 18px 30px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px var(--brand-glow);
+            gap: 12px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
-            border: none;
+            border: 1px solid var(--onyx);
+            position: relative;
+            overflow: hidden;
         }
-        .luxury-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 90, 156, 0.3);
+        
+        .luxury-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .luxury-btn:hover::before {
+            left: 100%;
+        }
+
+        .luxury-btn.gold-accent {
+            background: var(--onyx);
+            border-color: var(--champagne);
+            color: var(--champagne);
+        }
+        .luxury-btn.gold-accent:hover {
+            background: var(--champagne);
+            color: var(--onyx);
         }
 
         .secondary-btn {
-            background: #f1f5f9;
-            color: var(--brand-primary);
-            font-weight: 800;
+            background: transparent;
+            color: var(--charcoal);
+            font-size: 10px;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 12px 20px;
-            border-radius: 10px;
+            letter-spacing: 1.5px;
+            padding: 16px 24px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
+            gap: 10px;
+            transition: all 0.3s ease;
             cursor: pointer;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-delicate);
         }
         .secondary-btn:hover {
-            background: #e2e8f0;
+            border-color: var(--charcoal);
+            background: var(--paper);
         }
 
-        /* Interactive Accordions */
+        /* Premium Accordions */
         .accordion-item {
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--border-delicate);
             overflow: hidden;
         }
         .accordion-header {
@@ -84,43 +139,55 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 0;
+            padding: 24px 0;
             background: none;
             border: none;
             cursor: pointer;
-            font-weight: 800;
-            font-size: 16px;
-            color: var(--text-dark);
+            color: var(--charcoal);
             text-align: left;
+        }
+        .accordion-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
         .accordion-content {
             max-height: 0;
-            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1);
+            transition: max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
             opacity: 0;
         }
         .accordion-content.open {
             max-height: 2000px;
-            transition: max-height 0.4s ease-in-out;
             opacity: 1;
-            padding-bottom: 20px;
+            padding-bottom: 24px;
         }
         .accordion-icon {
-            transition: transform 0.3s ease;
-            color: var(--brand-primary);
+            transition: transform 0.4s ease;
+            color: var(--champagne);
+            font-weight: 300;
         }
         .open .accordion-icon {
             transform: rotate(180deg);
         }
 
-        /* Quote Reveal Blur */
+        /* The Black Card Quote Reveal */
+        .black-card {
+            background: var(--onyx);
+            color: white;
+            position: relative;
+            z-index: 10;
+        }
         .quote-blur {
-            filter: blur(12px);
+            filter: blur(16px);
             user-select: none;
             pointer-events: none;
-            transition: filter 1s ease, opacity 0.5s ease;
+            transition: filter 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+            opacity: 0.4;
         }
         .quote-unlocked .quote-blur {
             filter: blur(0);
+            opacity: 1;
             pointer-events: auto;
         }
         .reveal-overlay {
@@ -129,236 +196,230 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255,255,255,0.6);
-            backdrop-filter: blur(4px);
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(8px);
             z-index: 10;
-            border-radius: 20px;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease, visibility 0.8s;
         }
         .quote-unlocked .reveal-overlay {
             opacity: 0;
-            pointer-events: none;
+            visibility: hidden;
         }
 
-        /* Interactive Gallery */
+        /* Museum Gallery */
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
         .gallery-item {
             aspect-ratio: 4/3;
-            border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
             position: relative;
-            background: #f1f5f9;
+            background: #eee;
+            border: 1px solid var(--border-delicate);
         }
         .gallery-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s ease;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s;
+            filter: grayscale(20%);
         }
         .gallery-item:hover img {
-            transform: scale(1.1);
+            transform: scale(1.05);
+            filter: grayscale(0%);
         }
         .gallery-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+            background: linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.2) 60%, transparent 100%);
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 12px;
+            padding: 20px;
             color: white;
             pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
         }
         .gallery-overlay h4 {
-            font-size: 11px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 2px;
-            color: #0dcaf0;
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            color: var(--champagne);
         }
         .gallery-overlay p {
             font-size: 10px;
-            line-height: 1.3;
-            opacity: 0.9;
+            font-weight: 300;
+            line-height: 1.5;
+            letter-spacing: 0.5px;
+            color: #d1d5db;
         }
 
-        /* Modal Image Viewer */
-        #imageModal {
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        /* PIN Input */
+        /* Minimalist PIN Input */
         .pin-input {
-            width: 60px;
-            height: 70px;
+            width: 50px;
+            height: 60px;
             text-align: center;
-            font-size: 32px;
-            font-weight: 900;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: #fff;
-            color: var(--brand-primary);
-            transition: all 0.2s;
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 400;
+            border: none;
+            border-bottom: 2px solid var(--border-delicate);
+            background: transparent;
+            color: var(--charcoal);
+            transition: all 0.3s ease;
+            border-radius: 0;
         }
         .pin-input:focus {
             outline: none;
-            border-color: var(--brand-primary);
-            box-shadow: 0 0 0 4px var(--brand-glow);
+            border-bottom-color: var(--champagne);
+        }
+
+        /* Minimalist Data Cards */
+        .data-card {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-delicate);
+        }
+        .data-card-title {
+            font-size: 9px;
+            color: var(--slate);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+        .data-card-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--charcoal);
+            margin-bottom: 10px;
+        }
+        .data-card-explain {
+            font-size: 11px;
+            font-weight: 300;
+            color: #666;
+            line-height: 1.6;
         }
 
         /* Animations */
         @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-enter {
-            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        
-        .data-card {
-            background: #f8fafc;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-        .data-card-title {
-            font-size: 10px;
-            color: var(--text-muted);
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-        .data-card-value {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-        .data-card-explain {
-            font-size: 11px;
-            color: #475569;
-            line-height: 1.4;
-            border-top: 1px dashed #cbd5e1;
-            padding-top: 8px;
+            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 </head>
 <body class="relative">
 
     <!-- SECURE CLIENT PIN GATE -->
-    <div id="clientAuthGate" class="fixed inset-0 z-[9999] flex items-center justify-center bg-[#f8fafc] p-6 transition-opacity duration-500">
-        <div class="glass-surface p-10 w-full max-w-md text-center">
-            <h1 class="text-3xl font-black tracking-wide text-slate-800 mb-2">YORKSHIRE WINDOWS</h1>
-            <p class="text-xs text-slate-500 uppercase tracking-widest mb-8">Secure Client Vault</p>
+    <div id="clientAuthGate" class="fixed inset-0 z-[9999] flex items-center justify-center bg-[color:var(--paper)] p-6 transition-opacity duration-700">
+        <div class="p-12 w-full max-w-md text-center">
+            <h1 class="text-3xl font-serif tracking-widest text-charcoal mb-4 uppercase">Yorkshire</h1>
+            <div class="h-[1px] w-12 bg-[color:var(--champagne)] mx-auto mb-4"></div>
+            <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-12">Private Architectural Dossier</p>
             
-            <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span class="material-icons-round text-4xl text-[color:var(--brand-primary)]">lock</span>
-            </div>
+            <p class="text-xs text-gray-400 mb-8 font-light tracking-wide leading-relaxed">Please enter the secure access key provided by your design consultant to view your project.</p>
             
-            <p class="text-sm text-slate-600 mb-6 font-medium">Enter the 4-digit PIN provided by your designer to unlock your project dossier.</p>
-            
-            <div class="flex justify-center gap-3 mb-8">
+            <div class="flex justify-center gap-4 mb-12">
                 <input type="password" maxlength="1" class="pin-input" id="pin1" onkeyup="moveToNext(this, 'pin2')">
                 <input type="password" maxlength="1" class="pin-input" id="pin2" onkeyup="moveToNext(this, 'pin3', 'pin1')">
                 <input type="password" maxlength="1" class="pin-input" id="pin3" onkeyup="moveToNext(this, 'pin4', 'pin2')">
                 <input type="password" maxlength="1" class="pin-input" id="pin4" onkeyup="moveToNext(this, null, 'pin3')">
             </div>
             
-            <button id="btnUnlockVault" class="luxury-btn w-full">Unlock My Vault</button>
-            <p id="pinError" class="text-red-500 text-xs font-bold mt-4 opacity-0 transition-opacity">Incorrect PIN. Please try again.</p>
+            <button id="btnUnlockVault" class="luxury-btn w-full">Access Dossier</button>
+            <p id="pinError" class="text-red-800 text-[10px] uppercase tracking-widest font-bold mt-6 opacity-0 transition-opacity">Incorrect Access Key.</p>
         </div>
     </div>
 
     <!-- MAIN VAULT APP -->
-    <div id="vaultApp" class="hidden min-h-screen pb-24">
+    <div id="vaultApp" class="hidden min-h-screen pb-32">
         
-        <!-- Header -->
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-            <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+        <!-- Minimalist Header -->
+        <header class="bg-[color:var(--paper)] border-b border-[color:var(--border-delicate)] sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
                 <div>
-                    <h2 class="text-xl font-black tracking-wide text-slate-800">YORKSHIRE WINDOWS</h2>
-                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Interactive Dossier</p>
+                    <h2 class="text-lg font-serif tracking-[0.2em] uppercase text-[color:var(--charcoal)]">Yorkshire</h2>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:block">Live Connection</span>
+                <div class="flex items-center gap-4">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[color:var(--champagne)] animate-pulse"></span>
+                    <span class="text-[9px] text-gray-400 uppercase tracking-[0.2em]">Secure Connection</span>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-12">
             
-            <!-- Hero Welcome & Appointment Banner -->
-            <div id="vaultHeroBanner" class="glass-surface p-8 mb-8 animate-enter opacity-0 transition-all duration-700" style="background: linear-gradient(135deg, #005A9C 0%, #003a66 100%); color: white;">
-                <h1 class="text-4xl font-black mb-2 tracking-tight" id="vaultHeroTitle">Welcome back, Client.</h1>
-                <p class="text-blue-100 text-lg mb-8 max-w-2xl" id="vaultHeroSub">Your bespoke architectural survey and quotation are ready for review. We measure everything meticulously so there are zero surprises during installation.</p>
-                
-                <div id="apptBanner" class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-5 flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="bg-white text-[color:var(--brand-primary)] p-3 rounded-lg shadow-lg">
-                            <span class="material-icons-round text-2xl">event</span>
+            <!-- Hero Welcome Banner -->
+            <div id="vaultHeroBanner" class="p-10 sm:p-16 mb-12 animate-enter opacity-0 transition-all duration-700 bg-[color:var(--onyx)] text-white relative overflow-hidden" style="border-left: 4px solid var(--champagne);">
+                <!-- Subtle background pattern or noise could go here -->
+                <div class="relative z-10 max-w-3xl">
+                    <h1 class="text-4xl sm:text-5xl font-serif mb-6 leading-tight" id="vaultHeroTitle">Welcome, Client.</h1>
+                    <p class="text-sm font-light text-gray-300 leading-loose max-w-2xl mb-12 tracking-wide" id="vaultHeroSub">Your bespoke architectural survey is ready for review. We engineer every element meticulously to ensure a flawless realization of your new living space.</p>
+                    
+                    <div id="apptBanner" class="inline-flex items-center gap-6 border border-white/20 p-6 bg-white/5 backdrop-blur-sm">
+                        <div class="text-[color:var(--champagne)]">
+                            <span class="material-icons-round text-3xl font-light">calendar_today</span>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-widest font-bold text-blue-200">Next Scheduled Visit</p>
-                            <p class="text-xl font-bold" id="vaultApptDate">Awaiting Scheduling</p>
+                            <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1">Next Consultation</p>
+                            <p class="text-lg font-serif tracking-wide" id="vaultApptDate">Awaiting Scheduling</p>
                         </div>
                     </div>
-                    <button class="bg-white text-[color:var(--brand-primary)] font-bold text-xs uppercase tracking-widest py-3 px-6 rounded-lg shadow-lg hover:scale-105 transition">
-                        Reschedule
-                    </button>
                 </div>
             </div>
 
             <!-- Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 
-                <!-- LEFT COLUMN: The Details -->
-                <div class="lg:col-span-2 space-y-8">
+                <!-- LEFT COLUMN: The Details (Wider in luxury layouts) -->
+                <div class="lg:col-span-8 space-y-12">
                     
                     <!-- 1. Interactive Survey Details -->
-                    <div class="glass-surface p-8 animate-enter opacity-0" style="animation-delay: 0.1s;">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="material-icons-round text-2xl text-[color:var(--brand-primary)]">architecture</span>
-                            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Your Survey Diagnostics</h2>
-                        </div>
-                        <p class="text-sm text-slate-600 mb-6">Explore exactly how your new living space is being engineered. We believe in total transparency regarding your property's structural requirements.</p>
+                    <div class="glass-surface p-10 sm:p-12 animate-enter opacity-0" style="animation-delay: 0.1s;">
+                        <h2 class="text-3xl font-serif text-[color:var(--charcoal)] mb-4">Structural Diagnostics</h2>
+                        <div class="h-[1px] w-12 bg-[color:var(--champagne)] mb-8"></div>
+                        <p class="text-xs text-gray-500 font-light leading-relaxed mb-10 tracking-wide">A transparent breakdown of the engineering and design choices dictating the construction of your property extension.</p>
                         
-                        <div class="space-y-2">
+                        <div class="space-y-4">
                             <!-- Accordion 1: Design -->
                             <div class="accordion-item">
                                 <button class="accordion-header" onclick="toggleAccordion(this)">
-                                    <span class="flex items-center gap-3"><span class="material-icons-round text-slate-400">palette</span> Architectural Design Choices</span>
-                                    <span class="material-icons-round accordion-icon">expand_more</span>
+                                    <span class="accordion-title">Architectural Vision</span>
+                                    <span class="material-icons-round accordion-icon">add</span>
                                 </button>
                                 <div class="accordion-content">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 pb-6">
                                         <div class="data-card">
-                                            <p class="data-card-title">Build Type & Size</p>
+                                            <p class="data-card-title">Footprint & Scale</p>
                                             <p class="data-card-value" id="v-buildType">-</p>
-                                            <p class="data-card-explain">This defines the footprint of your new space. Engineered to maximize your property's potential while respecting boundary limits.</p>
+                                            <p class="data-card-explain">Engineered to maximize your property's potential while respecting boundary limits and maximizing natural light flow.</p>
                                         </div>
                                         <div class="data-card">
-                                            <p class="data-card-title">Roof System & Pitch</p>
+                                            <p class="data-card-title">Roofing Architecture</p>
                                             <p class="data-card-value" id="v-roof">-</p>
-                                            <p class="data-card-explain">The pitch ensures optimal rain runoff, while the system itself dictates the thermal performance and internal ceiling height.</p>
+                                            <p class="data-card-explain">Calculated to provide optimal thermal efficiency and a striking internal vaulted aesthetic.</p>
                                         </div>
                                         <div class="data-card">
-                                            <p class="data-card-title">External Frame</p>
+                                            <p class="data-card-title">Exterior Finish</p>
                                             <p class="data-card-value" id="v-frameExt">-</p>
-                                            <p class="data-card-explain">Chosen to either seamlessly match your existing home's aesthetic or provide a striking modern contrast.</p>
+                                            <p class="data-card-explain">Selected to integrate seamlessly with your existing masonry or provide a bold, contemporary contrast.</p>
                                         </div>
                                         <div class="data-card">
-                                            <p class="data-card-title">Internal Frame</p>
+                                            <p class="data-card-title">Interior Palette</p>
                                             <p class="data-card-value" id="v-frameInt">-</p>
-                                            <p class="data-card-explain">Dictates the interior décor feel. Often kept white to maximize light reflection and create a spacious atmosphere.</p>
+                                            <p class="data-card-explain">Dictates the ambient feel of the room, typically neutral to amplify natural illumination.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -367,30 +428,30 @@
                             <!-- Accordion 2: Engineering -->
                             <div class="accordion-item">
                                 <button class="accordion-header" onclick="toggleAccordion(this)">
-                                    <span class="flex items-center gap-3"><span class="material-icons-round text-slate-400">foundation</span> Foundations & Engineering</span>
-                                    <span class="material-icons-round accordion-icon">expand_more</span>
+                                    <span class="accordion-title">Foundations & Engineering</span>
+                                    <span class="material-icons-round accordion-icon">add</span>
                                 </button>
                                 <div class="accordion-content">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 pb-6">
                                         <div class="data-card">
-                                            <p class="data-card-title">Base Construction</p>
+                                            <p class="data-card-title">Sub-Structure Strategy</p>
                                             <p class="data-card-value" id="v-baseType">-</p>
-                                            <p class="data-card-explain">Determined by your local soil geology and load-bearing requirements to guarantee a lifetime of structural integrity.</p>
+                                            <p class="data-card-explain">Dictated by local geology assessments to ensure absolute structural permanence.</p>
                                         </div>
                                         <div class="data-card">
-                                            <p class="data-card-title">DPC Alignment</p>
+                                            <p class="data-card-title">Moisture Defense (DPC)</p>
                                             <p class="data-card-value" id="v-dpc">-</p>
-                                            <p class="data-card-explain">Damp Proof Course measurement. Crucial for perfectly sealing the new structure against your home to prevent any moisture bridging.</p>
+                                            <p class="data-card-explain">Precise damp-proof course measurements to eliminate environmental moisture bridging.</p>
                                         </div>
                                         <div class="data-card">
-                                            <p class="data-card-title">Sub-Floor Venting</p>
+                                            <p class="data-card-title">Sub-Floor Aeration</p>
                                             <p class="data-card-value" id="v-airBricks">-</p>
-                                            <p class="data-card-explain">Ensures your existing home continues to breathe correctly beneath the floorboards once the new extension is attached.</p>
+                                            <p class="data-card-explain">Preserving the breathability of your primary residence's existing sub-floor architecture.</p>
                                         </div>
                                         <div class="data-card">
-                                            <p class="data-card-title">Fascia Height</p>
+                                            <p class="data-card-title">Eaves Clearances</p>
                                             <p class="data-card-value" id="v-fascia">-</p>
-                                            <p class="data-card-explain">Calculated to ensure the new roofline clears your existing first-floor windows while maximizing interior headroom.</p>
+                                            <p class="data-card-explain">Calculated tolerances to respect existing first-floor fenestration.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -399,25 +460,25 @@
                             <!-- Accordion 3: Logistics -->
                             <div class="accordion-item">
                                 <button class="accordion-header" onclick="toggleAccordion(this)">
-                                    <span class="flex items-center gap-3"><span class="material-icons-round text-slate-400">local_shipping</span> Site Preparation & Logistics</span>
-                                    <span class="material-icons-round accordion-icon">expand_more</span>
+                                    <span class="accordion-title">Site Logistics & Preparation</span>
+                                    <span class="material-icons-round accordion-icon">add</span>
                                 </button>
                                 <div class="accordion-content">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 pb-6">
                                         <div class="data-card">
-                                            <p class="data-card-title">Access Route</p>
+                                            <p class="data-card-title">Transit Route</p>
                                             <p class="data-card-value" id="v-access">-</p>
-                                            <p class="data-card-explain">Surveyed to plan the safe transport of heavy materials (like steel beams and glass) from the road to your garden.</p>
+                                            <p class="data-card-explain">Pre-planned pathways for the secure and non-disruptive transport of structural materials.</p>
                                         </div>
                                         <div class="data-card">
-                                            <p class="data-card-title">Drainage Works</p>
+                                            <p class="data-card-title">Groundworks & Drainage</p>
                                             <p class="data-card-value" id="v-drainage">-</p>
-                                            <p class="data-card-explain">Maps existing manholes and pipes. If your new base crosses a drain, we safely reroute it to maintain your utility access.</p>
+                                            <p class="data-card-explain">Mapping of subterranean utilities to facilitate safe modifications or rerouting.</p>
                                         </div>
                                         <div class="data-card sm:col-span-2">
-                                            <p class="data-card-title">Wall Obstacles</p>
+                                            <p class="data-card-title">Structural Obstructions</p>
                                             <p class="data-card-value" id="v-obstacles">-</p>
-                                            <p class="data-card-explain">Identifies boiler flues, extractor fans, or soil pipes that need careful working around or relocation during the build phase.</p>
+                                            <p class="data-card-explain">Identification of existing flues or vents requiring specialized architectural workarounds.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -426,25 +487,25 @@
                             <!-- Accordion 4: Compliance -->
                             <div class="accordion-item">
                                 <button class="accordion-header" onclick="toggleAccordion(this)">
-                                    <span class="flex items-center gap-3"><span class="material-icons-round text-slate-400">gavel</span> Planning & Compliance</span>
-                                    <span class="material-icons-round accordion-icon">expand_more</span>
+                                    <span class="accordion-title">Regulatory Compliance</span>
+                                    <span class="material-icons-round accordion-icon">add</span>
                                 </button>
                                 <div class="accordion-content">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 pb-6">
                                         <div class="data-card">
-                                            <p class="data-card-title">Building Control</p>
+                                            <p class="data-card-title">Building Control Status</p>
                                             <p class="data-card-value" id="v-regs">-</p>
-                                            <p class="data-card-explain">Yorkshire Windows handles all necessary regulatory certificates directly with inspectors to ensure your build is legally sound.</p>
+                                            <p class="data-card-explain">Fully managed liaison with inspectors to secure all mandatory legal certifications.</p>
                                         </div>
                                         <div class="data-card">
-                                            <p class="data-card-title">Planning Permission</p>
+                                            <p class="data-card-title">Planning Authority</p>
                                             <p class="data-card-value" id="v-planning">-</p>
-                                            <p class="data-card-explain">Determines if your build falls under Permitted Development or requires a formal application. We process this for you.</p>
+                                            <p class="data-card-explain">Determination and execution of Permitted Development or formal application requirements.</p>
                                         </div>
                                         <div class="data-card sm:col-span-2">
-                                            <p class="data-card-title">SAP Energy Calcs</p>
+                                            <p class="data-card-title">Thermal Validation (SAP)</p>
                                             <p class="data-card-value" id="v-sap">-</p>
-                                            <p class="data-card-explain">Thermal loss calculations. This proves to Building Control that your new space will remain highly energy efficient, keeping you warm in winter.</p>
+                                            <p class="data-card-explain">Complex energy calculations proving the ultimate thermal efficiency of your new space.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -452,16 +513,11 @@
                         </div>
                     </div>
 
-                    <!-- 2. Interactive Photo Gallery (Comprehensive) -->
-                    <div class="glass-surface p-8 animate-enter opacity-0" style="animation-delay: 0.2s;">
-                        <div class="flex justify-between items-end mb-6">
-                            <div>
-                                <h2 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                                    <span class="material-icons-round text-[color:var(--brand-primary)]">photo_camera</span> Site Evidence
-                                </h2>
-                                <p class="text-sm text-slate-500 mt-1">We visually map every potential hurdle to ensure our installation teams arrive fully prepared.</p>
-                            </div>
-                        </div>
+                    <!-- 2. Interactive Photo Gallery -->
+                    <div class="glass-surface p-10 sm:p-12 animate-enter opacity-0" style="animation-delay: 0.2s;">
+                        <h2 class="text-3xl font-serif text-[color:var(--charcoal)] mb-4">Site Cartography</h2>
+                        <div class="h-[1px] w-12 bg-[color:var(--champagne)] mb-8"></div>
+                        <p class="text-xs text-gray-500 font-light leading-relaxed mb-10 tracking-wide">A comprehensive visual index of your property, ensuring absolute precision before fabrication commences.</p>
                         
                         <div class="gallery-grid" id="v-gallery">
                             <!-- Populated dynamically via JS -->
@@ -469,19 +525,17 @@
                     </div>
 
                     <!-- 3. Pamphlet Downloads -->
-                    <div class="glass-surface p-8 animate-enter opacity-0" style="animation-delay: 0.3s;">
-                        <h2 class="text-xl font-black text-slate-800 tracking-tight mb-6 flex items-center gap-3">
-                            <span class="material-icons-round text-[color:var(--brand-primary)]">menu_book</span> Relevant Brochures
-                        </h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="v-brochures">
-                            <a href="./assets/shared/who-we-are.jpg" target="_blank" class="secondary-btn w-full justify-between">
-                                <span>Corporate Profile</span> <span class="material-icons-round">open_in_new</span>
+                    <div class="glass-surface p-10 sm:p-12 animate-enter opacity-0" style="animation-delay: 0.3s;">
+                        <h2 class="text-xl font-serif text-[color:var(--charcoal)] mb-8 tracking-wide">Corporate Literature</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" id="v-brochures">
+                            <a href="./assets/shared/who-we-are.jpg" target="_blank" class="secondary-btn justify-between">
+                                <span>The Yorkshire Profile</span> <span class="material-icons-round text-[color:var(--champagne)]">arrow_forward</span>
                             </a>
-                            <a href="./assets/shared/journey.jpg" target="_blank" class="secondary-btn w-full justify-between">
-                                <span>The Customer Journey</span> <span class="material-icons-round">open_in_new</span>
+                            <a href="./assets/shared/journey.jpg" target="_blank" class="secondary-btn justify-between">
+                                <span>Client Journey</span> <span class="material-icons-round text-[color:var(--champagne)]">arrow_forward</span>
                             </a>
-                            <a href="./assets/shared/protecting-home.jpg" target="_blank" class="secondary-btn w-full justify-between">
-                                <span>Our Guarantees</span> <span class="material-icons-round">open_in_new</span>
+                            <a href="./assets/shared/protecting-home.jpg" target="_blank" class="secondary-btn justify-between">
+                                <span>Our Guarantees</span> <span class="material-icons-round text-[color:var(--champagne)]">arrow_forward</span>
                             </a>
                         </div>
                     </div>
@@ -489,59 +543,53 @@
                 </div>
 
                 <!-- RIGHT COLUMN: Quote & Contact (Mobile Hero Shift Applied) -->
-                <div class="space-y-8 order-first lg:order-none">
+                <div class="lg:col-span-4 space-y-12 order-first lg:order-none">
                     
-                    <!-- 1. The Quote Reveal Engine -->
-                    <div class="glass-surface p-1 relative overflow-hidden animate-enter opacity-0" style="animation-delay: 0.4s;" id="quoteContainer">
-                        <!-- Premium gradient border effect -->
-                        <div class="bg-white rounded-[19px] p-8 h-full relative z-10">
-                            <div class="flex items-center gap-3 mb-6">
-                                <span class="material-icons-round text-2xl text-[color:var(--brand-primary)]">request_quote</span>
-                                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Official Quotation</h2>
+                    <!-- 1. The Black Card Quote Reveal -->
+                    <div class="black-card p-10 sm:p-12 animate-enter opacity-0 shadow-2xl" style="animation-delay: 0.4s;" id="quoteContainer">
+                        <h2 class="text-2xl font-serif text-white mb-2">Financial Schedule</h2>
+                        <div class="h-[1px] w-12 bg-[color:var(--champagne)] mb-10"></div>
+                        
+                        <!-- Blurred content until unlocked -->
+                        <div class="quote-blur space-y-10">
+                            <div>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-[0.2em] mb-3">Total Investment</p>
+                                <p class="text-5xl font-serif text-[color:var(--champagne)] tracking-tight" id="v-quoteTotal">£0.00</p>
+                                <p class="text-[10px] text-gray-500 mt-3 font-light tracking-widest uppercase">Inclusive of VAT & Installation</p>
                             </div>
                             
-                            <!-- Blurred content until unlocked -->
-                            <div class="quote-blur space-y-6">
-                                <div>
-                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Agreed Contract Total</p>
-                                    <p class="text-4xl font-black text-[color:var(--brand-primary)] tracking-tight" id="v-quoteTotal">£0.00</p>
-                                    <p class="text-xs text-slate-400 mt-1">Inclusive of VAT & Installation</p>
-                                </div>
-                                
-                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Required Deposit</p>
-                                    <p class="text-2xl font-bold text-slate-800" id="v-quoteDeposit">£0.00</p>
-                                </div>
+                            <div class="pt-8 border-t border-white/10">
+                                <p class="text-[9px] text-gray-400 uppercase tracking-[0.2em] mb-2">Required Deposit</p>
+                                <p class="text-2xl font-serif text-white" id="v-quoteDeposit">£0.00</p>
                             </div>
-                            
-                            <!-- The Unlock Button Overlay -->
-                            <div class="reveal-overlay flex-col text-center p-6">
-                                <span class="material-icons-round text-4xl text-slate-400 mb-3">lock</span>
-                                <h3 class="text-lg font-bold text-slate-800 mb-4">Your Quote is Ready</h3>
-                                <button onclick="revealQuote()" class="luxury-btn w-full shadow-[0_10px_20px_rgba(0,0,0,0.1)]">Reveal Figures</button>
-                            </div>
+                        </div>
+                        
+                        <!-- The Unlock Button Overlay -->
+                        <div class="reveal-overlay flex-col text-center p-8">
+                            <span class="material-icons-round text-5xl text-[color:var(--champagne)] mb-6 font-light">lock_outline</span>
+                            <h3 class="text-xl font-serif text-white mb-2">Proposal Finalized</h3>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-10">Confidential Document</p>
+                            <button onclick="revealQuote()" class="luxury-btn gold-accent w-full">Reveal Investment</button>
                         </div>
                     </div>
 
                     <!-- 2. Talk to Designer Card -->
-                    <div class="glass-surface p-8 animate-enter opacity-0" style="animation-delay: 0.5s;">
-                        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Your Design Consultant</h2>
+                    <div class="glass-surface p-10 sm:p-12 animate-enter opacity-0" style="animation-delay: 0.5s;">
+                        <h2 class="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.2em] mb-8">Lead Design Consultant</h2>
                         
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-[color:var(--brand-primary)] shadow-lg">
-                                <img id="v-designerImg" src="https://via.placeholder.com/150" class="w-full h-full object-cover">
+                        <div class="mb-8">
+                            <div class="w-24 h-24 overflow-hidden mb-6 border border-[color:var(--border-delicate)]">
+                                <img id="v-designerImg" src="https://via.placeholder.com/150" class="w-full h-full object-cover filter grayscale transition hover:grayscale-0">
                             </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-800" id="v-designerName">Thomas Oldroyd</h3>
-                                <p class="text-xs text-[color:var(--brand-primary)] font-bold uppercase tracking-widest" id="v-designerRole">New Living Space Designer</p>
-                            </div>
+                            <h3 class="text-2xl font-serif text-[color:var(--charcoal)] mb-1" id="v-designerName">Thomas Oldroyd</h3>
+                            <p class="text-[10px] text-[color:var(--champagne)] font-bold uppercase tracking-[0.1em]" id="v-designerRole">New Living Space Designer</p>
                         </div>
                         
-                        <p class="text-sm text-slate-600 mb-6 italic" id="v-designerBio">"Here to help you bring your vision to life. Reach out directly if you need to adjust your design or discuss the quotation."</p>
+                        <p class="text-xs text-gray-500 mb-10 font-light leading-loose italic" id="v-designerBio">"Here to help you bring your vision to life. Reach out directly if you need to adjust your design or discuss the schedule."</p>
                         
                         <!-- Dynamic Mailto Link -->
-                        <a href="#" id="v-designerEmailBtn" class="secondary-btn w-full justify-center">
-                            <span class="material-icons-round">email</span> Send Message
+                        <a href="#" id="v-designerEmailBtn" class="luxury-btn w-full">
+                            Contact Consultant
                         </a>
                     </div>
 
@@ -551,11 +599,11 @@
     </div>
 
     <!-- Fullscreen Image Lightbox -->
-    <div id="imageModal" class="fixed inset-0 bg-black/90 z-[10000] hidden items-center justify-center p-4 opacity-0">
-        <button onclick="closeModal()" class="absolute top-6 right-6 text-white hover:text-gray-300 transition p-2 bg-white/10 rounded-full">
-            <span class="material-icons-round text-3xl">close</span>
+    <div id="imageModal" class="fixed inset-0 bg-[color:var(--onyx)] z-[10000] hidden items-center justify-center p-8 opacity-0">
+        <button onclick="closeModal()" class="absolute top-8 right-8 text-white hover:text-[color:var(--champagne)] transition">
+            <span class="material-icons-round text-4xl font-light">close</span>
         </button>
-        <img id="modalImage" src="" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
+        <img id="modalImage" src="" class="max-w-full max-h-[85vh] object-contain shadow-2xl border border-white/10">
     </div>
 
     <script type="module">
@@ -566,7 +614,7 @@
         let surveyData = null;
         let telemetryInterval = null;
         
-        // TELEMETRY METRICS (The Heartbeat Engine)
+        // TELEMETRY METRICS
         let metrics = {
             sessionStart: Date.now(),
             totalSecondsActive: 0,
@@ -596,14 +644,14 @@
 
             if (enteredPin.length !== 4) return;
 
-            btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Verifying...`;
+            btn.innerHTML = `<span class="material-icons-round animate-spin font-light mr-2">sync</span> Authenticating`;
             
             const urlParams = new URLSearchParams(window.location.search);
             activeProjectId = urlParams.get('id');
 
             if (!activeProjectId) {
-                alert("Invalid Vault Link. No Project ID found.");
-                btn.innerHTML = `Unlock My Vault`;
+                alert("Invalid Access Link.");
+                btn.innerHTML = `Access Dossier`;
                 return;
             }
 
@@ -614,7 +662,6 @@
                 if (docSnap.exists()) {
                     surveyData = docSnap.data();
                     
-                    // Check PIN
                     const correctPin = surveyData.customerProfile?.vaultPIN || "1234";
                     
                     if (enteredPin === correctPin) {
@@ -622,17 +669,16 @@
                         populateVaultData();
                         startHeartbeatEngine();
                     } else {
-                        throw new Error("Invalid PIN");
+                        throw new Error("Invalid Key");
                     }
                 } else {
-                    alert("Survey not found.");
-                    btn.innerHTML = `Unlock My Vault`;
+                    alert("Dossier not found.");
+                    btn.innerHTML = `Access Dossier`;
                 }
             } catch (err) {
                 console.error(err);
                 document.getElementById('pinError').classList.remove('opacity-0');
-                btn.innerHTML = `Unlock My Vault`;
-                // Clear inputs
+                btn.innerHTML = `Access Dossier`;
                 ['pin1','pin2','pin3','pin4'].forEach(id => document.getElementById(id).value = '');
                 document.getElementById('pin1').focus();
             }
@@ -647,12 +693,9 @@
                 gate.style.display = 'none';
                 app.classList.remove('hidden');
                 
-                // Trigger staggered entrance animations
                 const elements = document.querySelectorAll('.animate-enter');
-                elements.forEach(el => {
-                    el.style.animationPlayState = 'running';
-                });
-            }, 500);
+                elements.forEach(el => el.style.animationPlayState = 'running');
+            }, 700);
         };
 
         // ==========================================
@@ -667,20 +710,15 @@
             const clientNameDisplay = profile.leadName || 'Client';
 
             // Profile & Banner Logic
-            const heroBanner = document.getElementById('vaultHeroBanner');
             const heroTitle = document.getElementById('vaultHeroTitle');
             const heroSub = document.getElementById('vaultHeroSub');
 
             if (quote) {
-                // Dynamic Banner Evolution - Quote Ready
-                heroBanner.style.background = 'linear-gradient(135deg, #238636 0%, #1a6328 100%)';
-                heroTitle.innerHTML = `Your Quotation is Ready, ${clientNameDisplay}.`;
-                heroSub.innerText = "We have finalized your project costs. Reveal your official quotation below before reviewing the technical survey details.";
+                heroTitle.innerHTML = `Proposal Finalized, ${clientNameDisplay}.`;
+                heroSub.innerText = "We have structured your investment schedule. Reveal your official quotation below prior to reviewing the technical engineering diagnostics.";
             } else {
-                // Standard Banner
-                heroBanner.style.background = 'linear-gradient(135deg, #005A9C 0%, #003a66 100%)';
-                heroTitle.innerHTML = `Welcome back, ${clientNameDisplay}.`;
-                heroSub.innerText = "Your bespoke architectural survey is ready for review. We measure everything meticulously so there are zero surprises during installation.";
+                heroTitle.innerHTML = `Welcome, ${clientNameDisplay}.`;
+                heroSub.innerText = "Your bespoke architectural survey is ready for review. We engineer every element meticulously to ensure a flawless realization of your new living space.";
             }
             
             if (profile.revisitDate) {
@@ -711,20 +749,21 @@
             // Compliance
             document.getElementById('v-regs').innerText = specs.buildingRegs || 'Determining Requirements...';
             document.getElementById('v-planning').innerText = specs.planningPerms || 'Determining Status...';
-            document.getElementById('v-sap').innerText = specs.sapCalcs === "Yes" ? "Required & Managed by Us" : "Exempt";
+            document.getElementById('v-sap').innerText = specs.sapCalcs === "Yes" ? "Required & Managed" : "Exempt";
 
             // Quote Data (OCR Scraped)
             if (quote) {
                 document.getElementById('v-quoteTotal').innerText = quote.contractTotal || '£0.00';
                 document.getElementById('v-quoteDeposit').innerText = quote.deposit || '£0.00';
             } else {
-                document.getElementById('v-quoteTotal').innerText = 'Awaiting Calculation';
-                document.querySelector('.reveal-overlay h3').innerText = 'Quote Being Prepared';
+                document.getElementById('v-quoteTotal').innerText = 'Pending';
+                document.querySelector('.reveal-overlay h3').innerText = 'Calculating Costs';
+                document.querySelector('.reveal-overlay p').innerText = 'Pending Final Review';
                 document.querySelector('.reveal-overlay button').style.display = 'none';
             }
 
-            // Designer Profile & Dynamic Email Link
-            document.getElementById('v-designerName').innerText = designer.name || 'Yorkshire Windows Design Team';
+            // Designer Profile & Dynamic Email
+            document.getElementById('v-designerName').innerText = designer.name || 'Yorkshire Windows';
             document.getElementById('v-designerRole').innerText = designer.role || 'Design Consultant';
             if (designer.bio) document.getElementById('v-designerBio').innerText = `"${designer.bio}"`;
             if (designer.headshot) document.getElementById('v-designerImg').src = designer.headshot;
@@ -732,12 +771,11 @@
             const designerEmail = surveyData.designerEmail || 'sales@yorkshirewindows.com';
             document.getElementById('v-designerEmailBtn').href = `mailto:${designerEmail}`;
 
-            // Comprehensive Gallery Population
+            // Gallery
             const gallery = document.getElementById('v-gallery');
             let gHtml = '';
             
             const addImage = (srcArray, title, desc) => {
-                // Handle both single strings and arrays (from the new photo grid logic)
                 let actualSrc = null;
                 if (Array.isArray(srcArray) && srcArray.length > 0) actualSrc = srcArray[0];
                 else if (typeof srcArray === 'string') actualSrc = srcArray;
@@ -754,7 +792,6 @@
                 }
             };
 
-            // Map all possible photo uploads with their structural explanations
             addImage(media.sketch, 'Laser Scope', 'Digital architectural mapping.');
             addImage(media.front, 'Front Elevation', 'Used to match existing property styling.');
             addImage(media.side, 'Side Elevation', 'Mapped for boundary positioning.');
@@ -765,7 +802,7 @@
             addImage(media.brick, 'Brick Match Profile', 'To source a seamless masonry blend.');
             addImage(media.misc, 'Misc Documentation', 'Additional site-specific details.');
             
-            if(!gHtml) gHtml = `<p class="text-xs text-slate-400 p-4 col-span-full">No imagery uploaded for this project yet.</p>`;
+            if(!gHtml) gHtml = `<p class="text-xs text-gray-400 p-4 font-light italic col-span-full">Visual mapping pending synchronization.</p>`;
             gallery.innerHTML = gHtml;
         };
 
@@ -775,27 +812,28 @@
         window.toggleAccordion = (button) => {
             metrics.accordionsOpened++;
             const content = button.nextElementSibling;
+            const icon = button.querySelector('.accordion-icon');
             const isOpen = content.classList.contains('open');
             
             document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('open'));
             document.querySelectorAll('.accordion-item').forEach(el => el.classList.remove('open'));
+            document.querySelectorAll('.accordion-icon').forEach(el => el.innerText = 'add');
             
             if (!isOpen) {
                 content.classList.add('open');
                 button.parentElement.classList.add('open');
+                icon.innerText = 'remove';
             }
         };
 
         window.revealQuote = () => {
             const container = document.getElementById('quoteContainer');
             container.classList.add('quote-unlocked');
-            
-            // Log this high-intent action to analytics
             metrics.hasRevealedQuote = true;
-            syncTelemetry(true); // Force immediate sync
+            syncTelemetry(true);
         };
 
-        // Lightbox Logic
+        // Lightbox
         window.openModal = (src) => {
             metrics.photosViewed++;
             const modal = document.getElementById('imageModal');
@@ -816,24 +854,19 @@
         };
 
         // ==========================================
-        // 4. THE HEARTBEAT ENGINE (TELEMETRY)
+        // 4. HEARTBEAT ENGINE
         // ==========================================
         const startHeartbeatEngine = () => {
-            // Initial payload structure creation
             syncTelemetry();
-
-            // Run silent heartbeat every 15 seconds
             telemetryInterval = setInterval(() => {
                 metrics.totalSecondsActive = Math.floor((Date.now() - metrics.sessionStart) / 1000);
                 syncTelemetry();
-            }, 15000); // 15 seconds
+            }, 15000);
         };
 
         const syncTelemetry = async (urgent = false) => {
             if (!activeProjectId) return;
-            
             try {
-                // We use merge: true so we don't overwrite the core survey data
                 await setDoc(doc(db, "surveys", activeProjectId), {
                     telemetry: {
                         lastActive: serverTimestamp(),
@@ -843,21 +876,18 @@
                         photosExpanded: metrics.photosViewed
                     }
                 }, { merge: true });
-                
                 if(urgent) console.log("High-intent telemetry synced immediately.");
             } catch (err) {
-                // Silently fail so client experience isn't interrupted
                 console.warn("Heartbeat sync failed temporarily.");
             }
         };
 
-        // Pause tracking if they switch tabs
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === 'hidden') {
                 clearInterval(telemetryInterval);
-                syncTelemetry(true); // Final sync before hiding
+                syncTelemetry(true);
             } else if (document.visibilityState === 'visible' && surveyData) {
-                metrics.sessionStart = Date.now() - (metrics.totalSecondsActive * 1000); // Resume math
+                metrics.sessionStart = Date.now() - (metrics.totalSecondsActive * 1000);
                 startHeartbeatEngine();
             }
         });
