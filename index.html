@@ -13,9 +13,9 @@
     <style>
         /* DYNAMIC BRANDING ENGINE */
         :root {
-            --brand-primary: #005A9C; 
-            --brand-bg-glow: rgba(0, 90, 156, 0.12);
-            --brand-border: rgba(0, 90, 156, 0.3);
+            --brand-primary: #d4af37; /* Default COHI Gold */
+            --brand-bg-glow: rgba(212, 175, 55, 0.12);
+            --brand-border: rgba(212, 175, 55, 0.3);
             --success: #238636;
             
             --bg-base: #0a0a0c;
@@ -67,7 +67,7 @@
             background: var(--bg-surface-elevated); 
             transform: translateY(-4px); 
             box-shadow: 0 16px 32px rgba(0,0,0,0.6); 
-            border-color: var(--brand-border); 
+            border-color: var(--brand-primary); 
         }
         .doc-preview-area { 
             flex: 1; 
@@ -344,7 +344,6 @@
             transition: width 0.3s ease; 
         }
 
-        /* Profile specific styles */
         .avatar-upload-circle { 
             width: 120px; 
             height: 120px; 
@@ -419,16 +418,18 @@
 </head>
 <body class="flex w-full h-full relative">
 
-    <!-- SECURE AUTH GATE -->
+    <!-- SECURE AUTH GATE WITH DYNAMIC BRANDING -->
     <div id="authGate" class="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0a0a0c] p-6">
-        <div class="md-surface p-10 w-full max-w-md relative overflow-hidden shadow-2xl">
-            <div class="absolute top-0 left-0 w-full h-1" style="background: var(--brand-primary);"></div>
-            <div class="text-center mb-10">
-                <h1 class="text-3xl font-black tracking-widest mb-2" id="loginBrandTitle">COHI<span style="color: var(--brand-primary)">PRO</span></h1>
-                <p class="text-xs text-gray-500 uppercase tracking-widest">Enterprise Authentication</p>
+        <div class="md-surface p-10 w-full max-w-md relative overflow-hidden shadow-2xl transition-all duration-300" style="border-top: 4px solid var(--brand-primary);">
+            <div class="text-center mb-10 flex flex-col items-center">
+                <!-- Fallback to co-logo.png if no brand is detected yet -->
+                <img id="loginBrandLogo" src="assets/co-logo.png" alt="COHI Group" class="h-20 mb-6 object-contain transition-all duration-500">
+                <h1 class="text-2xl font-black tracking-widest mb-1 transition-colors duration-300" id="loginBrandTitle">COHI<span style="color: var(--brand-primary)">PRO</span></h1>
+                <p class="text-[10px] text-gray-500 uppercase tracking-widest">Enterprise Authentication</p>
             </div>
             <div class="space-y-5">
-                <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input text-center" value="thomas@yorkshirewindows.com">
+                <!-- The JS listener is attached to this specific ID to swap logos -->
+                <input type="email" id="authEmail" placeholder="Designer Email" class="luxury-input text-center font-bold" value="">
                 <input type="password" id="authPassword" placeholder="••••••••" class="luxury-input text-center tracking-[0.5em]" value="password123">
                 <button id="btnLogin" class="btn-primary w-full">Initialize Session</button>
             </div>
@@ -438,18 +439,18 @@
     <!-- MOBILE SIDEBAR OVERLAY -->
     <div id="drawerOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity opacity-0" onclick="toggleMenu()"></div>
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR WITH DYNAMIC LOGO -->
     <nav id="appSidebar" class="w-72 bg-[#141418] border-r border-[#27272f] h-full fixed left-0 top-0 z-50 flex flex-col shadow-2xl">
-        <div class="p-6 pt-12 pb-4 border-b border-[#27272f] flex flex-col gap-4">
-            <h2 class="text-xl font-black uppercase tracking-widest m-0" id="sidebarBrand">COHI<span style="color: var(--brand-primary)">PRO</span></h2>
+        <div class="p-6 pt-12 pb-6 border-b border-[#27272f] flex flex-col gap-6">
+            <img id="sidebarBrandLogo" src="assets/co-logo.png" alt="Brand Logo" class="h-10 object-contain self-start transition-all duration-500">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-gray-600 flex items-center justify-center text-sm font-bold shadow-lg overflow-hidden relative">
                     <span id="sidebarAvatarInitial">T</span>
                     <img id="sidebarAvatarImg" src="" class="absolute inset-0 w-full h-full object-cover opacity-0">
                 </div>
                 <div>
-                    <p class="text-sm font-bold text-white" id="userName">Loading...</p>
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest truncate max-w-[150px]" id="userRole">New Living Space Designer</p>
+                    <p class="text-sm font-bold text-white leading-tight" id="userName">Loading...</p>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest truncate max-w-[150px]" id="userRole">Designer</p>
                 </div>
             </div>
         </div>
@@ -476,7 +477,6 @@
     <!-- MAIN APP SHELL -->
     <div id="appShell" class="flex flex-col w-full h-full opacity-0 transition-opacity duration-500 overflow-hidden">
         
-        <!-- TOP APP BAR -->
         <header class="h-16 border-b border-[#27272f] bg-[#141418] flex items-center justify-between px-6 z-30 shrink-0">
             <div class="flex items-center gap-4">
                 <button onclick="toggleMenu()" class="text-gray-300 hover:text-white p-2 rounded-full hover:bg-gray-800 transition flex items-center justify-center">
@@ -486,7 +486,6 @@
             </div>
         </header>
 
-        <!-- FLEXIBLE SCROLLABLE WORKSPACE -->
         <main class="flex-1 min-h-0 overflow-y-auto relative p-4 md:p-10">
             
             <!-- MODULE 1: DASHBOARD -->
@@ -495,7 +494,7 @@
                     <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest">Recent Surveys</h2>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="projectsGrid">
-                    <!-- Projects populated here -->
+                    <!-- Projects populated here. Will show nice empty state if data missing. -->
                 </div>
                 <button class="fab" onclick="switchModule('module-survey', document.querySelectorAll('.nav-link')[1])" title="Start New Survey">
                     <span class="material-icons-round">add</span>
@@ -525,7 +524,6 @@
                             <input type="text" id="clientName" placeholder="e.g. Mr. Dow" class="luxury-input">
                         </div>
                         
-                        <!-- UPGRADED PHONE/PIN FIELD -->
                         <div class="bg-[color:var(--bg-surface-elevated)] p-3 rounded-lg border border-emerald-900/50">
                             <label class="block text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-1">
                                 <span class="material-icons-round text-[12px]">lock</span> Client Mobile *
@@ -995,20 +993,31 @@
     <script type="module">
         import { db, doc, setDoc, getDoc, collection, serverTimestamp, getDocs, query, orderBy } from './js/core-firebase.js';
         
-        // NEW: Firebase Storage Import for Gatekeeper Document Upload
+        // Firebase Storage Import for Gatekeeper Document Upload
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         // Initialize PDF.js Worker for True OCR
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-        // Brand Configuration
-        const brands = { "Yorkshire Windows": { hex: "#005A9C", title: "YORKSHIRE" } };
+        // ==========================================
+        // ENTERPRISE BRANDING DICTIONARY 
+        // Maps emails to exact GitHub repository assets
+        // ==========================================
+        const brands = {
+            "yorkshirewindows": { hex: "#005A9C", rgb: "0, 90, 156", logo: "assets/yorkshirewindows/logo.png", name: "YORKSHIRE WINDOWS" },
+            "clearview": { hex: "#0284c7", rgb: "2, 132, 199", logo: "assets/clearview/logo.png", name: "CLEARVIEW" },
+            "orion": { hex: "#ea580c", rgb: "234, 88, 12", logo: "assets/orion/logo.png", name: "ORION" },
+            "planet": { hex: "#16a34a", rgb: "22, 163, 74", logo: "assets/planet/logo.png", name: "PLANET" },
+            "trentvalley": { hex: "#4f46e5", rgb: "79, 70, 229", logo: "assets/trentvalley/logo.png", name: "TRENT VALLEY" },
+            "westyorkshire": { hex: "#9333ea", rgb: "147, 51, 234", logo: "assets/westyorkshire/logo.png", name: "WEST YORKSHIRE" },
+            "default": { hex: "#d4af37", rgb: "212, 175, 55", logo: "assets/co-logo.png", name: "COHI GROUP" }
+        };
         
         // Globals
         window.activeProfileData = { name: "Thomas Oldroyd", role: "New Living Space Designer", bio: "", headshot: null, portfolio: [] };
         window.sitePhotos = { front:[], side:[], back:[], access:[], drainage:[], trees:[], brick:[], misc:[], sniper:[] };
         window.sniperPoints = [];
-        window.currentUserEmail = "thomas@yorkshirewindows.com";
+        window.currentUserEmail = "";
         window.currentProjectId = null;
         window.activeGatekeeperProjectId = null;
         
@@ -1056,10 +1065,36 @@
         };
 
         // ==========================================
-        // AUTHENTICATION & SESSION PERSISTENCE
+        // DYNAMIC AUTHENTICATION & BRAND INJECTION
         // ==========================================
+        
+        // Listen to email input to change brand graphics in real-time
+        document.getElementById('authEmail')?.addEventListener('input', (e) => {
+            const email = e.target.value.toLowerCase();
+            let matchedBrand = "default";
+            
+            for (const key in brands) {
+                if (key !== "default" && email.includes(key)) {
+                    matchedBrand = key;
+                    break;
+                }
+            }
+            
+            const config = brands[matchedBrand];
+            
+            // Inject CSS Variables dynamically
+            document.documentElement.style.setProperty('--brand-primary', config.hex);
+            document.documentElement.style.setProperty('--brand-bg-glow', `rgba(${config.rgb}, 0.12)`);
+            document.documentElement.style.setProperty('--brand-border', `rgba(${config.rgb}, 0.3)`);
+            
+            // Swap Logos and Titles
+            document.getElementById('loginBrandLogo').src = config.logo;
+            document.getElementById('loginBrandTitle').innerHTML = `${config.name}<span style="color: var(--brand-primary)">PRO</span>`;
+        });
+
         window.performLogin = (email) => {
-            window.currentUserEmail = email || "thomas@yorkshirewindows.com";
+            if(!email) return alert("Please enter an email address.");
+            window.currentUserEmail = email.toLowerCase();
             
             localStorage.setItem('cohi_user_session', window.currentUserEmail);
             
@@ -1067,17 +1102,23 @@
             if(btn) btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
             
             setTimeout(async () => {
-                const config = brands["Yorkshire Windows"];
-                const root = document.documentElement;
-                root.style.setProperty('--brand-primary', config.hex);
-                const rgb = "0, 90, 156"; 
-                root.style.setProperty('--brand-bg-glow', `rgba(${rgb}, 0.12)`);
-                root.style.setProperty('--brand-border', `rgba(${rgb}, 0.3)`);
+                // Ensure correct brand is set on successful login
+                let matchedBrand = "default";
+                for (const key in brands) {
+                    if (key !== "default" && window.currentUserEmail.includes(key)) {
+                        matchedBrand = key;
+                        break;
+                    }
+                }
+                const config = brands[matchedBrand];
                 
-                const titleHTML = `${config.title}<span style="color: var(--brand-primary)">PRO</span>`;
-                const loginTitle = document.getElementById('loginBrandTitle');
-                if(loginTitle) loginTitle.innerHTML = titleHTML;
-                document.getElementById('sidebarBrand').innerHTML = titleHTML;
+                // Set CSS Variables globally for the session
+                document.documentElement.style.setProperty('--brand-primary', config.hex);
+                document.documentElement.style.setProperty('--brand-bg-glow', `rgba(${config.rgb}, 0.12)`);
+                document.documentElement.style.setProperty('--brand-border', `rgba(${config.rgb}, 0.3)`);
+                
+                // Inject Brand into Sidebar
+                document.getElementById('sidebarBrandLogo').src = config.logo;
                 
                 await window.loadDesignerProfile();
                 window.loadLiveProjects(); 
@@ -1096,7 +1137,7 @@
         };
 
         document.getElementById('btnLogin')?.addEventListener('click', () => {
-            const emailInput = document.getElementById('authEmail').value.trim().toLowerCase();
+            const emailInput = document.getElementById('authEmail').value.trim();
             window.performLogin(emailInput);
         });
 
@@ -1288,7 +1329,12 @@
                         </div>
                     `;
                 });
-                container.innerHTML = html || '<p class="text-xs text-gray-500 text-center">No projects found.</p>';
+                
+                container.innerHTML = html || `
+                    <div class="text-center py-10 border-dashed border-2 border-[#27272f] rounded-lg">
+                        <span class="material-icons-round text-3xl text-gray-600 mb-2">folder_open</span>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Pipeline Empty</p>
+                    </div>`;
             } catch(e) { 
                 console.error(e); 
                 container.innerHTML = '<p class="text-xs text-red-500 text-center">Error loading pipeline.</p>';
@@ -1315,7 +1361,6 @@
             const file = input.files[0];
             const dropZone = document.getElementById('pdfDropZone');
             
-            // 1. Initial Loading UI for true OCR feel
             dropZone.innerHTML = `
                 <span class="material-icons-round text-6xl text-[color:var(--brand-primary)] animate-pulse mb-4">document_scanner</span>
                 <h3 class="text-xl font-bold text-white mb-2">Running Gatekeeper OCR Engine...</h3>
@@ -1327,13 +1372,13 @@
             `;
 
             try {
-                // 2. UPLOAD TO FIREBASE STORAGE (FOR VAULT PDF VIEWER)
+                // UPLOAD TO FIREBASE STORAGE
                 const storage = getStorage();
                 const pdfRef = ref(storage, `quotes/${Date.now()}_${file.name.replace(/\s+/g, '_')}`);
                 await uploadBytes(pdfRef, file);
                 const uploadedPdfUrl = await getDownloadURL(pdfRef);
 
-                // 3. RUN PDF.JS OCR EXTRACTION
+                // RUN PDF.JS OCR EXTRACTION
                 const fileReader = new FileReader();
                 fileReader.onload = async function(e) {
                     try {
@@ -1365,7 +1410,6 @@
 
                         document.getElementById('ocrLog2').innerText = "> Financials & Scope extracted securely. Syncing...";
 
-                        // The Enhanced Payload (includes the itemized scope and document link)
                         const extractedData = {
                             contractTotal: contractTotal,
                             deposit: deposit,
@@ -1413,7 +1457,7 @@
 
                     } catch (error) {
                         console.error("PDF Parsing Error:", error);
-                        throw error; // pass to outer catch
+                        throw error;
                     }
                 };
                 fileReader.readAsArrayBuffer(file);
@@ -1717,7 +1761,6 @@
             const clientNameVal = document.getElementById('clientName').value.trim();
             const postCodeVal = document.getElementById('postCode').value.trim();
             
-            // Generate the PIN from the phone input
             const rawPhone = document.getElementById('clientPhone').value || "";
             const cleanPhoneDigits = rawPhone.replace(/\D/g, ''); 
             const autoGeneratedPin = cleanPhoneDigits.length >= 4 ? cleanPhoneDigits.slice(-4) : "1234";
@@ -1746,7 +1789,7 @@
                         customerNum: document.getElementById('clientNum').value,
                         postcode: postCodeVal,
                         phone: rawPhone,
-                        vaultPIN: autoGeneratedPin, // The dynamically generated code 
+                        vaultPIN: autoGeneratedPin, 
                         apptDate: document.getElementById('apptDate').value,
                         revisitDate: document.getElementById('revisitDate').value
                     },
@@ -1840,14 +1883,18 @@
                     const name = profile.leadName || 'Unnamed Client';
                     const pc = profile.postcode || 'Unknown Loc';
                     const date = profile.apptDate || 'Recent';
+                    // Upgraded fallback if no front photo is loaded
                     const img = media.front || 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80';
-                    const tagStyle = hasQuote ? 'border-[color:var(--success)] text-[color:var(--success)]' : 'border-gray-600 text-gray-400';
+                    const imgFilter = media.front ? '' : 'filter: grayscale(20%) contrast(120%);';
+                    
+                    const tagStyle = hasQuote ? 'border-[color:var(--success)] text-[color:var(--success)]' : 'border-[color:var(--brand-primary)] text-[color:var(--brand-primary)]';
                     const tagText = hasQuote ? 'Vault Ready' : 'Survey Mode';
 
                     html += `
                         <div class="md-surface doc-card group" onclick="openProject('${id}')">
-                            <div class="doc-preview-area">
-                                <img src="${img}" class="w-full h-full object-cover opacity-50 transition duration-500 group-hover:opacity-90 group-hover:scale-110" style="filter: grayscale(20%) contrast(120%);">
+                            <div class="doc-preview-area relative">
+                                <img src="${img}" class="w-full h-full object-cover opacity-50 transition duration-500 group-hover:opacity-90 group-hover:scale-110" style="${imgFilter}">
+                                ${!media.front ? `<div class="absolute inset-0 flex items-center justify-center pointer-events-none"><span class="material-icons-round text-3xl text-gray-500/50">hide_image</span></div>` : ''}
                                 <span class="absolute top-2 right-2 border bg-black/60 backdrop-blur px-2 py-1 rounded text-[9px] font-bold uppercase tracking-widest z-10 ${tagStyle}">${tagText}</span>
                             </div>
                             <div class="p-4 border-t border-[#27272f] bg-[#141418] relative z-20">
@@ -1865,10 +1912,11 @@
                     <div class="col-span-full md-surface p-10 text-center border-dashed border-2 border-[#27272f]">
                         <span class="material-icons-round text-4xl text-gray-600 mb-2">folder_off</span>
                         <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">No active projects found.</p>
+                        <p class="text-[10px] text-gray-600 mt-2">Start a new Rapid Site Survey to populate your library.</p>
                     </div>`;
             } catch (error) {
                 console.error("Error loading projects:", error);
-                grid.innerHTML = '<p class="text-xs text-red-500 col-span-full">Failed to load live projects.</p>';
+                grid.innerHTML = '<p class="text-xs text-red-500 col-span-full">Failed to load live projects. Check Firebase connection.</p>';
             }
         };
 
@@ -1883,7 +1931,7 @@
                 document.getElementById('clientName').value = data.customerProfile?.leadName || '';
                 document.getElementById('clientNum').value = data.customerProfile?.customerNum || '';
                 document.getElementById('postCode').value = data.customerProfile?.postcode || '';
-                document.getElementById('clientPhone').value = data.customerProfile?.phone || ''; // NEW: Loads phone dynamically
+                document.getElementById('clientPhone').value = data.customerProfile?.phone || ''; 
                 document.getElementById('apptDate').value = data.customerProfile?.apptDate || '';
                 document.getElementById('revisitDate').value = data.customerProfile?.revisitDate || '';
                 
