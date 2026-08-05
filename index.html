@@ -38,7 +38,7 @@
             height: 100%; 
             min-height: -webkit-fill-available;
             background-color: #020617; 
-            /* The background image is now injected dynamically via JS below */
+            /* The background image is injected dynamically via JS below */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -483,10 +483,12 @@
 </head>
 <body class="flex w-full h-full relative">
 
-    <!-- DYNAMIC BACKGROUND SCRIPT (Runs immediately) -->
+    <!-- =========================================================
+         DYNAMIC BACKGROUND SCRIPT (Runs immediately)
+         ========================================================= -->
     <script>
         (function() {
-            // These map exactly to your folder structure from the screenshot
+            // These map exactly to your folder structure
             const bgImages = [
                 '1.JPG', 
                 '2.JPG', 
@@ -501,7 +503,7 @@
             // Pick a random image from the array
             const randomImage = bgImages[Math.floor(Math.random() * bgImages.length)];
             
-            // Construct the path (assumes index.html is at the root and assets is a folder)
+            // Construct the path
             const bgUrl = `assets/Backgrounds/${randomImage}`;
             
             // Apply the slate-blue gradient overlay + the random image
@@ -510,6 +512,85 @@
                 url('${bgUrl}')
             `;
         })();
+    </script>
+
+    <!-- =========================================================
+         THE GUARANTEED UNLOCK SCRIPTS (Runs Independent of Firebase)
+         ========================================================= -->
+    <script>
+        const brands = {
+            "yorkshirewindows": { hex: "#005A9C", rgb: "0, 90, 156", logo: "assets/yorkshirewindows/logo.png" },
+            "clearview": { hex: "#0284c7", rgb: "2, 132, 199", logo: "assets/clearview/logo.png" },
+            "orion": { hex: "#ea580c", rgb: "234, 88, 12", logo: "assets/orion/logo.png" },
+            "planet": { hex: "#16a34a", rgb: "22, 163, 74", logo: "assets/planet/logo.png" },
+            "trentvalley": { hex: "#4f46e5", rgb: "79, 70, 229", logo: "assets/trentvalley/logo.png" },
+            "westyorkshire": { hex: "#9333ea", rgb: "147, 51, 234", logo: "assets/westyorkshire/logo.png" },
+            "default": { hex: "#3b82f6", rgb: "59, 130, 246", logo: "assets/co-logo.png" } 
+        };
+
+        window.performLogin = function(email) {
+            if(!email) return alert("Please enter an email address.");
+            window.currentUserEmail = email.toLowerCase();
+            localStorage.setItem('cohi_user_session', window.currentUserEmail);
+            
+            const btn = document.getElementById('btnLogin');
+            if(btn) btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
+            
+            // Set Branding Elements
+            let matchedBrand = "default";
+            for (const key in brands) {
+                if (key !== "default" && window.currentUserEmail.includes(key)) { 
+                    matchedBrand = key; 
+                    break; 
+                }
+            }
+            
+            const config = brands[matchedBrand];
+            document.documentElement.style.setProperty('--brand-primary', config.hex);
+            document.documentElement.style.setProperty('--brand-bg-glow', `rgba(${config.rgb}, 0.3)`);
+            const sbLogo = document.getElementById('sidebarBrandLogo');
+            if (sbLogo) sbLogo.src = config.logo;
+            
+            // 1. UNLOCK THE UI IMMEDIATELY (Guaranteed Entry)
+            setTimeout(() => {
+                const authGate = document.getElementById('authGate');
+                if (authGate) {
+                    authGate.classList.add('fade-out');
+                    setTimeout(() => { 
+                        authGate.style.display = 'none'; 
+                        const shell = document.getElementById('appShell');
+                        if(shell) shell.style.opacity = '1'; 
+                    }, 500);
+                }
+                
+                // 2. TRIGGER FIREBASE BACKGROUND LOAD (If module successfully loaded)
+                if (typeof window.triggerFirebaseDataLoad === 'function') {
+                    window.triggerFirebaseDataLoad();
+                } else {
+                    console.warn("Firebase scripts did not load. Running in UI-Only Offline Mode.");
+                }
+            }, 800);
+        };
+
+        // Attach Login Listeners early
+        window.addEventListener('DOMContentLoaded', () => {
+            const loginBtn = document.getElementById('btnLogin');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', () => {
+                    window.performLogin(document.getElementById('authEmail').value.trim());
+                });
+            }
+
+            const savedSession = localStorage.getItem('cohi_user_session');
+            if (savedSession) {
+                const authGate = document.getElementById('authGate');
+                if(authGate) { 
+                    authGate.style.opacity = '0'; 
+                    authGate.style.pointerEvents = 'none'; 
+                }
+                window.performLogin(savedSession);
+            }
+        });
     </script>
 
     <!-- SECURE AUTH GATE -->
@@ -1115,7 +1196,7 @@
     </div>
 
     <!-- =========================================================
-         CORE LOGIC & JS INTERACTIVITY 
+         CORE LOGIC & JS INTERACTIVITY (Firebase Module)
          ========================================================= -->
     <script type="module">
         import { db, doc, setDoc, getDoc, collection, serverTimestamp, getDocs, query, orderBy } from './js/core-firebase.js';
@@ -1126,19 +1207,6 @@
         // INIT PDF.JS WORKER
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
         const storage = getStorage();
-
-        // ==========================================
-        // ENTERPRISE BRANDING DICTIONARY 
-        // ==========================================
-        const brands = {
-            "yorkshirewindows": { hex: "#005A9C", rgb: "0, 90, 156", logo: "assets/yorkshirewindows/logo.png" },
-            "clearview": { hex: "#0284c7", rgb: "2, 132, 199", logo: "assets/clearview/logo.png" },
-            "orion": { hex: "#ea580c", rgb: "234, 88, 12", logo: "assets/orion/logo.png" },
-            "planet": { hex: "#16a34a", rgb: "22, 163, 74", logo: "assets/planet/logo.png" },
-            "trentvalley": { hex: "#4f46e5", rgb: "79, 70, 229", logo: "assets/trentvalley/logo.png" },
-            "westyorkshire": { hex: "#9333ea", rgb: "147, 51, 234", logo: "assets/westyorkshire/logo.png" },
-            "default": { hex: "#3b82f6", rgb: "59, 130, 246", logo: "assets/co-logo.png" } 
-        };
         
         // ==========================================
         // GLOBAL VARIABLES
@@ -1151,9 +1219,8 @@
             portfolio: [] 
         };
         
-        window.rawFilesToUpload = {}; // Holds actual File objects for Firebase Storage
+        window.rawFilesToUpload = {}; 
         window.sniperPoints = [];
-        window.currentUserEmail = "";
         window.currentProjectId = null;
         window.activeGatekeeperProjectId = null;
         
@@ -1206,83 +1273,16 @@
         };
 
         // ==========================================
-        // DYNAMIC AUTHENTICATION & BRAND INJECTION
+        // BACKGROUND DATA LOAD (Triggered by the UI Script)
         // ==========================================
-        document.getElementById('authEmail')?.addEventListener('input', (e) => {
-            const email = e.target.value.toLowerCase();
-            let matchedBrand = "default";
-            
-            for (const key in brands) {
-                if (key !== "default" && email.includes(key)) { 
-                    matchedBrand = key; 
-                    break; 
-                }
-            }
-            
-            const config = brands[matchedBrand];
-            document.documentElement.style.setProperty('--brand-primary', config.hex);
-            document.documentElement.style.setProperty('--brand-bg-glow', `rgba(${config.rgb}, 0.3)`);
-            document.getElementById('loginBrandLogo').src = config.logo;
-        });
-
-        // THE FIX: Try/Catch wrapped around database fetches to prevent login lockouts
-        window.performLogin = async (email) => {
-            if(!email) return alert("Please enter an email address.");
-            window.currentUserEmail = email.toLowerCase();
-            localStorage.setItem('cohi_user_session', window.currentUserEmail);
-            
-            const btn = document.getElementById('btnLogin');
-            if(btn) btn.innerHTML = `<span class="material-icons-round animate-spin">sync</span> Authenticating...`;
-            
-            // Set Brand Info
-            let matchedBrand = "default";
-            for (const key in brands) {
-                if (key !== "default" && window.currentUserEmail.includes(key)) { 
-                    matchedBrand = key; 
-                    break; 
-                }
-            }
-            
-            const config = brands[matchedBrand];
-            document.documentElement.style.setProperty('--brand-primary', config.hex);
-            document.getElementById('sidebarBrandLogo').src = config.logo;
-            
-            // Safe Database Read Attempt
+        window.triggerFirebaseDataLoad = async function() {
             try {
                 await window.loadDesignerProfile();
-                await window.loadLiveProjects(); 
-            } catch (error) {
-                console.warn("Non-fatal DB fetch error on login. Safe proceeding enabled.", error);
-            }
-            
-            // Always unlock the gate, even if offline or Firebase blocks the profile read
-            const authGate = document.getElementById('authGate');
-            if (authGate) {
-                authGate.classList.add('fade-out');
-                setTimeout(() => { 
-                    authGate.style.display = 'none'; 
-                    document.getElementById('appShell').style.opacity = '1'; 
-                }, 500);
-            } else {
-                document.getElementById('appShell').style.opacity = '1'; 
+                await window.loadLiveProjects();
+            } catch (e) {
+                console.warn("Background Firebase fetch encountered an issue:", e);
             }
         };
-
-        document.getElementById('btnLogin')?.addEventListener('click', () => {
-            window.performLogin(document.getElementById('authEmail').value.trim());
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedSession = localStorage.getItem('cohi_user_session');
-            if (savedSession) {
-                const authGate = document.getElementById('authGate');
-                if(authGate) { 
-                    authGate.style.opacity = '0'; 
-                    authGate.style.pointerEvents = 'none'; 
-                }
-                window.performLogin(savedSession);
-            }
-        });
 
         // ==========================================
         // DESIGNER PROFILE ENGINE 
@@ -1317,7 +1317,7 @@
                 window.renderPortfolioGrid();
             } catch (error) { 
                 console.error("Profile load error:", error); 
-                throw error; // Let the login Try/Catch handle this safely
+                throw error; 
             }
         };
 
